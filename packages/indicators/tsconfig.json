@@ -15,5 +15,5 @@
     "skipLibCheck": true,
     "types": ["@types/jest"]
   },
-  "exclude": ["__tests__", "examples", "node_modules"]
+  "exclude": ["__tests__", "examples", "dist"]
 }
