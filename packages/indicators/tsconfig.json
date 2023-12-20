@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "module": "ES6",
+    "moduleResolution": "Node",
+    "target": "ES6",
+    "declaration": true,
+    "outDir": "./dist",
+    "sourceMap": false,
+    "lib": ["esnext", "DOM"],
+    "noImplicitAny": false,
+    "strict": true,
+    "strictNullChecks": true,
+    "noUnusedLocals": false,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "types": ["@types/jest"]
+  },
+  "exclude": ["__tests__", "examples", "node_modules"]
+}

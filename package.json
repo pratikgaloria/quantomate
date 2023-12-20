@@ -1,0 +1,14 @@
+{
+  "name": "quantomate",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "workspaces": [
+    "packages/core",
+    "packages/indicators"
+  ]
+}

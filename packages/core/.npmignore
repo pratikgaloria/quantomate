@@ -1,0 +1,11 @@
+tsconfig.json
+src
+.prettierrc
+.coveralls.yml
+.babelrc
+.travis.yml
+tslint.json
+typedoc.js
+__tests__
+coverage
+docs
