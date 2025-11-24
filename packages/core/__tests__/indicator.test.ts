@@ -80,5 +80,100 @@ describe('Indicator', () => {
       multi5.spread(dataset);
       expect(mockBeforeCalculateFn).toHaveBeenCalled();
     });
+
+    it('Should handle empty dataset', () => {
+      const dataset = new Dataset<number>([]);
+      const multi5 = new Indicator('multi5', sampleIndicatorFn);
+
+      multi5.spread(dataset);
+
+      expect(dataset.quotes).toHaveLength(0);
+    });
+
+    it('Should handle single quote dataset', () => {
+      const dataset = new Dataset([5]);
+      const multi5 = new Indicator('multi5', sampleIndicatorFn);
+
+      multi5.spread(dataset);
+
+      expect(dataset.quotes[0].getIndicator('multi5')).toBe(25);
+    });
+
+    it('Should preserve existing indicators on quotes', () => {
+      const dataset = new Dataset([1, 2]);
+      const multi5 = new Indicator('multi5', sampleIndicatorFn);
+      const add10 = new Indicator('add10', (ds) => ds.valueAt(-1) + 10);
+
+      // Apply first indicator
+      add10.spread(dataset);
+      expect(dataset.quotes[0].getIndicator('add10')).toBe(11);
+      expect(dataset.quotes[1].getIndicator('add10')).toBe(12);
+
+      // Apply second indicator - should preserve first
+      multi5.spread(dataset);
+      expect(dataset.quotes[0].getIndicator('add10')).toBe(11);
+      expect(dataset.quotes[0].getIndicator('multi5')).toBe(5);
+      expect(dataset.quotes[1].getIndicator('add10')).toBe(12);
+      expect(dataset.quotes[1].getIndicator('multi5')).toBe(10);
+    });
+
+    it('Should work with large datasets', () => {
+      const largeData = Array.from({ length: 1000 }, (_, i) => i + 1);
+      const dataset = new Dataset(largeData);
+      const multi5 = new Indicator('multi5', sampleIndicatorFn);
+
+      multi5.spread(dataset);
+
+      expect(dataset.quotes.length).toBe(1000);
+      expect(dataset.quotes[0].getIndicator('multi5')).toBe(5);
+      expect(dataset.quotes[999].getIndicator('multi5')).toBe(5000);
+    });
+
+    it('Should work with object-based quotes', () => {
+      const dataset = new Dataset<{ close: number }>([
+        { close: 10 },
+        { close: 20 },
+        { close: 30 },
+      ]);
+      const indicator = new Indicator<unknown, { close: number }>(
+        'closeValue',
+        (ds) => ds.valueAt(-1, 'close')
+      );
+
+      indicator.spread(dataset);
+
+      expect(dataset.quotes[0].getIndicator('closeValue')).toBe(10);
+      expect(dataset.quotes[1].getIndicator('closeValue')).toBe(20);
+      expect(dataset.quotes[2].getIndicator('closeValue')).toBe(30);
+    });
+
+    it('Should return the same dataset instance', () => {
+      const dataset = new Dataset([1, 2, 3]);
+      const multi5 = new Indicator('multi5', sampleIndicatorFn);
+
+      const result = multi5.spread(dataset);
+
+      expect(result).toBe(dataset);
+    });
+
+    it('Should calculate indicator correctly for incremental datasets', () => {
+      const dataset = new Dataset([1, 2, 3, 4, 5]);
+      // Indicator that sums all values in dataset
+      const sumIndicator = new Indicator('sum', (ds) => {
+        let sum = 0;
+        for (let i = 0; i < ds.length; i++) {
+          sum += ds.valueAt(i);
+        }
+        return sum;
+      });
+
+      sumIndicator.spread(dataset);
+
+      expect(dataset.quotes[0].getIndicator('sum')).toBe(1); // [1]
+      expect(dataset.quotes[1].getIndicator('sum')).toBe(3); // [1, 2]
+      expect(dataset.quotes[2].getIndicator('sum')).toBe(6); // [1, 2, 3]
+      expect(dataset.quotes[3].getIndicator('sum')).toBe(10); // [1, 2, 3, 4]
+      expect(dataset.quotes[4].getIndicator('sum')).toBe(15); // [1, 2, 3, 4, 5]
+    });
   });
 });

@@ -2,3 +2,8 @@ export { SMA } from './sma/sma';
 export { EMA } from './ema/ema';
 export { MACD } from './macd/macd';
 export { RSI } from './rsi/rsi';
+export { BB } from './bb/bb';
+export { Stochastic } from './stochastic/stochastic';
+export { ATR } from './atr/atr';
+export { WilliamsR } from './williamsR/williamsR';
+export { CCI } from './cci/cci';

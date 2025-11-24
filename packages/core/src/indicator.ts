@@ -64,14 +64,13 @@ export class Indicator<P, T = number> {
       this.options.beforeCalculate(dataset);
     }
 
-    const emptyDataset = new Dataset<T>();
-    dataset.quotes.forEach((quote) => {
-      const quoteWithIndicator = quote.setIndicator(
-        this.name,
-        this.calculate(emptyDataset.add(quote))
-      );
-
-      emptyDataset.mutateAt(-1, quoteWithIndicator);
+    const tempDataset = new Dataset<T>();
+    dataset.quotes.forEach((quote, index) => {
+      tempDataset.quotes.push(quote);
+      const indicatorValue = this.calculate(tempDataset);
+      const quoteWithIndicator = quote.setIndicator(this.name, indicatorValue);
+      tempDataset.quotes[index] = quoteWithIndicator;
+      dataset.mutateAt(index, quoteWithIndicator);
     });
 
     return dataset;
