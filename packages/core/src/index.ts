@@ -4,3 +4,5 @@ export { Strategy } from './strategy';
 export { Backtest, BacktestConfiguration } from './backtest';
 export { Trader } from './trader';
 export { BacktestReport } from './backtestReport';
+export { Quote } from './quote';
+export { TradePosition, TradePositionType } from './position';

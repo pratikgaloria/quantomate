@@ -86,7 +86,9 @@ describe('Strategy', () => {
         }
       );
 
-      expect(backtestReport.currentCapital).toBe(83);
+      // Entry at 35: buy 100/35 = 2.857 shares
+      // Exit at 18: sell 2.857*18 = 51.43
+      expect(backtestReport.currentCapital).toBeCloseTo(51.43, 1);
     });
   });
 });

@@ -7,11 +7,13 @@ type BacktestReportTrades<T> = {
   type: 'entry' | 'exit';
   quote: Quote<T>;
   tradedValue: number;
+  shares?: number;
   currentCapital: number;
 };
 
 export class BacktestReport<T = number> {
   currentCapital: number;
+  sharesOwned: number;
 
   profit: number;
   loss: number;
@@ -21,6 +23,7 @@ export class BacktestReport<T = number> {
   initialCapital: number;
   finalCapital: number;
   returns: number;
+  returnsPercentage: number;
   winningRate: number;
   trades: BacktestReportTrades<T>[];
 
@@ -38,9 +41,11 @@ export class BacktestReport<T = number> {
     this.finalCapital = initialCapital;
 
     this.returns = 0;
+    this.returnsPercentage = 0;
     this.winningRate = 0;
     this.trades = [];
     this.currentCapital = initialCapital;
+    this.sharesOwned = 0;
   }
 
   private updateCapital(value: number) {
@@ -48,7 +53,8 @@ export class BacktestReport<T = number> {
   }
 
   private updateTotals() {
-    this.returns =
+    this.returns = this.finalCapital - this.initialCapital;
+    this.returnsPercentage =
       ((this.finalCapital - this.initialCapital) * 100) / this.initialCapital;
     this.numberOfTrades += 1;
   }
@@ -58,11 +64,16 @@ export class BacktestReport<T = number> {
    * @param tradedValue - Traded value at the time.
    */
   markEntry(tradedValue: number, quote: Quote<T>) {
-    this.updateCapital(-tradedValue);
+    // Calculate shares with all available capital
+    const shares = this.finalCapital / tradedValue;
+    this.sharesOwned = shares;
+    this.finalCapital = 0; // All capital used to buy shares
+    
     this.trades.push({
       type: 'entry',
       quote,
       tradedValue,
+      shares,
       currentCapital: this.finalCapital,
     });
   }
@@ -72,13 +83,18 @@ export class BacktestReport<T = number> {
    * @param tradedValue - Traded value at the time.
    */
   markExit(tradedValue: number, quote: Quote<T>) {
-    this.updateCapital(tradedValue);
+    // Calculate proceeds from selling all shares
+    const proceeds = this.sharesOwned * tradedValue;
+    this.finalCapital = proceeds;
+    
     this.trades.push({
       type: 'exit',
       quote,
       tradedValue,
+      shares: this.sharesOwned,
       currentCapital: this.finalCapital,
     });
+    
     const hasWon = this.finalCapital > this.currentCapital;
 
     if (hasWon) {
@@ -93,6 +109,7 @@ export class BacktestReport<T = number> {
       this.numberOfWinningTrades /
       (this.numberOfWinningTrades + this.numberOfLosingTrades);
 
+    this.sharesOwned = 0; // Reset shares after exit
     this.currentCapital = this.finalCapital;
     this.updateTotals();
   }

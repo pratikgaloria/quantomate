@@ -1,4 +1,4 @@
-import { Indicator, Dataset } from '@quantomate/core';
+import { Indicator, Dataset, Quote } from '@quantomate/core';
 
 interface IIndicatorParamsSMA<T> {
   attribute?: T extends object ? keyof T : string;
@@ -13,30 +13,42 @@ export class SMA<T = number> extends Indicator<IIndicatorParamsSMA<T>, T> {
         const { attribute, period = 5 } = params;
         const datasetLength = dataset.length;
 
-        const lastSMA = dataset.at(-2)?.getIndicator(this.name);
-
-        if (lastSMA !== undefined && datasetLength > period) {
-          const firstAttributeValue = dataset.valueAt(-1 - period, attribute as string);
-          const lastAttributeValue = dataset.valueAt(-1, attribute as string);
-          const change = lastAttributeValue - firstAttributeValue;
-
-          return (lastSMA * period + change) / period;
-        } else {
-          if (datasetLength < period) {
-            return dataset.valueAt(-1, attribute as string);
-          } else {
-            let total = 0;
-            for (let i = datasetLength - period; i < datasetLength; i++) {
-              total += dataset.valueAt(i, attribute as string);
-            }
-
-            return total / period;
-          }
+        if (datasetLength < period) {
+          return dataset.valueAt(-1, attribute as string);
         }
+
+        // Full calculation: sum last N values
+        let total = 0;
+        for (let i = datasetLength - period; i < datasetLength; i++) {
+          total += dataset.valueAt(i, attribute as string);
+        }
+        return total / period;
       },
       {
         params,
       }
     );
+
+    // Add incremental calculation (O(1) update) after super()
+    this.withIncremental((prevSMA: number, newQuote: Quote<T>, dataset: Dataset<T>) => {
+      const { attribute, period = 5 } = params;
+      
+      if (dataset.length < period) {
+        return dataset.valueAt(-1, attribute as string);
+      }
+      
+      if (dataset.length === period) {
+        // First full SMA, calculate normally
+        return this.calculate(dataset);
+      }
+      
+      // Incremental: remove oldest, add newest
+      const oldestValue = dataset.valueAt(-period - 1, attribute as string);
+      const newestValue = typeof newQuote.value === 'object' 
+        ? (newQuote.value as any)[attribute as string]
+        : newQuote.value as number;
+      
+      return prevSMA + (newestValue - oldestValue) / period;
+    });
   }
 }

@@ -1,4 +1,5 @@
 import { Dataset } from './';
+import { Quote } from './quote';
 
 export interface IndicatorOptions<P, T = number> {
   params?: P;
@@ -11,6 +12,11 @@ export interface IndicatorOptions<P, T = number> {
 export class Indicator<P, T = number> {
   private _name: string;
   private _calculate: (dataset: Dataset<T>) => number;
+  private _calculateIncremental?: (
+    previousValue: number,
+    newQuote: Quote<T>,
+    dataset: Dataset<T>
+  ) => number;
   private _options?: IndicatorOptions<P, T>;
 
   /**
@@ -42,6 +48,28 @@ export class Indicator<P, T = number> {
   }
 
   /**
+   * Sets an incremental calculation function for performance optimization.
+   * This allows updating the indicator value based on the previous value and new quote,
+   * instead of recalculating over the entire dataset.
+   * @param fn - Incremental calculation function
+   * @returns this indicator instance for chaining
+   */
+  withIncremental(
+    fn: (previousValue: number, newQuote: Quote<T>, dataset: Dataset<T>) => number
+  ): this {
+    this._calculateIncremental = fn;
+    return this;
+  }
+
+  /**
+   * Checks if this indicator supports incremental calculation
+   * @returns true if incremental calculation is available
+   */
+  hasIncremental(): boolean {
+    return this._calculateIncremental !== undefined;
+  }
+
+  /**
    * Calculates an indicator over a given dataset
    * @param dataset - `Dataset`.
    * @returns the value of indicator.
@@ -52,6 +80,26 @@ export class Indicator<P, T = number> {
     }
 
     return this._calculate(dataset);
+  }
+
+  /**
+   * Calculates indicator incrementally based on previous value and new quote.
+   * Falls back to full calculation if incremental is not available.
+   * @param previousValue - Previous indicator value
+   * @param newQuote - New quote being added
+   * @param dataset - Current dataset (with new quote already added)
+   * @returns updated indicator value
+   */
+  calculateIncremental(
+    previousValue: number,
+    newQuote: Quote<T>,
+    dataset: Dataset<T>
+  ): number {
+    if (this._calculateIncremental) {
+      return this._calculateIncremental(previousValue, newQuote, dataset);
+    }
+    // Fallback to full calculation if incremental not available
+    return this.calculate(dataset);
   }
 
   /**

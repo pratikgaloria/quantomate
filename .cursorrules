@@ -1,0 +1,290 @@
+# Quantomate Development Rules
+
+## Project Context
+
+This is a **TypeScript-based algorithmic trading system** with three main packages:
+- `@quantomate/core` - Backtesting engine, strategies, datasets
+- `@quantomate/indicators` - Technical indicators (SMA, EMA, RSI, MACD, etc.)
+- `@quantomate/strategies` - Trading strategies (Golden Cross, RSI Mean Reversion, etc.)
+
+**Goal:** Build a lightweight, high-performance trading system for backtesting and eventually live trading.
+
+---
+
+## Coding Standards
+
+### TypeScript
+- **Strict mode enabled** - No `any` types unless absolutely necessary
+- **Explicit types** - Always define interfaces for complex objects
+- **Functional where possible** - Prefer pure functions over mutations
+- **Classes for state** - Use classes when encapsulation is needed
+
+### Naming Conventions
+- **Classes:** PascalCase (e.g., `BacktestReport`, `GoldenCrossStrategy`)
+- **Functions/Methods:** camelCase (e.g., `calculateRSI`, `markEntry`)
+- **Interfaces:** PascalCase with `I` prefix (e.g., `IStrategy`, `IBar`)
+- **Files:** camelCase matching class/function name (e.g., `backtestReport.ts`)
+
+### Code Organization
+- **One class per file** - Exception: small helper types/interfaces
+- **Index exports** - Use `index.ts` to export public API
+- **Tests alongside code** - `__tests__` folder in each package
+- **Tasks in package** - `tasks/` folder for package-specific tasks
+
+---
+
+## Performance Rules
+
+### Critical for Trading Systems
+1. **Avoid O(n²) operations** - Especially in hot paths (Dataset.add, indicator calculations)
+2. **Use typed arrays** - Float64Array for large numeric datasets
+3. **Minimize object creation** - Reuse objects in loops
+4. **Prefer for-loops over forEach** - 20% faster in hot paths
+5. **Incremental calculations** - Don't recalculate entire dataset on each new quote
+
+### Memory Management
+- **Columnar storage** - Store indicator values in typed arrays, not objects
+- **Windowed calculations** - Only process last N quotes when possible
+- **Clear references** - Avoid memory leaks in long-running processes
+
+---
+
+## Testing Standards
+
+### Test Coverage
+- **Core classes:** 100% coverage required
+- **Indicators:** Test edge cases (empty data, single value, etc.)
+- **Strategies:** Test entry/exit logic, edge cases
+- **Integration tests:** Backtest with real data samples
+
+### Test Structure
+```typescript
+describe('ClassName', () => {
+  describe('methodName', () => {
+    it('should handle normal case', () => { ... });
+    it('should handle edge case', () => { ... });
+    it('should throw on invalid input', () => { ... });
+  });
+});
+```
+
+### Performance Tests
+- Benchmark critical paths (Dataset.add, indicator calculations)
+- Target: 100k quotes in <100ms
+- Memory: <20MB for 100k quotes
+
+---
+
+## Task Management
+
+### Task Files
+- **Location:** `packages/{package}/tasks/*.md`
+- **Format:** Markdown with checkboxes
+- **Granularity:** One file per major feature/improvement
+- **Status:** `[ ]` todo, `[/]` in progress, `[x]` done
+
+### Task Workflow
+1. Create task file before starting work
+2. Break down into small, testable chunks
+3. Update checkboxes as you progress
+4. Add benchmarks/results when done
+
+### Example Task File
+```markdown
+# Feature Name
+
+## Goal
+Brief description of what we're building
+
+## Tasks
+- [ ] Design interface
+- [ ] Implement core logic
+- [ ] Add tests
+- [ ] Benchmark performance
+- [ ] Update documentation
+
+## Benchmarks
+- Before: X ms
+- After: Y ms
+- Improvement: Z%
+```
+
+---
+
+## Documentation Standards
+
+### Code Comments
+- **Public API:** JSDoc comments required
+- **Complex logic:** Inline comments explaining why, not what
+- **TODOs:** Include ticket/issue reference
+
+### README Files
+- **Package README:** API overview, usage examples
+- **Root README:** Project overview, getting started
+- **Keep concise:** Link to detailed docs, don't duplicate
+
+---
+
+## Git Workflow
+
+### Commits
+- **Atomic commits** - One logical change per commit
+- **Descriptive messages** - "Add stop-loss support to Strategy" not "fix bug"
+- **Test before commit** - Run tests, ensure they pass
+
+### Branches
+- `main` - Production-ready code
+- `feature/*` - New features
+- `fix/*` - Bug fixes
+- `perf/*` - Performance improvements
+
+---
+
+## Performance Priorities
+
+### Current Focus: Core Package Optimization
+
+**Phase 1 (Week 1):**
+1. Dataset.add() optimization (10x speedup)
+2. Remove Object.assign overhead (5% speedup)
+3. Array iteration optimization (20% speedup)
+
+**Phase 2 (Week 2):**
+4. Columnar storage (3x memory reduction)
+5. Windowed calculations (process less data)
+
+**Phase 3 (Week 3):**
+6. Stop-loss support
+7. Position sizing
+8. Transaction costs
+
+**Target:** 10-15x faster, 3x less memory
+
+---
+
+## AI Agent Guidelines
+
+### When Working on Tasks
+1. **Read task file first** - Understand the goal and checklist
+2. **Update checkboxes** - Mark items as in progress `[/]` and done `[x]`
+3. **Run tests** - After each change, verify tests pass
+4. **Benchmark** - Measure performance improvements
+5. **Document** - Update README/comments as needed
+
+### Code Review Checklist
+- [ ] TypeScript strict mode compliant
+- [ ] Tests added/updated
+- [ ] Performance acceptable (benchmark if critical path)
+- [ ] Documentation updated
+- [ ] No console.logs left in code
+- [ ] Task file updated
+
+### Communication
+- **Be concise** - Don't repeat what's in code/docs
+- **Show results** - Benchmark numbers, test output
+- **Ask when unclear** - Don't assume requirements
+
+---
+
+## Architecture Principles
+
+### Separation of Concerns
+- **Core:** Generic backtesting engine, no strategy logic
+- **Indicators:** Pure calculations, no strategy logic
+- **Strategies:** Combine indicators, define entry/exit rules
+
+### Dependency Direction
+```
+Strategies → Indicators → Core
+(depends on)  (depends on)
+```
+
+Never reverse: Core should not depend on Strategies/Indicators
+
+### Extensibility
+- **Indicator interface** - Easy to add new indicators
+- **Strategy interface** - Easy to add new strategies
+- **Plugin architecture** - Consider for future features
+
+---
+
+## Common Patterns
+
+### Indicator Pattern
+```typescript
+export class MyIndicator extends Indicator<MyParams, number> {
+  constructor(params: MyParams) {
+    super('MyIndicator', params);
+  }
+  
+  calculate(dataset: Dataset<number>): number {
+    // Calculation logic
+  }
+  
+  // Optional: Incremental calculation
+  calculateIncremental(prev: number, newQuote: Quote): number {
+    // Faster incremental update
+  }
+}
+```
+
+### Strategy Pattern
+```typescript
+export class MyStrategy extends Strategy {
+  constructor() {
+    super('MyStrategy', {
+      indicators: [new SMA({ period: 20 })],
+      entryWhen: (quote) => {
+        // Entry logic
+      },
+      exitWhen: (quote) => {
+        // Exit logic
+      }
+    });
+  }
+}
+```
+
+---
+
+## Resources
+
+- **Core improvements:** `docs/core_improvements.md`
+- **Trading research:** `docs/trading_research.md`
+- **Library comparison:** `docs/library_comparison.md`
+- **Data-Forge analysis:** `docs/dataforge_analysis.md`
+
+---
+
+## Quick Reference
+
+**Run tests:**
+```bash
+npm test
+```
+
+**Run specific package tests:**
+```bash
+npm test --workspace=@quantomate/core
+```
+
+**Benchmark:**
+```bash
+npm run benchmark
+```
+
+**Build:**
+```bash
+npm run build
+```
+
+---
+
+## Remember
+
+1. **Performance matters** - This is for real-time trading
+2. **Type safety matters** - Catch bugs at compile time
+3. **Tests matter** - Prevent regressions
+4. **Simplicity matters** - Easier to maintain and debug
+
+**Goal:** Build the fastest, lightest, most reliable trading system in TypeScript.

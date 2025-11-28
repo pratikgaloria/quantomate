@@ -91,12 +91,31 @@ export class Dataset<T = number> {
   add(quote: Quote<T>) {
     this.quotes.push(quote);
 
+    // Optimized: Use incremental calculation when available
     this.indicators.forEach((i) => {
-      const quoteWithIndicator = quote.setIndicator(
-        i.name,
-        i.indicator.calculate(this)
-      );
+      let indicatorValue: number;
+      
+      // Try incremental calculation first (O(1) instead of O(n))
+      if (i.indicator.hasIncremental() && this.length > 1) {
+        const prevQuote = this.at(-2);
+        const prevValue = prevQuote?.getIndicator(i.name);
+        
+        if (prevValue !== undefined && !isNaN(prevValue)) {
+          indicatorValue = i.indicator.calculateIncremental(
+            prevValue,
+            quote,
+            this
+          );
+        } else {
+          // Fallback to full calculation if previous value not available
+          indicatorValue = i.indicator.calculate(this);
+        }
+      } else {
+        // Use full calculation for first quote or if incremental not available
+        indicatorValue = i.indicator.calculate(this);
+      }
 
+      const quoteWithIndicator = quote.setIndicator(i.name, indicatorValue);
       this.mutateAt(-1, quoteWithIndicator);
     });
 

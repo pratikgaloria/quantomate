@@ -1,4 +1,4 @@
-import { Indicator, Dataset } from '@quantomate/core';
+import { Indicator, Dataset, Quote } from '@quantomate/core';
 import { getAverageLoss } from '../utils';
 
 interface IIndicatorParamsAverageLoss<T> {
@@ -15,25 +15,30 @@ export class AverageLoss<T = number> extends Indicator<
       name,
       function (this: AverageLoss<T>, dataset: Dataset<T>) {
         const { attribute, period } = params;
-        const datasetLength = dataset.length;
-        const lastAverageLoss = dataset.at(-2)?.getIndicator(this.name);
-
-        if (lastAverageLoss && datasetLength > period) {
-          const lastQuoteValue = dataset.valueAt(-1, attribute as string);
-          const secondLastQuoteValue = dataset.valueAt(-2, attribute as string);
-          const difference = lastQuoteValue - secondLastQuoteValue;
-
-          const currentLoss = difference < 0 ? -difference : 0;
-
-          return (lastAverageLoss * (period - 1) + currentLoss) / period;
-        } else {
-          const flattenDataset = dataset.flatten(attribute as string);
-          return getAverageLoss(flattenDataset, period) || NaN;
-        }
+        const flattenDataset = dataset.flatten(attribute as string);
+        return getAverageLoss(flattenDataset, period) || NaN;
       },
       {
         params,
       }
     );
+
+    // Add incremental calculation
+    this.withIncremental((prevAvgLoss: number, newQuote: Quote<T>, dataset: Dataset<T>) => {
+      const { attribute, period } = params;
+      
+      if (dataset.length <= period || isNaN(prevAvgLoss)) {
+        return this.calculate(dataset);
+      }
+
+      const lastQuoteValue = typeof newQuote.value === 'object'
+        ? (newQuote.value as any)[attribute as string]
+        : newQuote.value as number;
+      const secondLastQuoteValue = dataset.valueAt(-2, attribute as string);
+      const difference = lastQuoteValue - secondLastQuoteValue;
+      const currentLoss = difference < 0 ? -difference : 0;
+
+      return (prevAvgLoss * (period - 1) + currentLoss) / period;
+    });
   }
 }

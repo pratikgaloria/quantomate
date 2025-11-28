@@ -30,10 +30,13 @@ describe('Backtest', () => {
         onExit: (quote) => quote.value * 1,
       });
 
+      // Entry at 35: buy 100/35 = 2.857 shares
+      // Exit at 18: sell 2.857*18 = 51.43
+      // Loss: 51.43 - 100 = -48.57
       expect(backtestReport.numberOfTrades).toBe(1);
-      expect(backtestReport.loss).toBe(17);
-      expect(backtestReport.returns).toBe(-17);
-      expect(backtestReport.finalCapital).toBe(83);
+      expect(backtestReport.loss).toBeCloseTo(48.57, 1);
+      expect(backtestReport.returns).toBeCloseTo(-48.57, 1);
+      expect(backtestReport.finalCapital).toBeCloseTo(51.43, 1);
     });
 
     it('Should exit the last trade and return a report if it was on hold.', () => {
@@ -45,10 +48,13 @@ describe('Backtest', () => {
         onExit: (quote) => quote.value * 1,
       });
 
+      // Entry at 35: buy 100/35 = 2.857 shares  
+      // Exit at 32 (forced): sell 2.857*32 = 91.43
+      // Loss: 91.43 - 100 = -8.57
       expect(backtestReport.numberOfTrades).toBe(1);
-      expect(backtestReport.loss).toBe(3);
-      expect(backtestReport.returns).toBe(-3);
-      expect(backtestReport.finalCapital).toBe(97);
+      expect(backtestReport.loss).toBeCloseTo(8.57, 1);
+      expect(backtestReport.returns).toBeCloseTo(-8.57, 1);
+      expect(backtestReport.finalCapital).toBeCloseTo(91.43, 1);
     });
 
     it('Should run over a dataset with objects.', () => {
@@ -78,9 +84,12 @@ describe('Backtest', () => {
       });
 
       expect(backtestReport.numberOfTrades).toBe(1);
-      expect(backtestReport.loss).toBe(17);
-      expect(backtestReport.returns).toBe(-17);
-      expect(backtestReport.finalCapital).toBe(83);
+      // Entry at 35: buy 100/35 = 2.857 shares
+      // Exit at 18: sell 2.857*18 = 51.43
+      // Loss: 51.43 - 100 = -48.57
+      expect(backtestReport.returns).toBeCloseTo(-48.57, 1);
+      expect(backtestReport.finalCapital).toBeCloseTo(51.43, 1);
     });
   });
 });
+
