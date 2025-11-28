@@ -2,7 +2,7 @@ import { Dataset, Strategy, Indicator } from '../../src';
 import { SMA } from './mock-sma';
 
 export const sampleIndicatorFn = (ds: Dataset) =>
-  ds.quotes[ds.length - 1].value * 5;
+  (ds.at(ds.length - 1)?.value as number) * 5;
 
 export const sampleStrategy = (name: string) =>
   new Strategy(name, {

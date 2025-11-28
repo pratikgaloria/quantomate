@@ -21,41 +21,47 @@ describe('GoldenCrossStrategy Verification', () => {
     dataset.prepare(strategy);
 
     // Check that strategy values are set
-    const quotesWithStrategy = dataset.quotes.filter(
-      q => q.getStrategy('test-golden-cross') !== undefined
-    );
+    let quotesWithStrategyCount = 0;
+    for (let i = 0; i < dataset.length; i++) {
+      if (dataset.at(i)?.getStrategy('test-golden-cross') !== undefined) {
+        quotesWithStrategyCount++;
+      }
+    }
 
     console.log('\n=== Strategy Application Test ===');
-    console.log(`Total quotes: ${dataset.quotes.length}`);
-    console.log(`Quotes with strategy: ${quotesWithStrategy.length}`);
+    console.log(`Total quotes: ${dataset.length}`);
+    console.log(`Quotes with strategy: ${quotesWithStrategyCount}`);
 
     // Find entry and exit signals
-    const entries = dataset.quotes.filter(
-      q => q.getStrategy('test-golden-cross')?.position?.value === 'entry'
-    );
-    const exits = dataset.quotes.filter(
-      q => q.getStrategy('test-golden-cross')?.position?.value === 'exit'
-    );
+    let entriesCount = 0;
+    let exitsCount = 0;
+    for (let i = 0; i < dataset.length; i++) {
+      const q = dataset.at(i);
+      const position = q?.getStrategy('test-golden-cross')?.position?.value;
+      if (position === 'entry') entriesCount++;
+      if (position === 'exit') exitsCount++;
+    }
 
-    console.log(`Entry signals: ${entries.length}`);
-    console.log(`Exit signals: ${exits.length}`);
+    console.log(`Entry signals: ${entriesCount}`);
+    console.log(`Exit signals: ${exitsCount}`);
 
     // Log some indicator values to verify calculation
     console.log('\n=== Sample Indicator Values ===');
-    dataset.quotes.slice(20, 25).forEach((q, idx) => {
+    for (let i = 20; i < 25 && i < dataset.length; i++) {
+      const q = dataset.at(i)!;
       const fastEMA = q.getIndicator('fastEMA');
       const slowSMA = q.getIndicator('slowSMA');
       const prevFast = q.getIndicator('prevFastEMA');
       const prevSlow = q.getIndicator('prevSlowSMA');
       const position = q.getStrategy('test-golden-cross')?.position?.value;
 
-      console.log(`Quote ${20 + idx}:`);
+      console.log(`Quote ${i}:`);
       console.log(`  Fast EMA: ${fastEMA?.toFixed(2)}, Slow SMA: ${slowSMA?.toFixed(2)}`);
       console.log(`  Prev Fast: ${prevFast?.toFixed(2)}, Prev Slow: ${prevSlow?.toFixed(2)}`);
       console.log(`  Position: ${position}`);
-    });
+    }
 
-    expect(quotesWithStrategy.length).toBeGreaterThan(0);
+    expect(quotesWithStrategyCount).toBeGreaterThan(0);
   });
 
   it('should calculate backtest correctly with simple data', () => {
@@ -86,12 +92,13 @@ describe('GoldenCrossStrategy Verification', () => {
 
     // Log all trades
     console.log('\n=== Trade Details ===');
-    dataset.quotes.forEach((q, idx) => {
+    for (let i = 0; i < dataset.length; i++) {
+      const q = dataset.at(i)!;
       const position = q.getStrategy('test-backtest')?.position?.value;
       if (position === 'entry' || position === 'exit') {
-        console.log(`Quote ${idx}: ${position} at price ${q.value.close}`);
+        console.log(`Quote ${i}: ${position} at price ${q.value.close}`);
       }
-    });
+    }
 
     expect(report.numberOfTrades).toBeGreaterThan(0);
   });

@@ -18,18 +18,18 @@ export class GoldenCrossStrategy extends Strategy<any, any> {
     const prevFastEMAIndicator = new Indicator<any, any>(
       'prevFastEMA',
       (dataset: Dataset<any>) => {
-        const currentIndex = dataset.quotes.length - 1;
+        const currentIndex = dataset.length - 1;
         if (currentIndex < 1) return NaN;
-        return dataset.quotes[currentIndex - 1].getIndicator('fastEMA') ?? NaN;
+        return dataset.at(currentIndex - 1)?.getIndicator('fastEMA') ?? NaN;
       }
     );
 
     const prevSlowSMAIndicator = new Indicator<any, any>(
       'prevSlowSMA',
       (dataset: Dataset<any>) => {
-        const currentIndex = dataset.quotes.length - 1;
+        const currentIndex = dataset.length - 1;
         if (currentIndex < 1) return NaN;
-        return dataset.quotes[currentIndex - 1].getIndicator('slowSMA') ?? NaN;
+        return dataset.at(currentIndex - 1)?.getIndicator('slowSMA') ?? NaN;
       }
     );
 

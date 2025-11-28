@@ -73,7 +73,7 @@ describe('Stochastic Oscillator should return the correct value', () => {
       const lastValue = ds.at(-1)?.getIndicator(name);
       expect(lastValue).toBeDefined();
       expect(typeof lastValue).toBe('number');
-      expect(isNaN(lastValue)).toBe(false);
+      expect(isNaN(lastValue!)).toBe(false);
       expect(lastValue).toBeGreaterThanOrEqual(0);
       expect(lastValue).toBeLessThanOrEqual(100);
     });
@@ -143,7 +143,8 @@ describe('Stochastic Oscillator should return the correct value', () => {
 
       stochastic.spread(ds);
 
-      ds.quotes.forEach((quote, index) => {
+      for (let index = 0; index < ds.length; index++) {
+        const quote = ds.at(index)!;
         if (index >= 13) {
           // After kPeriod
           const kValue = quote.getIndicator('stoch_k');
@@ -152,7 +153,7 @@ describe('Stochastic Oscillator should return the correct value', () => {
             expect(kValue).toBeLessThanOrEqual(100);
           }
         }
-      });
+      }
     });
   });
 

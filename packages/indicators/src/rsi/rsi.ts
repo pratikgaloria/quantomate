@@ -21,10 +21,10 @@ export class RSI<T = number> extends Indicator<IIndicatorParamsRSI<T>, T> {
 
         const averageGain = dataset
           .at(-1)
-          ?.getIndicator(`averageGain${params.period}`);
+          ?.getIndicator(`averageGain${params.period}`) ?? NaN;
         const averageLoss = dataset
           .at(-1)
-          ?.getIndicator(`averageLoss${params.period}`);
+          ?.getIndicator(`averageLoss${params.period}`) ?? NaN;
 
         const relativeStrength = isNaN(averageGain / averageLoss)
           ? 0

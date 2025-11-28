@@ -53,22 +53,23 @@ export class Backtest<P = unknown, T = number, O = unknown> {
   run({ config, onEntry, onExit }: BacktestRunner<T>) {
     const report = new BacktestReport<T>(config.capital);
 
-    this._dataset.quotes.forEach((quote: Quote<T>, index, array) => {
+    for (let i = 0; i < this._dataset.length; i++) {
+      const quote = this._dataset.at(i)!;
       const position = quote.getStrategy(this.strategy.name).position;
 
       if (
-        index === array.length - 1 &&
+        i === this._dataset.length - 1 &&
         (position.value === 'entry' || position.value === 'hold')
       ) {
-        report.markExit(onExit(quote, index, array), quote);
+        report.markExit(onExit(quote, i, []), quote);
       } else {
         if (position.value === 'entry') {
-          report.markEntry(onEntry(quote, index, array), quote);
+          report.markEntry(onEntry(quote, i, []), quote);
         } else if (position.value === 'exit') {
-          report.markExit(onExit(quote, index, array), quote);
+          report.markExit(onExit(quote, i, []), quote);
         }
       }
-    });
+    }
 
     return report;
   }

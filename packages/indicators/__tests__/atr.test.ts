@@ -71,7 +71,7 @@ describe('ATR (Average True Range) should return the correct value', () => {
       const lastValue = ds.at(-1)?.getIndicator(name);
       expect(lastValue).toBeDefined();
       expect(typeof lastValue).toBe('number');
-      expect(isNaN(lastValue)).toBe(false);
+      expect(isNaN(lastValue!)).toBe(false);
       expect(lastValue).toBeGreaterThan(0);
     });
   });
@@ -136,7 +136,8 @@ describe('ATR (Average True Range) should return the correct value', () => {
 
       atr.spread(ds);
 
-      ds.quotes.forEach((quote, index) => {
+      for (let index = 0; index < ds.length; index++) {
+        const quote = ds.at(index)!;
         if (index >= 1) {
           // After first quote
           const atrValue = quote.getIndicator('atr');
@@ -144,7 +145,7 @@ describe('ATR (Average True Range) should return the correct value', () => {
             expect(atrValue).toBeGreaterThan(0);
           }
         }
-      });
+      }
     });
   });
 

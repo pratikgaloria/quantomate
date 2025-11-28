@@ -158,9 +158,12 @@ export class Stochastic<T = number> extends Indicator<
           // Otherwise, calculate %K for the last dPeriod values
           for (let i = datasetLength - dPeriod; i < datasetLength; i++) {
             // Create a sub-dataset up to index i
-            const subDataset = new Dataset<T>(
-              dataset.quotes.slice(0, i + 1).map((q) => q.value)
-            );
+            // Create a sub-dataset up to index i
+            const values: T[] = [];
+            for (let j = 0; j <= i; j++) {
+              values.push(dataset.valueAt(j) as T);
+            }
+            const subDataset = new Dataset<T>(values);
 
             const k = calculateStochasticK(
               subDataset,

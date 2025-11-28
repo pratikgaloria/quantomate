@@ -9,7 +9,7 @@ describe('Dataset', () => {
     it('Should be created without values.', () => {
       const dataset = new Dataset();
 
-      expect(dataset.quotes).toStrictEqual([]);
+      expect(dataset.length).toBe(0);
       expect(dataset.indicators).toStrictEqual([]);
       expect(dataset.strategies).toStrictEqual([]);
     });
@@ -18,32 +18,30 @@ describe('Dataset', () => {
       const dataset = new Dataset([1]);
 
       expect(dataset).toHaveProperty('quotes');
-      expect(dataset.quotes).toBeInstanceOf(Array);
-      expect(dataset.quotes).toHaveLength(1);
-
-      expect(dataset.quotes[0].value).toBe(1);
+      expect(dataset.length).toBe(1);
+      expect(dataset.at(0)?.value).toBe(1);
     });
 
     it('Should create a valid Dataset object for multiple values.', () => {
       const dataset = new Dataset([0, 1, 2]);
 
-      expect(dataset.quotes).toHaveLength(3);
+      expect(dataset.length).toBe(3);
     });
 
     it('Should create a valid Dataset object for Quotes.', () => {
       const dataset = new Dataset([new Quote(10), new Quote(20)]);
 
-      expect(dataset.quotes).toHaveLength(2);
+      expect(dataset.length).toBe(2);
     });
 
     it('Should create a valid Array of Quotes.', () => {
       const dataset = new Dataset([1]);
 
       expect(dataset).toHaveProperty('quotes');
-      expect(dataset.quotes).toHaveLength(1);
+      expect(dataset.length).toBe(1);
 
-      expect(dataset.quotes[0]).toBeInstanceOf(Quote);
-      expect(dataset.quotes[0].value).toStrictEqual(1);
+      expect(dataset.at(0)).toBeInstanceOf(Quote);
+      expect(dataset.at(0)?.value).toStrictEqual(1);
     });
   });
 
@@ -110,8 +108,8 @@ describe('Dataset', () => {
 
       dataset.add(quote);
 
-      expect(dataset.quotes).toHaveLength(2);
-      expect(dataset.quotes[1].value).toBe(2);
+      expect(dataset.length).toBe(2);
+      expect(dataset.at(1)?.value).toBe(2);
     });
 
     it('Should apply an indicator to the new Quote if exists', () => {
@@ -122,7 +120,7 @@ describe('Dataset', () => {
       const quote = new Quote(2);
       dataset.add(quote);
 
-      expect(dataset.quotes[1].getIndicator('sma2')).toBe(10);
+      expect(dataset.at(1)?.getIndicator('sma2')).toBe(10);
     });
 
     it('Should apply a strategy to the new Quote in the empty dataset', () => {
@@ -132,7 +130,7 @@ describe('Dataset', () => {
       const quote = new Quote(2);
       dataset.add(quote);
 
-      expect(dataset.quotes[0].getStrategy('sample-strategy')?.position.value).toBe('entry');
+      expect(dataset.at(0)?.getStrategy('sample-strategy')?.position.value).toBe('entry');
     });
 
     it('Should apply a strategy to the new Quote based on the previous quote', () => {
@@ -142,7 +140,7 @@ describe('Dataset', () => {
       const quote = new Quote(2);
       dataset.add(quote);
 
-      expect(dataset.quotes[1].getStrategy('sample-strategy')?.position.value).toBe('hold');
+      expect(dataset.at(1)?.getStrategy('sample-strategy')?.position.value).toBe('hold');
     });
   });
 
@@ -153,7 +151,7 @@ describe('Dataset', () => {
 
       dataset.apply(indicator);
 
-      expect(dataset.quotes).toHaveLength(1);
+      expect(dataset.length).toBe(1);
       expect(dataset.at(0)?.getIndicator('multi5')).toBe(5);
       expect(dataset.indicators).toStrictEqual([{
         name: 'multi5',
@@ -165,11 +163,11 @@ describe('Dataset', () => {
       const dataset = new Dataset([5, 10]);
       const add2 = new Indicator(
         'add2',
-        (ds) => ds.quotes[ds.length - 1].value + 2
+        (ds) => (ds.at(ds.length - 1)?.value ?? 0) + 2
       );
       const min1 = new Indicator(
         'min1',
-        (ds) => ds.quotes[ds.length - 1].value - 1
+        (ds) => (ds.at(ds.length - 1)?.value ?? 0) - 1
       );
 
       dataset.apply(add2, min1);
@@ -203,8 +201,8 @@ describe('Dataset', () => {
       });
       dataset.prepare(strategy);
 
-      expect(dataset.quotes[0].getStrategy('sample-strategy')?.position.value).toBe('entry');
-      expect(dataset.quotes[1].getStrategy('sample-strategy')?.position.value).toBe('hold');
+      expect(dataset.at(0)?.getStrategy('sample-strategy')?.position.value).toBe('entry');
+      expect(dataset.at(1)?.getStrategy('sample-strategy')?.position.value).toBe('hold');
       
       expect(dataset.strategies).toStrictEqual([{
         name: 'sample-strategy',

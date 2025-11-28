@@ -113,13 +113,18 @@ export class Indicator<P, T = number> {
     }
 
     const tempDataset = new Dataset<T>();
-    dataset.quotes.forEach((quote, index) => {
-      tempDataset.quotes.push(quote);
+    
+    for (let i = 0; i < dataset.length; i++) {
+      const quote = dataset.at(i)!;
+      tempDataset.add(quote);
+      
       const indicatorValue = this.calculate(tempDataset);
       const quoteWithIndicator = quote.setIndicator(this.name, indicatorValue);
-      tempDataset.quotes[index] = quoteWithIndicator;
-      dataset.mutateAt(index, quoteWithIndicator);
-    });
+      
+      // We don't need to update tempDataset as add() already added the quote
+      // But we need to update the original dataset
+      dataset.mutateAt(i, quoteWithIndicator);
+    }
 
     return dataset;
   }

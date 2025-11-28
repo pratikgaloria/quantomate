@@ -73,7 +73,7 @@ describe('Williams %R should return the correct value', () => {
       const lastValue = ds.at(-1)?.getIndicator(name);
       expect(lastValue).toBeDefined();
       expect(typeof lastValue).toBe('number');
-      expect(isNaN(lastValue)).toBe(false);
+      expect(isNaN(lastValue!)).toBe(false);
       expect(lastValue).toBeGreaterThanOrEqual(-100);
       expect(lastValue).toBeLessThanOrEqual(0);
     });
@@ -95,7 +95,8 @@ describe('Williams %R should return the correct value', () => {
 
       williamsR.spread(ds);
 
-      ds.quotes.forEach((quote, index) => {
+      for (let index = 0; index < ds.length; index++) {
+        const quote = ds.at(index)!;
         if (index >= 13) {
           // After period
           const rValue = quote.getIndicator('williams_r');
@@ -104,7 +105,7 @@ describe('Williams %R should return the correct value', () => {
             expect(rValue).toBeLessThanOrEqual(0);
           }
         }
-      });
+      }
     });
   });
 

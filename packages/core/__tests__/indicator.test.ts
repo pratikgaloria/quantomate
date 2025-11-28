@@ -62,8 +62,8 @@ describe('Indicator', () => {
       multi5.spread(dataset);
 
       expect(dataset).toBeInstanceOf(Dataset);
-      expect(dataset.quotes[0].getIndicator('multi5')).toBe(5);
-      expect(dataset.quotes[1].getIndicator('multi5')).toBe(10);
+      expect(dataset.at(0)?.getIndicator('multi5')).toBe(5);
+      expect(dataset.at(1)?.getIndicator('multi5')).toBe(10);
     });
 
     it('Should call beforeCalculate() if defined with options while spreading.', () => {
@@ -87,7 +87,7 @@ describe('Indicator', () => {
 
       multi5.spread(dataset);
 
-      expect(dataset.quotes).toHaveLength(0);
+      expect(dataset.length).toBe(0);
     });
 
     it('Should handle single quote dataset', () => {
@@ -96,7 +96,7 @@ describe('Indicator', () => {
 
       multi5.spread(dataset);
 
-      expect(dataset.quotes[0].getIndicator('multi5')).toBe(25);
+      expect(dataset.at(0)?.getIndicator('multi5')).toBe(25);
     });
 
     it('Should preserve existing indicators on quotes', () => {
@@ -106,15 +106,15 @@ describe('Indicator', () => {
 
       // Apply first indicator
       add10.spread(dataset);
-      expect(dataset.quotes[0].getIndicator('add10')).toBe(11);
-      expect(dataset.quotes[1].getIndicator('add10')).toBe(12);
+      expect(dataset.at(0)?.getIndicator('add10')).toBe(11);
+      expect(dataset.at(1)?.getIndicator('add10')).toBe(12);
 
       // Apply second indicator - should preserve first
       multi5.spread(dataset);
-      expect(dataset.quotes[0].getIndicator('add10')).toBe(11);
-      expect(dataset.quotes[0].getIndicator('multi5')).toBe(5);
-      expect(dataset.quotes[1].getIndicator('add10')).toBe(12);
-      expect(dataset.quotes[1].getIndicator('multi5')).toBe(10);
+      expect(dataset.at(0)?.getIndicator('add10')).toBe(11);
+      expect(dataset.at(0)?.getIndicator('multi5')).toBe(5);
+      expect(dataset.at(1)?.getIndicator('add10')).toBe(12);
+      expect(dataset.at(1)?.getIndicator('multi5')).toBe(10);
     });
 
     it('Should work with large datasets', () => {
@@ -124,9 +124,9 @@ describe('Indicator', () => {
 
       multi5.spread(dataset);
 
-      expect(dataset.quotes.length).toBe(1000);
-      expect(dataset.quotes[0].getIndicator('multi5')).toBe(5);
-      expect(dataset.quotes[999].getIndicator('multi5')).toBe(5000);
+      expect(dataset.length).toBe(1000);
+      expect(dataset.at(0)?.getIndicator('multi5')).toBe(5);
+      expect(dataset.at(999)?.getIndicator('multi5')).toBe(5000);
     });
 
     it('Should work with object-based quotes', () => {
@@ -142,9 +142,9 @@ describe('Indicator', () => {
 
       indicator.spread(dataset);
 
-      expect(dataset.quotes[0].getIndicator('closeValue')).toBe(10);
-      expect(dataset.quotes[1].getIndicator('closeValue')).toBe(20);
-      expect(dataset.quotes[2].getIndicator('closeValue')).toBe(30);
+      expect(dataset.at(0)?.getIndicator('closeValue')).toBe(10);
+      expect(dataset.at(1)?.getIndicator('closeValue')).toBe(20);
+      expect(dataset.at(2)?.getIndicator('closeValue')).toBe(30);
     });
 
     it('Should return the same dataset instance', () => {
@@ -169,11 +169,11 @@ describe('Indicator', () => {
 
       sumIndicator.spread(dataset);
 
-      expect(dataset.quotes[0].getIndicator('sum')).toBe(1); // [1]
-      expect(dataset.quotes[1].getIndicator('sum')).toBe(3); // [1, 2]
-      expect(dataset.quotes[2].getIndicator('sum')).toBe(6); // [1, 2, 3]
-      expect(dataset.quotes[3].getIndicator('sum')).toBe(10); // [1, 2, 3, 4]
-      expect(dataset.quotes[4].getIndicator('sum')).toBe(15); // [1, 2, 3, 4, 5]
+      expect(dataset.at(0)?.getIndicator('sum')).toBe(1); // [1]
+      expect(dataset.at(1)?.getIndicator('sum')).toBe(3); // [1, 2]
+      expect(dataset.at(2)?.getIndicator('sum')).toBe(6); // [1, 2, 3]
+      expect(dataset.at(3)?.getIndicator('sum')).toBe(10); // [1, 2, 3, 4]
+      expect(dataset.at(4)?.getIndicator('sum')).toBe(15); // [1, 2, 3, 4, 5]
     });
   });
 });

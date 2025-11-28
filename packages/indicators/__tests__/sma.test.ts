@@ -22,6 +22,6 @@ describe('SMA', () => {
     const lastValue = ds.at(-1)?.getIndicator('sma5');
     expect(lastValue).toBeDefined();
     expect(typeof lastValue).toBe('number');
-    expect(isNaN(lastValue)).toBe(false);
+    expect(isNaN(lastValue!)).toBe(false);
   });
 });

@@ -121,12 +121,15 @@ export class ATR<T = number> extends Indicator<IIndicatorParamsATR<T>, T> {
 
           if (!trIndicator) {
             // Calculate True Range for all quotes
-            dataset.quotes.forEach((quote, index) => {
-              if (index > 0) {
+            // Calculate True Range for all quotes
+            for (let i = 0; i < dataset.length; i++) {
+              const quote = dataset.at(i)!;
+              
+              if (i > 0) {
                 // True Range requires previous close
                 const tr = calculateTrueRange(
                   dataset,
-                  index,
+                  i,
                   params.high,
                   params.low,
                   params.close
@@ -136,15 +139,17 @@ export class ATR<T = number> extends Indicator<IIndicatorParamsATR<T>, T> {
                 // First quote: True Range is High - Low
                 const high = Number(
                   params.high
-                    ? quote.value[params.high as string]
+                    ? (quote.value as any)[params.high as string]
                     : quote.value
                 );
                 const low = Number(
-                  params.low ? quote.value[params.low as string] : quote.value
+                  params.low ? (quote.value as any)[params.low as string] : quote.value
                 );
                 quote.setIndicator(trIndicatorName, high - low);
               }
-            });
+              
+              dataset.mutateAt(i, quote);
+            }
           }
         },
       }

@@ -63,7 +63,7 @@ describe('CCI (Commodity Channel Index) should return the correct value', () => 
       const lastValue = ds.at(-1)?.getIndicator(name);
       expect(lastValue).toBeDefined();
       expect(typeof lastValue).toBe('number');
-      expect(isNaN(lastValue)).toBe(false);
+      expect(isNaN(lastValue!)).toBe(false);
     });
   });
 

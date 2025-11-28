@@ -68,8 +68,7 @@ export class Quote<T = number> {
    * @returns self reference.
    */
   setIndicator(indicatorName: string, indicatorValue: number) {
-    Object.assign(this._indicators, { [indicatorName]: indicatorValue });
-
+    this._indicators[indicatorName] = indicatorValue;
     return this;
   }
 
@@ -89,8 +88,7 @@ export class Quote<T = number> {
    * @returns self reference.
    */
   setStrategy(strategyName: string, strategyValue: StrategyValue) {
-    Object.assign(this._strategies, { [strategyName]: strategyValue });
-
+    this._strategies[strategyName] = strategyValue;
     return this;
   }
 }

@@ -38,7 +38,14 @@ export class Trader<P = unknown, T = number> {
     return new Promise<StrategyValue>((resolve, reject) => {
       try {
         this._dataset.add(new Quote(quote));
-        resolve(this.dataset.at(-1)?.getStrategy(this._strategy.name));
+        const strategyValue = this.dataset.at(-1)?.getStrategy(this._strategy.name);
+        
+        if (strategyValue) {
+          resolve(strategyValue);
+        } else {
+          // Should not happen if strategy is correctly applied
+          reject(new Error(`Strategy ${this._strategy.name} value not found`));
+        }
       } catch (error) {
         reject(error);
       }

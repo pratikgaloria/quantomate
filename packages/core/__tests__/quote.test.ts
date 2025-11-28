@@ -60,17 +60,17 @@ describe('Quote', () => {
       );
 
       dataset.apply(multi5);
-      dataset.quotes.forEach(q => {
-        expect(q.getIndicator('multi5')).toBeTruthy();
-      });
+      for (let i = 0; i < dataset.length; i++) {
+        expect(dataset.at(i)?.getIndicator('multi5')).toBeTruthy();
+      }
     });
 
     it("Should return undefined if indicator does't exists", () => {
       const ds = new Dataset([1, 2]);
 
-      ds.quotes.forEach(q => {
-        expect(q.getIndicator('multi5')).toBeUndefined();
-      });
+      for (let i = 0; i < ds.length; i++) {
+        expect(ds.at(i)?.getIndicator('multi5')).toBeUndefined();
+      }
     });
   });
 
@@ -87,18 +87,18 @@ describe('Quote', () => {
       );
 
       dataset.apply(multi2, multi5);
-      dataset.quotes.forEach(q => {
-        expect(q.indicators).toHaveProperty('multi2');
-        expect(q.indicators).toHaveProperty('multi5');
-      });
+      for (let i = 0; i < dataset.length; i++) {
+        expect(dataset.at(i)?.indicators).toHaveProperty('multi2');
+        expect(dataset.at(i)?.indicators).toHaveProperty('multi5');
+      }
     });
 
     it("Should return blank objects if indicators don't exists", () => {
       const ds = new Dataset([1, 2]);
 
-      ds.quotes.forEach(q => {
-        expect(q.indicators).toStrictEqual({});
-      });
+      for (let i = 0; i < ds.length; i++) {
+        expect(ds.at(i)?.indicators).toStrictEqual({});
+      }
     });
   });
 
@@ -108,17 +108,17 @@ describe('Quote', () => {
       const strategy = sampleStrategy('new-strategy');
       const backtest = new Backtest(dataset, strategy);
 
-      backtest.dataset.quotes.forEach(q => {
-        expect(q.getStrategy('new-strategy')).toBeInstanceOf(StrategyValue);
-      })
+      for (let i = 0; i < backtest.dataset.length; i++) {
+        expect(backtest.dataset.at(i)?.getStrategy('new-strategy')).toBeInstanceOf(StrategyValue);
+      }
     });
 
     it('Should return undefined if strategy doesn\'t exists.', () => {
       const dataset = new Dataset([1, 2]);
       
-      dataset.quotes.forEach(q => {
-        expect(q.getStrategy('new-strategy')).toBeUndefined();
-      })
+      for (let i = 0; i < dataset.length; i++) {
+        expect(dataset.at(i)?.getStrategy('new-strategy')).toBeUndefined();
+      }
     });
   });
 
@@ -128,17 +128,17 @@ describe('Quote', () => {
       const strategy = sampleStrategy('new-strategy');
       const backtest = new Backtest(dataset, strategy);
       
-      dataset.quotes.forEach(q => {
-        expect(q.strategies).toHaveProperty('new-strategy');
-      });
+      for (let i = 0; i < dataset.length; i++) {
+        expect(dataset.at(i)?.strategies).toHaveProperty('new-strategy');
+      }
     });
 
     it("Should return blank objects if strategies don't exists", () => {
       const ds = new Dataset([1, 2]);
 
-      ds.quotes.forEach(q => {
-        expect(q.strategies).toStrictEqual({});
-      });
+      for (let i = 0; i < ds.length; i++) {
+        expect(ds.at(i)?.strategies).toStrictEqual({});
+      }
     });
   });
 });

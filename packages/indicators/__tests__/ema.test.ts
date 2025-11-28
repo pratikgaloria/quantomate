@@ -23,6 +23,6 @@ describe('EMA', () => {
     const lastValue = ds.at(-1)?.getIndicator('ema5');
     expect(lastValue).toBeDefined();
     expect(typeof lastValue).toBe('number');
-    expect(isNaN(lastValue)).toBe(false);
+    expect(isNaN(lastValue!)).toBe(false);
   });
 });

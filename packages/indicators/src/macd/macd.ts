@@ -17,8 +17,8 @@ export class MACD<T> extends Indicator<IIndicatorParamsMACD<T>, T> {
         }
 
         return (
-          dataset.quotes[datasetLength - 1].getIndicator('ema12') -
-          dataset.quotes[datasetLength - 1].getIndicator('ema26')
+          (dataset.at(datasetLength - 1)?.getIndicator('ema12') ?? 0) -
+          (dataset.at(datasetLength - 1)?.getIndicator('ema26') ?? 0)
         );
       },
       {
