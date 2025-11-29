@@ -1,8 +1,7 @@
 {
-    "name": "@quantomate/strategies",
+    "name": "@quantomate/playground",
     "version": "0.1.0",
     "type": "module",
-    "description": "Trading strategies library for Alchemist",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "files": [
@@ -19,13 +18,7 @@
         "precommit": "lint-staged"
     },
     "author": "Pratik Galoria <pratik.d.galoria@gmail.com> (https://github.com/pratikgaloria)",
-    "keywords": [
-        "stocks",
-        "trading",
-        "algorithm",
-        "strategies",
-        "backtest"
-    ],
+    "keywords": [],
     "license": "MIT",
     "devDependencies": {
         "@types/jest": "^29.5.11",
@@ -46,7 +39,6 @@
     "dependencies": {
         "@quantomate/core": "^0.1.0",
         "@quantomate/indicators": "^0.1.0",
-        "lodash": "^4.17.21",
         "yahoo-finance2": "^3.10.2"
     },
     "jest": {

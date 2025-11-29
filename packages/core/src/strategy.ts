@@ -12,10 +12,13 @@ export class StrategyValue<O = unknown> {
 }
 
 type positionFn = <T>(quote: Quote<T>) => boolean;
+type RiskFn = <T, O>(quote: Quote<T>, position: TradePosition<O>) => boolean;
 
 type StrategyCommonOptions<P, T> = {
   indicators?: Indicator<P, T>[];
   onTrigger?: (positionType: TradePositionType, quote: Quote<T>) => void;
+  stopLossWhen?: RiskFn;
+  takeProfitWhen?: RiskFn;
 };
 
 type LongPositionOptions<P, T> = {
@@ -74,6 +77,33 @@ export class Strategy<P = unknown, T = number, O = unknown> {
     quote: Quote<T>,
     position: TradePosition<O> = new TradePosition<O>('idle')
   ) {
+    // STEP 1: Check stop-loss FIRST (highest priority)
+    if (
+      (position.value === 'hold' || position.value === 'entry') &&
+      this._options.stopLossWhen?.(quote, position)
+    ) {
+      return new StrategyValue(
+        new TradePosition('exit', {
+          ...position.options,
+          exitReason: 'stop-loss',
+        })
+      );
+    }
+
+    // STEP 2: Check take-profit
+    if (
+      (position.value === 'hold' || position.value === 'entry') &&
+      this._options.takeProfitWhen?.(quote, position)
+    ) {
+      return new StrategyValue(
+        new TradePosition('exit', {
+          ...position.options,
+          exitReason: 'take-profit',
+        })
+      );
+    }
+
+    // STEP 3: Check strategy exit conditions (lower priority)
     let newPositionValue: TradePositionType = 'idle';
 
     let entryFn: positionFn, exitFn: positionFn;
@@ -96,7 +126,10 @@ export class Strategy<P = unknown, T = number, O = unknown> {
 
     const updatedPosition = TradePosition.update(
       position,
-      new TradePosition(newPositionValue, position.options)
+      new TradePosition(newPositionValue, {
+        ...position.options,
+        exitReason: newPositionValue === 'exit' ? 'strategy' : undefined,
+      }) as TradePosition<O>
     );
     this._options.onTrigger?.(updatedPosition.value, quote);
 

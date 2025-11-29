@@ -33,6 +33,9 @@ export const newTradingPositionMap: {
 
 type TradePositionOptions<O> = O & {
   short?: boolean;
+  entryPrice?: number;
+  entryDate?: Date;
+  exitReason?: 'stop-loss' | 'take-profit' | 'strategy';
 };
 
 export class TradePosition<O = unknown> {
@@ -53,9 +56,14 @@ export class TradePosition<O = unknown> {
   }
 
   static update<O = unknown>(oldPosition: TradePosition<O>, newPosition: TradePosition<O>) {
+    const mergedOptions = {
+      ...oldPosition._options,
+      ...newPosition.options,
+    } as TradePositionOptions<O>;
+    
     return new TradePosition<O>(
       newTradingPositionMap[oldPosition.value][newPosition.value],
-      Object.assign({}, oldPosition._options, newPosition.options)
+      mergedOptions
     );
   }
 }

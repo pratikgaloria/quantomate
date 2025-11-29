@@ -68,7 +68,7 @@ describe('Strategy', () => {
       const quote = new Quote(1);
       quote.setIndicator('indicator', 2);
 
-      expect(strategy.apply(quote)).toStrictEqual(new StrategyValue(new TradePosition('idle', {})))
+      expect(strategy.apply(quote)).toStrictEqual(new StrategyValue(new TradePosition('idle', { exitReason: undefined })))
     });
   });
 

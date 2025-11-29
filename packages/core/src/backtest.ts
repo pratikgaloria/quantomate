@@ -1,10 +1,12 @@
-import { Dataset, Strategy } from './';
+import { Dataset, Strategy, StrategyValue } from './';
 import { BacktestReport } from './backtestReport';
 import { Quote } from './quote';
+import { TradePosition } from './position';
 
 export interface BacktestConfiguration {
   capital: number;
   name?: string;
+  entryPriceField?: 'close' | 'open' | 'high' | 'low' | (<T>(quote: Quote<T>) => number);
 }
 
 export type BacktestTrigger<T> = (
@@ -61,16 +63,47 @@ export class Backtest<P = unknown, T = number, O = unknown> {
         i === this._dataset.length - 1 &&
         (position.value === 'entry' || position.value === 'hold')
       ) {
-        report.markExit(onExit(quote, i, []), quote);
+        report.markExit(onExit(quote, i, []), quote, this.strategy.name);
       } else {
         if (position.value === 'entry') {
+          const entryPrice = this.getEntryPrice(quote, config);
+          const positionWithEntry = new TradePosition(position.value, {
+            ...position.options,
+            entryPrice,
+            entryDate: new Date(),
+          });
+
+          quote.setStrategy(
+            this.strategy.name,
+            new StrategyValue(positionWithEntry)
+          );
+
           report.markEntry(onEntry(quote, i, []), quote);
         } else if (position.value === 'exit') {
-          report.markExit(onExit(quote, i, []), quote);
+          report.markExit(onExit(quote, i, []), quote, this.strategy.name);
         }
       }
     }
 
     return report;
+  }
+
+  private getEntryPrice(quote: Quote<T>, config: BacktestConfiguration): number {
+    if (typeof config.entryPriceField === 'function') {
+      return config.entryPriceField(quote);
+    }
+
+    if (typeof quote.value === 'number') {
+      return quote.value;
+    }
+
+    if (typeof quote.value === 'object' && quote.value !== null) {
+      const field = config.entryPriceField || 'close';
+      if (field in quote.value) {
+        return quote.value[field] as number;
+      }
+    }
+
+    throw new Error('Cannot determine entry price from quote');
   }
 }

@@ -40,9 +40,11 @@ describe('BacktestReport', () => {
       const backtestReport = new BacktestReport(1000);
       const quote1 = new Quote(1);
       const quote2 = new Quote(2);
+      quote1.setStrategy('test-strategy', { position: { value: 'entry', options: {} } } as any);
+      quote2.setStrategy('test-strategy', { position: { value: 'exit', options: {} } } as any);
 
       backtestReport.markEntry(50, quote1);
-      backtestReport.markExit(100, quote2);
+      backtestReport.markExit(100, quote2, 'test-strategy');
 
       // Entry at 50: buy 1000/50 = 20 shares
       // Exit at 100: sell 20*100 = 2000
@@ -57,15 +59,19 @@ describe('BacktestReport', () => {
       expect(backtestReport.returnsPercentage).toBe(100);
       expect(backtestReport.trades).toStrictEqual([
         { type: 'entry', quote: quote1, tradedValue: 50, shares: 20, currentCapital: 0 },
-        { type: 'exit', quote: quote2, tradedValue: 100, shares: 20, currentCapital: 2000 }
+        { type: 'exit', quote: quote2, tradedValue: 100, shares: 20, currentCapital: 2000, exitReason: undefined, exitContext: undefined }
       ])
     });
 
     it('Should update capital and other metrics accordingly for exit position in case of loss.', () => {
       const backtestReport = new BacktestReport(1000);
+      const quote1 = new Quote(1);
+      const quote2 = new Quote(0);
+      quote1.setStrategy('test-strategy', { position: { value: 'entry', options: {} } } as any);
+      quote2.setStrategy('test-strategy', { position: { value: 'exit', options: {} } } as any);
 
-      backtestReport.markEntry(50, new Quote(1));
-      backtestReport.markExit(25, new Quote(0));
+      backtestReport.markEntry(50, quote1);
+      backtestReport.markExit(25, quote2, 'test-strategy');
 
       // Entry at 50: buy 1000/50 = 20 shares
       // Exit at 25: sell 20*25 = 500
