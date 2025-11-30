@@ -1,7 +1,6 @@
 {
     "name": "@quantomate/strategies",
     "version": "0.1.0",
-    "type": "module",
     "description": "Trading strategies library for Alchemist",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
