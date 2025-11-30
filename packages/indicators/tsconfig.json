@@ -1,19 +1,28 @@
 {
   "compilerOptions": {
-    "module": "ES6",
+    "module": "commonjs",
     "moduleResolution": "Node",
-    "target": "ES6",
+    "target": "ES2020",
     "declaration": true,
     "outDir": "./dist",
     "sourceMap": false,
-    "lib": ["esnext", "DOM"],
+    "lib": [
+      "esnext",
+      "DOM"
+    ],
     "noImplicitAny": false,
     "strict": true,
     "strictNullChecks": true,
     "noUnusedLocals": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "types": ["@types/jest"]
+    "types": [
+      "@types/jest"
+    ]
   },
-  "exclude": ["__tests__", "examples", "dist"]
+  "exclude": [
+    "__tests__",
+    "examples",
+    "dist"
+  ]
 }

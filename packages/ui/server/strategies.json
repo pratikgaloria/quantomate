@@ -1,0 +1,27 @@
+{
+  "strategies": [
+    {
+      "id": "golden-cross",
+      "name": "Golden Cross",
+      "description": "Buy when fast SMA crosses above slow SMA, sell when it crosses below",
+      "parameters": [
+        {
+          "name": "fastPeriod",
+          "type": "number",
+          "default": 50,
+          "min": 10,
+          "max": 100,
+          "description": "Fast SMA period"
+        },
+        {
+          "name": "slowPeriod",
+          "type": "number",
+          "default": 200,
+          "min": 50,
+          "max": 300,
+          "description": "Slow SMA period"
+        }
+      ]
+    }
+  ]
+}
