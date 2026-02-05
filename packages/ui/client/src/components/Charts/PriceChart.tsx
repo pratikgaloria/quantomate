@@ -91,9 +91,8 @@ export const PriceChart: React.FC<PriceChartProps> = ({ data, trades }) => {
   }, [data, trades]);
 
   return (
-    <div className="chart-container" style={{ height: '400px', width: '100%', marginBottom: '2rem' }}>
-      <h3>Price Chart with Trade Markers</h3>
-      <div ref={chartContainer} style={{ height: '360px', width: '100%' }} />
+    <div className="chart-container">
+      <div ref={chartContainer} style={{ width: '100%', height: '100%' }} />
     </div>
   );
 };
