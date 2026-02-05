@@ -1,4 +1,5 @@
 import React from 'react';
+import { CollapsibleSection } from './CollapsibleSection';
 import './TradeList.scss';
 
 interface Trade {
@@ -81,8 +82,7 @@ export const TradeList: React.FC<TradeListProps> = ({ trades }) => {
   };
 
   return (
-    <div className="trade-list">
-      <h3>Trade History</h3>
+    <CollapsibleSection title="Trade History" className="trade-list">
       {positions.length === 0 ? (
         <p className="no-trades">No trades executed</p>
       ) : (
@@ -123,6 +123,6 @@ export const TradeList: React.FC<TradeListProps> = ({ trades }) => {
           </table>
         </div>
       )}
-    </div>
+    </CollapsibleSection>
   );
 };
