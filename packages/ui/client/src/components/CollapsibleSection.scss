@@ -1,34 +1,37 @@
 .collapsible-section {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 
   h3.collapsible-header {
-    font-size: 1.1rem;
-    margin-bottom: 0.75rem;
-    color: #333;
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+    color: #222;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: space-between;
     user-select: none;
-    background-color: #f8f9fa;
-    padding: 0.5rem 0.75rem;
-    border-radius: 4px;
-    border: 1px solid #e9ecef;
-    transition: background-color 0.2s;
+    padding: 0.5rem 0;
+    font-weight: 600;
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid #eee;
+    border-radius: 0;
 
     &:hover {
-      background-color: #f1f3f5;
+      color: #000;
     }
 
     .arrow {
       font-size: 0.8em;
-      transition: transform 0.3s ease;
+      transition: transform 0.2s ease;
+      color: #888;
     }
   }
 
   &.collapsed {
     h3.collapsible-header {
       margin-bottom: 0;
+      border-bottom: none;
       .arrow {
         transform: rotate(-90deg);
       }
@@ -37,14 +40,14 @@
 
   .section-content {
     padding: 0.5rem 0;
-    animation: slideDown 0.3s ease-out;
+    animation: slideDown 0.2s ease-out;
   }
 }
 
 @keyframes slideDown {
   from {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(-5px);
   }
   to {
     opacity: 1;

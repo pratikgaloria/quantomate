@@ -146,5 +146,9 @@ export const PriceChart: FC<PriceChartProps> = ({ data, trades }) => {
     };
   }, [data, trades]);
 
-  return <div ref={chartRef} style={{ width: '100%', height: '800px' }} />;
+  return (
+    <div className="chart-container">
+      <div ref={chartRef} style={{ width: '100%', height: '100%' }} />
+    </div>
+  );
 };

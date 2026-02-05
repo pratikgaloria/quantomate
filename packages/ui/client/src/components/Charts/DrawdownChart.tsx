@@ -55,5 +55,5 @@ export const DrawdownChart: FC<DrawdownChartProps> = ({ equityData }) => {
     };
   }, [equityData]);
 
-  return <div ref={chartRef} style={{ width: '100%', height: '800px' }} />;
+  return <div ref={chartRef} style={{ width: '100%', height: '100%' }} />;
 };
