@@ -26,6 +26,13 @@ async function fetchStrategies() {
                         min: 50,
                         max: 300,
                         description: 'Slow SMA period'
+                    },
+                    {
+                        name: 'direction',
+                        type: 'select',
+                        default: 'long',
+                        options: ['long', 'short', 'both'],
+                        description: 'Trading direction'
                     }
                 ]
             },
@@ -33,7 +40,15 @@ async function fetchStrategies() {
                 id: 'pivot-trend',
                 name: 'Pivot Trend',
                 description: "Enter long when previous day's close is above pivot resistance (R), exit when below pivot support (S). Entry/exit at next day's open.",
-                parameters: []
+                parameters: [
+                    {
+                        name: 'direction',
+                        type: 'select',
+                        default: 'both',
+                        options: ['long', 'short', 'both'],
+                        description: 'Trading direction'
+                    }
+                ]
             }
         ];
 

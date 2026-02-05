@@ -1,7 +1,9 @@
-import { Strategy, Quote, Indicator, Dataset } from '@quantomate/core';
+import { Strategy, Quote, Indicator, Dataset, StrategyDirection } from '@quantomate/core';
 import { PivotTrend, PIVOT_TREND_UP, PIVOT_TREND_DOWN } from '@quantomate/indicators';
 
-export interface PivotTrendParams {}
+export interface PivotTrendParams {
+  direction?: StrategyDirection;
+}
 
 /**
  * Pivot-based trend following strategy.
@@ -15,11 +17,12 @@ export interface PivotTrendParams {}
  * Exit: when previous bar's trend is down → exit long.
  */
 export class PivotTrendStrategy extends Strategy<any, any> {
-  constructor(name: string, _params: Partial<PivotTrendParams> = {}) {
+  constructor(name: string, params: Partial<PivotTrendParams> = {}) {
     const pivotTrend = new PivotTrend<any>('pivotTrend');
 
     super(name, {
       indicators: [pivotTrend],
+      direction: params.direction,
       entryWhen: (quote: Quote<any>) => {
         const trend = quote.getIndicator('pivotTrend');
         if (trend === undefined || Number.isNaN(trend)) return false;
@@ -29,6 +32,16 @@ export class PivotTrendStrategy extends Strategy<any, any> {
         const trend = quote.getIndicator('pivotTrend');
         if (trend === undefined || Number.isNaN(trend)) return false;
         return trend === PIVOT_TREND_DOWN;
+      },
+      entryShortWhen: (quote: Quote<any>) => {
+        const trend = quote.getIndicator('pivotTrend');
+        if (trend === undefined || Number.isNaN(trend)) return false;
+        return trend === PIVOT_TREND_DOWN;
+      },
+      exitShortWhen: (quote: Quote<any>) => {
+        const trend = quote.getIndicator('pivotTrend');
+        if (trend === undefined || Number.isNaN(trend)) return false;
+        return trend === PIVOT_TREND_UP;
       },
     });
   }

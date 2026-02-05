@@ -10,6 +10,7 @@ interface BacktestRequest {
     symbol: string;
     startDate: string;
     endDate: string;
+    interval?: string;
   };
   config: {
     capital: number;
@@ -23,7 +24,8 @@ export async function runBacktest(request: BacktestRequest) {
   const stockData = await fetchStockData(
     stock.symbol,
     stock.startDate,
-    stock.endDate
+    stock.endDate,
+    stock.interval || '1d'
   );
 
   if (stockData.length === 0) {
@@ -67,7 +69,13 @@ export async function runBacktest(request: BacktestRequest) {
       stopLossExits: (report as any).stopLossExits || 0,
       takeProfitExits: (report as any).takeProfitExits || 0,
       strategyExits: (report as any).strategyExits || 0,
-      trades: report.trades,
+      trades: report.trades.map((trade) => ({
+        type: trade.type,
+        tradedValue: trade.tradedValue,
+        date: (trade.quote.value as any).date,
+        short: trade.short,
+        exitReason: trade.exitReason,
+      })),
     },
     chartData,
   };
@@ -84,6 +92,7 @@ function createStrategy(strategyId: string, parameters: Record<string, any>) {
 
       return new Strategy<any, StockData>('Golden Cross', {
         indicators: [fastSMA as any, slowSMA as any],
+        direction: parameters.direction,
         entryWhen: (quote) => {
           const fast = quote.getIndicator('fastSMA');
           const slow = quote.getIndicator('slowSMA');
@@ -97,7 +106,7 @@ function createStrategy(strategyId: string, parameters: Record<string, any>) {
       });
     }
     case 'pivot-trend': {
-      return new PivotTrendStrategy('Pivot Trend');
+      return new PivotTrendStrategy('Pivot Trend', parameters);
     }
     default:
       throw new Error(`Unknown strategy: ${strategyId}`);

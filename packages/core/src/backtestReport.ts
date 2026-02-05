@@ -20,6 +20,7 @@ type BacktestReportTrades<T> = {
   tradedValue: number;
   shares?: number;
   currentCapital: number;
+  short?: boolean;
   exitReason?: 'stop-loss' | 'take-profit' | 'strategy';
   exitContext?: ExitContext;
 };
@@ -27,6 +28,8 @@ type BacktestReportTrades<T> = {
 export class BacktestReport<T = number> {
   currentCapital: number;
   sharesOwned: number;
+  isShort: boolean = false;
+  entryTradedValue: number = 0;
 
   profit: number;
   loss: number;
@@ -82,17 +85,30 @@ export class BacktestReport<T = number> {
    * Updates the capital according to the traded value after executing the entry position.
    * @param tradedValue - Traded value at the time.
    */
-  markEntry(tradedValue: number, quote: Quote<T>) {
+  markEntry(tradedValue: number, quote: Quote<T>, strategyName: string) {
+    const position = quote.getStrategy(strategyName).position;
+    this.isShort = !!position.options?.short;
+    this.entryTradedValue = tradedValue;
+
     // Calculate shares with all available capital
     const shares = this.finalCapital / tradedValue;
     this.sharesOwned = shares;
-    this.finalCapital = 0; // All capital used to buy shares
+
+    if (this.isShort) {
+      // For short: selling shares we don't own. 
+      // We get cash from sale, but we'll need to buy them back later.
+      // Simplification: We hold the initial capital + sale proceeds as cash.
+      this.finalCapital = this.finalCapital + (shares * tradedValue);
+    } else {
+      this.finalCapital = 0; // All capital used to buy shares
+    }
     
     this.trades.push({
       type: 'entry',
       quote,
       tradedValue,
       shares,
+      short: this.isShort,
       currentCapital: this.finalCapital,
     });
   }
@@ -114,14 +130,24 @@ export class BacktestReport<T = number> {
     }
 
     const exitContext = this.buildExitContext(quote, position, tradedValue);
-    const proceeds = this.sharesOwned * tradedValue;
-    this.finalCapital = proceeds;
+    
+    if (this.isShort) {
+      // For short exit: buying back shares.
+      // Cash decreases by (shares * tradedValue)
+      this.finalCapital = this.finalCapital - (this.sharesOwned * tradedValue);
+    } else {
+      // For long exit: selling shares.
+      // Cash becomes the proceeds.
+      const proceeds = this.sharesOwned * tradedValue;
+      this.finalCapital = proceeds;
+    }
     
     this.trades.push({
       type: 'exit',
       quote,
       tradedValue,
       shares: this.sharesOwned,
+      short: this.isShort,
       currentCapital: this.finalCapital,
       exitReason,
       exitContext,
@@ -142,6 +168,7 @@ export class BacktestReport<T = number> {
       (this.numberOfWinningTrades + this.numberOfLosingTrades);
 
     this.sharesOwned = 0; // Reset shares after exit
+    this.isShort = false;
     this.currentCapital = this.finalCapital;
     this.updateTotals();
   }
@@ -160,7 +187,8 @@ export class BacktestReport<T = number> {
 
     const exitDate = new Date();
     const holdDuration = exitDate.getTime() - entryDate.getTime();
-    const priceChange = exitPrice - entryPrice;
+    const isShort = !!position.options?.short;
+    const priceChange = isShort ? entryPrice - exitPrice : exitPrice - entryPrice;
     const priceChangePercent = (priceChange / entryPrice) * 100;
 
     const indicators: { [key: string]: number } = {};

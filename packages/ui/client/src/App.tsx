@@ -15,10 +15,27 @@ function App() {
   const [symbol, setSymbol] = useState('AAPL');
   const [startDate, setStartDate] = useState('2023-01-01');
   const [endDate, setEndDate] = useState('2024-01-01');
+  const [interval, setInterval] = useState('1d');
   const [capital, setCapital] = useState(10000);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<BacktestResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const intervals = [
+    { label: '1 Minute', value: '1m' },
+    { label: '2 Minutes', value: '2m' },
+    { label: '5 Minutes', value: '5m' },
+    { label: '15 Minutes', value: '15m' },
+    { label: '30 Minutes', value: '30m' },
+    { label: '60 Minutes', value: '60m' },
+    { label: '90 Minutes', value: '90m' },
+    { label: '1 Hour', value: '1h' },
+    { label: '1 Day', value: '1d' },
+    { label: '5 Days', value: '5d' },
+    { label: '1 Week', value: '1wk' },
+    { label: '1 Month', value: '1mo' },
+    { label: '3 Months', value: '3mo' },
+  ];
 
   // Load strategies on mount
   useEffect(() => {
@@ -68,6 +85,7 @@ function App() {
           symbol,
           startDate,
           endDate,
+          interval,
         },
         config: {
           capital,
@@ -137,6 +155,18 @@ function App() {
                       placeholder={String(param.default ?? '')}
                     />
                   )}
+                  {param.type === 'select' && (
+                    <select
+                      value={parameters[param.name] ?? param.default}
+                      onChange={(e) => handleParameterChange(param.name, e.target.value)}
+                    >
+                      {param.options?.map(opt => (
+                        <option key={opt} value={opt}>
+                          {opt.charAt(0).toUpperCase() + opt.slice(1)}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                 </div>
               ))}
             </CollapsibleSection>
@@ -168,6 +198,19 @@ function App() {
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
               />
+            </div>
+            <div className="form-group">
+              <label>Data Interval</label>
+              <select 
+                value={interval} 
+                onChange={(e) => setInterval(e.target.value)}
+              >
+                {intervals.map(int => (
+                  <option key={int.value} value={int.value}>
+                    {int.label}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="form-group">
               <label>Initial Capital ($)</label>

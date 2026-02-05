@@ -1,4 +1,4 @@
-import React from 'react';
+import { FC } from 'react';
 import { CollapsibleSection } from './CollapsibleSection';
 import './TradeList.scss';
 
@@ -6,6 +6,7 @@ interface Trade {
   type: 'entry' | 'exit';
   tradedValue: number;
   date: string;
+  short?: boolean;
   exitReason?: string;
 }
 
@@ -13,7 +14,7 @@ interface TradeListProps {
   trades: Trade[];
 }
 
-export const TradeList: React.FC<TradeListProps> = ({ trades }) => {
+export const TradeList: FC<TradeListProps> = ({ trades }) => {
   // Group trades into positions (entry + exit pairs)
   const positions: Array<{
     entryDate: string;
@@ -21,6 +22,7 @@ export const TradeList: React.FC<TradeListProps> = ({ trades }) => {
     exitDate: string;
     exitPrice: number;
     exitReason: string;
+    isShort: boolean;
     profitLoss: number;
     profitLossPercent: number;
   }> = [];
@@ -30,25 +32,21 @@ export const TradeList: React.FC<TradeListProps> = ({ trades }) => {
     if (trade.type === 'entry' && i + 1 < trades.length) {
       const exitTrade = trades[i + 1];
       if (exitTrade.type === 'exit') {
+        const isShort = !!trade.short;
         const entryPrice = trade.tradedValue;
         const exitPrice = exitTrade.tradedValue;
-        const profitLoss = exitPrice - entryPrice;
+        
+        // Correct P&L: For long (exit - entry), for short (entry - exit)
+        const profitLoss = isShort ? entryPrice - exitPrice : exitPrice - entryPrice;
         const profitLossPercent = (profitLoss / entryPrice) * 100;
 
         positions.push({
-          entryDate: new Date(trade.date).toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'short', 
-            day: 'numeric' 
-          }),
+          entryDate: trade.date,
           entryPrice,
-          exitDate: new Date(exitTrade.date).toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'short', 
-            day: 'numeric' 
-          }),
+          exitDate: exitTrade.date,
           exitPrice,
           exitReason: exitTrade.exitReason || 'strategy',
+          isShort,
           profitLoss,
           profitLossPercent,
         });
@@ -56,6 +54,22 @@ export const TradeList: React.FC<TradeListProps> = ({ trades }) => {
       }
     }
   }
+
+  const formatDate = (dateStr: string) => {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return 'Invalid Date';
+    return d.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  };
+
+  const formatFullDate = (dateStr: string) => {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return 'Invalid Date';
+    return d.toLocaleString();
+  };
 
   const getExitReasonLabel = (reason: string) => {
     switch (reason) {
@@ -91,6 +105,7 @@ export const TradeList: React.FC<TradeListProps> = ({ trades }) => {
             <thead>
               <tr>
                 <th>Entry Date</th>
+                <th>Direction</th>
                 <th>Entry Price</th>
                 <th>Exit Date</th>
                 <th>Exit Price</th>
@@ -102,20 +117,25 @@ export const TradeList: React.FC<TradeListProps> = ({ trades }) => {
             <tbody>
               {positions.map((position, index) => (
                 <tr key={index}>
-                  <td>{position.entryDate}</td>
-                  <td>${position.entryPrice.toFixed(2)}</td>
-                  <td>{position.exitDate}</td>
-                  <td>${position.exitPrice.toFixed(2)}</td>
+                  <td title={formatFullDate(position.entryDate)}>{formatDate(position.entryDate)}</td>
+                  <td>
+                    <span className={`direction-label ${position.isShort ? 'short' : 'long'}`}>
+                      {position.isShort ? 'Short' : 'Long'}
+                    </span>
+                  </td>
+                  <td>${position.entryPrice?.toFixed(2) ?? '0.00'}</td>
+                  <td title={formatFullDate(position.exitDate)}>{formatDate(position.exitDate)}</td>
+                  <td>${position.exitPrice?.toFixed(2) ?? '0.00'}</td>
                   <td>
                     <span className={`exit-reason ${getExitReasonClass(position.exitReason)}`}>
                       {getExitReasonLabel(position.exitReason)}
                     </span>
                   </td>
                   <td className={position.profitLoss >= 0 ? 'profit' : 'loss'}>
-                    ${position.profitLoss.toFixed(2)}
+                    ${position.profitLoss?.toFixed(2) ?? '0.00'}
                   </td>
                   <td className={position.profitLoss >= 0 ? 'profit' : 'loss'}>
-                    {position.profitLossPercent.toFixed(2)}%
+                    {position.profitLossPercent?.toFixed(2) ?? '0.00'}%
                   </td>
                 </tr>
               ))}
