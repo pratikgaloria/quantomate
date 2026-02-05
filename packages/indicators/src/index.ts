@@ -7,3 +7,4 @@ export { Stochastic } from './stochastic/stochastic';
 export { ATR } from './atr/atr';
 export { WilliamsR } from './williamsR/williamsR';
 export { CCI } from './cci/cci';
+export { PivotTrend, PIVOT_TREND_UP, PIVOT_TREND_DOWN, PIVOT_TREND_NEUTRAL } from './pivotTrend/pivotTrend';

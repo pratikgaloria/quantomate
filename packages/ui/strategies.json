@@ -22,6 +22,12 @@
           "description": "Slow SMA period"
         }
       ]
+    },
+    {
+      "id": "pivot-trend",
+      "name": "Pivot Trend",
+      "description": "Enter long when previous day's close is above pivot resistance (R), exit when below pivot support (S). Entry/exit at next day's open.",
+      "parameters": []
     }
   ]
 }

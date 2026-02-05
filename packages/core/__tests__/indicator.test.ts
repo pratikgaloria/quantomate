@@ -117,6 +117,21 @@ describe('Indicator', () => {
       expect(dataset.at(1)?.getIndicator('multi5')).toBe(10);
     });
 
+    it('Should allow indicators to depend on other indicators', () => {
+      const dataset = new Dataset([1, 2]);
+      const add10 = new Indicator('add10', (ds) => ds.valueAt(-1) + 10);
+      const dependent = new Indicator('dependent', (ds) => {
+        const val = ds.at(-1)?.getIndicator('add10');
+        return val ? val * 2 : NaN;
+      });
+
+      add10.spread(dataset);
+      dependent.spread(dataset);
+
+      expect(dataset.at(0)?.getIndicator('dependent')).toBe(22); // (1+10) * 2
+      expect(dataset.at(1)?.getIndicator('dependent')).toBe(24); // (2+10) * 2
+    });
+
     it('Should work with large datasets', () => {
       const largeData = Array.from({ length: 1000 }, (_, i) => i + 1);
       const dataset = new Dataset(largeData);

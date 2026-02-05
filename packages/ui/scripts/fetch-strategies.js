@@ -28,17 +28,23 @@ async function fetchStrategies() {
                         description: 'Slow SMA period'
                     }
                 ]
+            },
+            {
+                id: 'pivot-trend',
+                name: 'Pivot Trend',
+                description: "Enter long when previous day's close is above pivot resistance (R), exit when below pivot support (S). Entry/exit at next day's open.",
+                parameters: []
             }
         ];
 
-        // Write to strategies.json
-        const outputPath = path.resolve(__dirname, '../strategies.json');
-        fs.writeFileSync(
-            outputPath,
-            JSON.stringify({ strategies: metadata }, null, 2)
-        );
+        // Write to both root and server directories
+        const rootPath = path.resolve(__dirname, '../strategies.json');
+        const serverPath = path.resolve(__dirname, '../server/strategies.json');
 
-        console.log(`✅ Generated strategies.json with ${metadata.length} strategies`);
+        fs.writeFileSync(rootPath, JSON.stringify({ strategies: metadata }, null, 2));
+        fs.writeFileSync(serverPath, JSON.stringify({ strategies: metadata }, null, 2));
+
+        console.log(`✅ Generated strategies.json in root and server directories`);
     } catch (error) {
         console.error('❌ Error fetching strategies:', error);
         process.exit(1);

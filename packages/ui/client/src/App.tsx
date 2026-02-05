@@ -123,10 +123,18 @@ function App() {
                   {param.type === 'number' && (
                     <input
                       type="number"
-                      value={parameters[param.name] || param.default}
+                      value={parameters[param.name] ?? param.default}
                       min={param.min}
                       max={param.max}
                       onChange={(e) => handleParameterChange(param.name, Number(e.target.value))}
+                    />
+                  )}
+                  {param.type === 'string' && (
+                    <input
+                      type="text"
+                      value={parameters[param.name] ?? param.default ?? ''}
+                      onChange={(e) => handleParameterChange(param.name, e.target.value)}
+                      placeholder={String(param.default ?? '')}
                     />
                   )}
                 </div>

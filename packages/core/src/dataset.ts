@@ -127,6 +127,16 @@ export class Dataset<T = number> {
     this.storage.addValue(value);
     const newIndex = this.storage.length - 1;
 
+    // If adding a Quote object, preserve its existing indicators and strategies
+    if (quote instanceof Quote) {
+      for (const [name, val] of Object.entries(quote.indicators)) {
+        this.storage.setIndicator(newIndex, name, val);
+      }
+      for (const [name, val] of Object.entries(quote.strategies)) {
+        this.storage.setStrategy(newIndex, name, val);
+      }
+    }
+
     // Calculate and store indicators
     for (let i = 0; i < this.indicators.length; i++) {
       const ind = this.indicators[i];

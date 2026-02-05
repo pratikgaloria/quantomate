@@ -1,4 +1,6 @@
-import yahooFinance from 'yahoo-finance2';
+import YahooFinance from 'yahoo-finance2';
+
+const yahooFinance = new YahooFinance();
 
 export interface StockData {
   date: Date;
@@ -15,19 +17,20 @@ export async function fetchStockData(
   endDate: string
 ): Promise<StockData[]> {
   try {
-    const result = await yahooFinance.historical(symbol, {
+    const result = await yahooFinance.chart(symbol, {
       period1: startDate,
       period2: endDate,
       interval: '1d',
+      return: 'array'
     });
 
-    return result.map(quote => ({
+    return result.quotes.map(quote => ({
       date: quote.date,
-      open: quote.open,
-      high: quote.high,
-      low: quote.low,
-      close: quote.close,
-      volume: quote.volume,
+      open: quote.open as number,
+      high: quote.high as number,
+      low: quote.low as number,
+      close: quote.close as number,
+      volume: quote.volume as number,
     }));
   } catch (error) {
     console.error(`Error fetching data for ${symbol}:`, error);

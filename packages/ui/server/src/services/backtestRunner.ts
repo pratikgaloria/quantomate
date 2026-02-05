@@ -1,5 +1,6 @@
 import { Dataset, Strategy, Backtest } from '@quantomate/core';
 import { SMA } from '@quantomate/indicators';
+import { PivotTrendStrategy } from '@quantomate/strategies';
 import { fetchStockData, StockData } from './stockDataFetcher';
 
 interface BacktestRequest {
@@ -35,14 +36,17 @@ export async function runBacktest(request: BacktestRequest) {
   // Create strategy based on strategyId
   const strategy = createStrategy(strategyId, parameters);
 
-  // Run backtest
+  // Run backtest (pivot-trend uses open for entry/exit; others use close)
   const backtest = new Backtest(dataset, strategy);
+  const useOpenPrice = strategyId === 'pivot-trend';
   const report = backtest.run({
     config: {
       capital: config.capital,
     },
-    onEntry: (quote) => (quote.value as StockData).close,
-    onExit: (quote) => (quote.value as StockData).close,
+    onEntry: (quote) =>
+      useOpenPrice ? (quote.value as StockData).open : (quote.value as StockData).close,
+    onExit: (quote) =>
+      useOpenPrice ? (quote.value as StockData).open : (quote.value as StockData).close,
   });
 
   // Prepare chart data
@@ -91,6 +95,9 @@ function createStrategy(strategyId: string, parameters: Record<string, any>) {
           return fast < slow;
         },
       });
+    }
+    case 'pivot-trend': {
+      return new PivotTrendStrategy('Pivot Trend');
     }
     default:
       throw new Error(`Unknown strategy: ${strategyId}`);

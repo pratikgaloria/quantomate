@@ -113,16 +113,19 @@ export class Indicator<P, T = number> {
     }
 
     const tempDataset = new Dataset<T>();
+    let lastValue = NaN;
     
     for (let i = 0; i < dataset.length; i++) {
       const quote = dataset.at(i)!;
       tempDataset.add(quote);
       
-      const indicatorValue = this.calculate(tempDataset);
+      const indicatorValue = (i > 0 && this.hasIncremental()) 
+        ? this.calculateIncremental(lastValue, quote, tempDataset)
+        : this.calculate(tempDataset);
+      
+      lastValue = indicatorValue;
       const quoteWithIndicator = quote.setIndicator(this.name, indicatorValue);
       
-      // We don't need to update tempDataset as add() already added the quote
-      // But we need to update the original dataset
       dataset.mutateAt(i, quoteWithIndicator);
     }
 

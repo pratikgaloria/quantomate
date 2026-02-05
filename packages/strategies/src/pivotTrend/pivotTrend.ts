@@ -1,0 +1,35 @@
+import { Strategy, Quote, Indicator, Dataset } from '@quantomate/core';
+import { PivotTrend, PIVOT_TREND_UP, PIVOT_TREND_DOWN } from '@quantomate/indicators';
+
+export interface PivotTrendParams {}
+
+/**
+ * Pivot-based trend following strategy.
+ *
+ * Uses the PivotTrend indicator from @quantomate/indicators:
+ * - Today's pivot = Last day's (High + Low + Close) / 3
+ * - R = (2 * Pivot) - Last day's Low, S = (2 * Pivot) - Last day's High
+ * - Close > R ⇒ trend up (next day), Close < S ⇒ trend down (next day)
+ *
+ * Entry: when previous bar's trend is up → enter long at today's open.
+ * Exit: when previous bar's trend is down → exit long.
+ */
+export class PivotTrendStrategy extends Strategy<any, any> {
+  constructor(name: string, _params: Partial<PivotTrendParams> = {}) {
+    const pivotTrend = new PivotTrend<any>('pivotTrend');
+
+    super(name, {
+      indicators: [pivotTrend],
+      entryWhen: (quote: Quote<any>) => {
+        const trend = quote.getIndicator('pivotTrend');
+        if (trend === undefined || Number.isNaN(trend)) return false;
+        return trend === PIVOT_TREND_UP;
+      },
+      exitWhen: (quote: Quote<any>) => {
+        const trend = quote.getIndicator('pivotTrend');
+        if (trend === undefined || Number.isNaN(trend)) return false;
+        return trend === PIVOT_TREND_DOWN;
+      },
+    });
+  }
+}

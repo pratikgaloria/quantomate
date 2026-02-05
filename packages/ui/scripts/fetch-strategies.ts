@@ -44,6 +44,16 @@ async function fetchStrategies() {
             description: 'Slow SMA period'
           }
         ]
+      },
+      {
+        id: 'pivot-trend',
+        name: 'Pivot Trend',
+        description: "Enter long when previous day's close is above pivot resistance (R), exit when below pivot support (S). Entry/exit at next day's open.",
+        parameters: [
+          { name: 'highKey', type: 'string', default: 'high', description: 'OHLC attribute for high' },
+          { name: 'lowKey', type: 'string', default: 'low', description: 'OHLC attribute for low' },
+          { name: 'closeKey', type: 'string', default: 'close', description: 'OHLC attribute for close' }
+        ]
       }
     ];
 
