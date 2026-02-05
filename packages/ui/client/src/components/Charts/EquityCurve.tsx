@@ -58,5 +58,5 @@ export const EquityCurve: React.FC<EquityCurveProps> = ({ data, initialCapital }
     };
   }, [data, initialCapital]);
 
-  return <div ref={chartRef} style={{ width: '100%', height: '800px' }} />;
+  return <div ref={chartRef} style={{ width: '100%', height: '100%' }} />;
 };

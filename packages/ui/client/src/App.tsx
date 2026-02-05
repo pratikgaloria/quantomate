@@ -87,10 +87,6 @@ function App() {
 
   return (
     <div className="app">
-      <header className="app-header">
-        <h1>Quantomate - Backtest Visualization</h1>
-      </header>
-
       <div className="app-content">
         <div className="controls-panel">
           <h2>Configuration</h2>
@@ -241,13 +237,17 @@ function App() {
                   data={result.chartData.prices} 
                   trades={result.chartData.trades}
                 />
-                <EquityCurve 
-                  data={result.chartData.equity}
-                  initialCapital={result.report.initialCapital}
-                />
-                <DrawdownChart 
-                  equityData={result.chartData.equity}
-                />
+                <div className="chart-wrapper">
+                  <EquityCurve
+                    data={result.chartData.equity}
+                    initialCapital={result.report.initialCapital}
+                  />
+                </div>
+                <div className="chart-wrapper">
+                  <DrawdownChart
+                    equityData={result.chartData.equity}
+                  />
+                </div>
               </CollapsibleSection>
 
               {/* Trade List - Collapsible handled internally but it wraps itself */}
