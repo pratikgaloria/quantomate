@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { StrategyMetadata, BacktestRequest, BacktestResponse } from './types';
 import { PriceChart } from './components/Charts/PriceChart';
 import { EquityCurve } from './components/Charts/EquityCurve';
 import { DrawdownChart } from './components/Charts/DrawdownChart';
 import { TradeList } from './components/TradeList';
+import { CollapsibleSection } from './components/CollapsibleSection';
 import './styles/App.scss';
 
 function App() {
@@ -94,8 +95,8 @@ function App() {
         <div className="controls-panel">
           <h2>Configuration</h2>
 
-          {/* Strategy Selector */}
-          <div className="form-group">
+          {/* Strategy Selector - Always visible */}
+          <div className="form-group strategy-selector">
             <label>Strategy</label>
             <select
               value={selectedStrategy}
@@ -115,8 +116,7 @@ function App() {
 
           {/* Parameters */}
           {selectedStrategyMeta && selectedStrategyMeta.parameters.length > 0 && (
-            <div className="parameters-section">
-              <h3>Parameters</h3>
+            <CollapsibleSection title="Parameters" className="parameters-section">
               {selectedStrategyMeta.parameters.map(param => (
                 <div key={param.name} className="form-group">
                   <label>{param.description}</label>
@@ -139,12 +139,11 @@ function App() {
                   )}
                 </div>
               ))}
-            </div>
+            </CollapsibleSection>
           )}
 
           {/* Stock Configuration */}
-          <div className="stock-section">
-            <h3>Stock & Period</h3>
+          <CollapsibleSection title="Stock & Period" className="stock-section">
             <div className="form-group">
               <label>Symbol</label>
               <input
@@ -179,7 +178,7 @@ function App() {
                 min={100}
               />
             </div>
-          </div>
+          </CollapsibleSection>
 
           <button
             className="run-button"
@@ -197,48 +196,47 @@ function App() {
           {result ? (
             <div className="results-content">
               {/* Metrics */}
-              <div className="metrics-grid">
-                <div className="metric">
-                  <span className="metric-label">Initial Capital</span>
-                  <span className="metric-value">${result.report.initialCapital.toFixed(2)}</span>
+              <CollapsibleSection title="Performance Metrics" className="metrics-section">
+                <div className="metrics-grid">
+                  <div className="metric">
+                    <span className="metric-label">Initial Capital</span>
+                    <span className="metric-value">${result.report.initialCapital.toFixed(2)}</span>
+                  </div>
+                  <div className="metric">
+                    <span className="metric-label">Final Capital</span>
+                    <span className="metric-value">${result.report.finalCapital.toFixed(2)}</span>
+                  </div>
+                  <div className="metric">
+                    <span className="metric-label">Returns</span>
+                    <span className={`metric-value ${result.report.returns >= 0 ? 'positive' : 'negative'}`}>
+                      ${result.report.returns.toFixed(2)} ({result.report.returnsPercentage.toFixed(2)}%)
+                    </span>
+                  </div>
+                  <div className="metric">
+                    <span className="metric-label">Number of Trades</span>
+                    <span className="metric-value">{result.report.numberOfTrades}</span>
+                  </div>
+                  <div className="metric">
+                    <span className="metric-label">Win Rate</span>
+                    <span className="metric-value">{(result.report.winningRate * 100).toFixed(2)}%</span>
+                  </div>
+                  <div className="metric">
+                    <span className="metric-label">Stop-Loss Exits</span>
+                    <span className="metric-value">{result.report.stopLossExits}</span>
+                  </div>
+                  <div className="metric">
+                    <span className="metric-label">Take-Profit Exits</span>
+                    <span className="metric-value">{result.report.takeProfitExits}</span>
+                  </div>
+                  <div className="metric">
+                    <span className="metric-label">Strategy Exits</span>
+                    <span className="metric-value">{result.report.strategyExits}</span>
+                  </div>
                 </div>
-                <div className="metric">
-                  <span className="metric-label">Final Capital</span>
-                  <span className="metric-value">${result.report.finalCapital.toFixed(2)}</span>
-                </div>
-                <div className="metric">
-                  <span className="metric-label">Returns</span>
-                  <span className={`metric-value ${result.report.returns >= 0 ? 'positive' : 'negative'}`}>
-                    ${result.report.returns.toFixed(2)} ({result.report.returnsPercentage.toFixed(2)}%)
-                  </span>
-                </div>
-                <div className="metric">
-                  <span className="metric-label">Number of Trades</span>
-                  <span className="metric-value">{result.report.numberOfTrades}</span>
-                </div>
-                <div className="metric">
-                  <span className="metric-label">Win Rate</span>
-                  <span className="metric-value">{(result.report.winningRate * 100).toFixed(2)}%</span>
-                </div>
-                <div className="metric">
-                  <span className="metric-label">Stop-Loss Exits</span>
-                  <span className="metric-value">{result.report.stopLossExits}</span>
-                </div>
-                <div className="metric">
-                  <span className="metric-label">Take-Profit Exits</span>
-                  <span className="metric-value">{result.report.takeProfitExits}</span>
-                </div>
-                <div className="metric">
-                  <span className="metric-label">Strategy Exits</span>
-                  <span className="metric-value">{result.report.strategyExits}</span>
-                </div>
-              </div>
-
-              {/* Trade List */}
-              <TradeList trades={result.report.trades} />
+              </CollapsibleSection>
 
               {/* Charts */}
-              <div className="charts-section">
+              <CollapsibleSection title="Charts" className="charts-section">
                 <PriceChart 
                   data={result.chartData.prices} 
                   trades={result.chartData.trades}
@@ -250,7 +248,10 @@ function App() {
                 <DrawdownChart 
                   equityData={result.chartData.equity}
                 />
-              </div>
+              </CollapsibleSection>
+
+              {/* Trade List - Collapsible handled internally but it wraps itself */}
+              <TradeList trades={result.report.trades} />
             </div>
           ) : (
             <div className="empty-state">

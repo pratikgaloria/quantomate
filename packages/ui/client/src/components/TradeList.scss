@@ -1,11 +1,5 @@
 .trade-list {
-  margin-top: 2rem;
-
-  h3 {
-    font-size: 1.25rem;
-    margin-bottom: 1rem;
-    color: #333;
-  }
+  /* margin-top removed as CollapsibleSection handles spacing */
 
   .no-trades {
     color: #999;
