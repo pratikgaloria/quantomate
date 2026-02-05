@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import { FC, useEffect, useRef } from 'react';
 import * as anychart from 'anychart';
 
 interface EquityCurveProps {
@@ -9,7 +9,7 @@ interface EquityCurveProps {
   initialCapital: number;
 }
 
-export const EquityCurve: React.FC<EquityCurveProps> = ({ data, initialCapital }) => {
+export const EquityCurve: FC<EquityCurveProps> = ({ data, initialCapital }) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<any>(null);
 

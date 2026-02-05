@@ -1,9 +1,10 @@
 export interface StrategyParameter {
   name: string;
-  type: 'number' | 'boolean' | 'string';
+  type: 'number' | 'boolean' | 'string' | 'select';
   default: any;
   min?: number;
   max?: number;
+  options?: string[];
   description: string;
 }
 
@@ -21,6 +22,7 @@ export interface BacktestRequest {
     symbol: string;
     startDate: string;
     endDate: string;
+    interval?: string;
   };
   config: {
     capital: number;

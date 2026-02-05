@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import { FC, useEffect, useRef } from 'react';
 import * as anychart from 'anychart';
 
 interface PriceChartProps {
@@ -17,7 +17,7 @@ interface PriceChartProps {
   }>;
 }
 
-export const PriceChart: React.FC<PriceChartProps> = ({ data, trades }) => {
+export const PriceChart: FC<PriceChartProps> = ({ data, trades }) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<any>(null);
 
@@ -87,13 +87,13 @@ export const PriceChart: React.FC<PriceChartProps> = ({ data, trades }) => {
     ohlcSeries.name('Price');
     
     // Style OHLC with custom colors
-    ohlcSeries.risingStroke(function() {
+    ohlcSeries.risingStroke(function(this: any) {
       const point = this as any;
       const dataItem = ohlcData.find(d => d.x === point.x);
       return dataItem?.stroke || '#26a69a';
     }, 1);
     
-    ohlcSeries.fallingStroke(function() {
+    ohlcSeries.fallingStroke(function(this: any) {
       const point = this as any;
       const dataItem = ohlcData.find(d => d.x === point.x);
       return dataItem?.stroke || '#ef5350';

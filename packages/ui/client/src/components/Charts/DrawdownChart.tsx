@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import { FC, useEffect, useRef } from 'react';
 import * as anychart from 'anychart';
 
 interface DrawdownChartProps {
@@ -8,7 +8,7 @@ interface DrawdownChartProps {
   }>;
 }
 
-export const DrawdownChart: React.FC<DrawdownChartProps> = ({ equityData }) => {
+export const DrawdownChart: FC<DrawdownChartProps> = ({ equityData }) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<any>(null);
 

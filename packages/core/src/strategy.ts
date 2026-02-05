@@ -14,33 +14,22 @@ export class StrategyValue<O = unknown> {
 type positionFn = <T>(quote: Quote<T>) => boolean;
 type RiskFn = <T, O>(quote: Quote<T>, position: TradePosition<O>) => boolean;
 
-type StrategyCommonOptions<P, T> = {
+export type StrategyDirection = 'long' | 'short' | 'both';
+
+type StrategyOptionsCommon<P, T> = {
   indicators?: Indicator<P, T>[];
   onTrigger?: (positionType: TradePositionType, quote: Quote<T>) => void;
   stopLossWhen?: RiskFn;
   takeProfitWhen?: RiskFn;
+  direction?: StrategyDirection;
 };
 
-type LongPositionOptions<P, T> = {
-  entryWhen: positionFn;
-  exitWhen: positionFn;
-} & StrategyCommonOptions<P, T>;
-
-type ShortPositionOptions<P, T> = {
-  entryShortWhen: positionFn;
-  exitShortWhen: positionFn;
-} & StrategyCommonOptions<P, T>;
-
-export type StrategyOptions<P, T> =
-  | LongPositionOptions<P, T>
-  | ShortPositionOptions<P, T>;
-
-function isShortPosition<P, T>(
-  position: TradePosition,
-  options: StrategyOptions<P, T>
-): options is ShortPositionOptions<P, T> {
-  return !!position.options?.short;
-}
+export type StrategyOptions<P, T> = {
+  entryWhen?: positionFn;
+  exitWhen?: positionFn;
+  entryShortWhen?: positionFn;
+  exitShortWhen?: positionFn;
+} & StrategyOptionsCommon<P, T>;
 
 /**
  * Defines a strategy that can be back-tested.
@@ -49,11 +38,6 @@ export class Strategy<P = unknown, T = number, O = unknown> {
   protected _name: string;
   protected _options: StrategyOptions<P, T>;
 
-  /**
-   * Creates a strategy with definition and indicators.
-   * @param name - Name of the strategy.
-   * @param options - StrategyOptions.
-   */
   constructor(name: string, options: StrategyOptions<P, T>) {
     this._name = name;
     this._options = options;
@@ -67,17 +51,10 @@ export class Strategy<P = unknown, T = number, O = unknown> {
     return this._options;
   }
 
-  /**
-   * Applies the strategy over a given quote and returns the strategy values.
-   * @param quote - `Quote` on which strategy should be applied.
-   * @param position - TradePositionType of the quote.
-   * @returns `StrategyValue`.
-   */
   apply(
     quote: Quote<T>,
     position: TradePosition<O> = new TradePosition<O>('idle')
   ) {
-    // STEP 1: Check stop-loss FIRST (highest priority)
     if (
       (position.value === 'hold' || position.value === 'entry') &&
       this._options.stopLossWhen?.(quote, position)
@@ -90,7 +67,6 @@ export class Strategy<P = unknown, T = number, O = unknown> {
       );
     }
 
-    // STEP 2: Check take-profit
     if (
       (position.value === 'hold' || position.value === 'entry') &&
       this._options.takeProfitWhen?.(quote, position)
@@ -103,31 +79,33 @@ export class Strategy<P = unknown, T = number, O = unknown> {
       );
     }
 
-    // STEP 3: Check strategy exit conditions (lower priority)
     let newPositionValue: TradePositionType = 'idle';
+    let isShort = !!position.options?.short;
 
-    let entryFn: positionFn, exitFn: positionFn;
-    if (isShortPosition(position, this._options)) {
-      entryFn = this._options.entryShortWhen;
-      exitFn = this._options.exitShortWhen;
+    if (position.value === 'hold' || position.value === 'entry') {
+      const exitFn = isShort ? this._options.exitShortWhen : this._options.exitWhen;
+      if (exitFn?.(quote)) {
+        newPositionValue = 'exit';
+      }
     } else {
-      entryFn = this._options.entryWhen;
-      exitFn = this._options.exitWhen;
-    }
+      const direction = this._options.direction || 'both';
+      const canEnterLong = direction === 'long' || direction === 'both';
+      const canEnterShort = direction === 'short' || direction === 'both';
 
-    if (
-      (position.value === 'hold' || position.value === 'entry') &&
-      exitFn(quote)
-    ) {
-      newPositionValue = 'exit';
-    } else if (entryFn(quote)) {
-      newPositionValue = 'entry';
+      if (canEnterLong && this._options.entryWhen?.(quote)) {
+        newPositionValue = 'entry';
+        isShort = false;
+      } else if (canEnterShort && this._options.entryShortWhen?.(quote)) {
+        newPositionValue = 'entry';
+        isShort = true;
+      }
     }
 
     const updatedPosition = TradePosition.update(
       position,
       new TradePosition(newPositionValue, {
         ...position.options,
+        short: isShort,
         exitReason: newPositionValue === 'exit' ? 'strategy' : undefined,
       }) as TradePosition<O>
     );

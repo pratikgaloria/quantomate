@@ -78,7 +78,7 @@ export class Backtest<P = unknown, T = number, O = unknown> {
             new StrategyValue(positionWithEntry)
           );
 
-          report.markEntry(onEntry(quote, i, []), quote);
+          report.markEntry(onEntry(quote, i, []), quote, this.strategy.name);
         } else if (position.value === 'exit') {
           report.markExit(onExit(quote, i, []), quote, this.strategy.name);
         }
