@@ -8,7 +8,11 @@ export const PIVOT_TREND_UP = 1;
 export const PIVOT_TREND_DOWN = -1;
 export const PIVOT_TREND_NEUTRAL = 0;
 
-interface IIndicatorParamsPivotTrend {}
+interface IIndicatorParamsPivotTrend<T> {
+  high?: T extends object ? keyof T : string;
+  low?: T extends object ? keyof T : string;
+  close?: T extends object ? keyof T : string;
+}
 
 /**
  * Pivot-based trend indicator (daily bars).
@@ -25,50 +29,50 @@ interface IIndicatorParamsPivotTrend {}
  * Returns: 1 (up), -1 (down), 0 (neutral). NaN if not enough data.
  */
 export class PivotTrend<T = number> extends Indicator<
-  IIndicatorParamsPivotTrend,
+  IIndicatorParamsPivotTrend<T>,
   T
 > {
-  constructor(name = 'PivotTrend') {
+  constructor(name = 'PivotTrend', params: IIndicatorParamsPivotTrend<T> = {}) {
     super(
       name,
       function (this: PivotTrend<T>, dataset: Dataset<T>) {
-        const high = 'high';
-        const low = 'low';
-        const close = 'close';
+        const high = (params.high as string) || 'high';
+        const low = (params.low as string) || 'low';
+        const close = (params.close as string) || 'close';
         const datasetLength = dataset.length;
 
-        if (datasetLength < 3) {
+        if (datasetLength < 2) {
           return NaN;
         }
 
-        const dayBeforeYesterdayHigh = Number(dataset.valueAt(-3, high));
-        const dayBeforeYesterdayLow = Number(dataset.valueAt(-3, low));
-        const dayBeforeYesterdayClose = Number(dataset.valueAt(-3, close));
-        const yesterdayClose = Number(dataset.valueAt(-2, close));
+        const previousHigh = Number(dataset.valueAt(-2, high));
+        const previousLow = Number(dataset.valueAt(-2, low));
+        const previousClose = Number(dataset.valueAt(-2, close));
+        const currentClose = Number(dataset.valueAt(-1, close));
 
         if (
-          Number.isNaN(dayBeforeYesterdayHigh) ||
-          Number.isNaN(dayBeforeYesterdayLow) ||
-          Number.isNaN(dayBeforeYesterdayClose) ||
-          Number.isNaN(yesterdayClose)
+          Number.isNaN(previousHigh) ||
+          Number.isNaN(previousLow) ||
+          Number.isNaN(previousClose) ||
+          Number.isNaN(currentClose)
         ) {
           return NaN;
         }
 
-        const pivot = (dayBeforeYesterdayHigh + dayBeforeYesterdayLow + dayBeforeYesterdayClose) / 3;
-        const resistance = 2 * pivot - dayBeforeYesterdayLow;
-        const support = 2 * pivot - dayBeforeYesterdayHigh;
+        const pivot = (previousHigh + previousLow + previousClose) / 3;
+        const resistance = 2 * pivot - previousLow;
+        const support = 2 * pivot - previousHigh;
 
-        if (yesterdayClose > resistance) {
+        if (currentClose > resistance) {
           return PIVOT_TREND_UP;
         }
-        if (yesterdayClose < support) {
+        if (currentClose < support) {
           return PIVOT_TREND_DOWN;
         }
         return PIVOT_TREND_NEUTRAL;
       },
       {
-        params: {},
+        params,
       }
     );
 
