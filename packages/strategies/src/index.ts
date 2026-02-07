@@ -2,3 +2,5 @@ export const VERSION = '0.1.0';
 export * from './goldenCross/goldenCross';
 export * from './rsiMeanReversion/rsiMeanReversion';
 export * from './pivotTrend/pivotTrend';
+export * from './bollingerBands/bollingerBands';
+export * from './macd/macd';
