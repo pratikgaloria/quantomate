@@ -1,5 +1,10 @@
 export { SMA } from './sma/sma';
 export { EMA } from './ema/ema';
+export { WMA } from './wma/wma';
+export { ROC } from './roc/roc';
+export { MOM } from './mom/mom';
+export { DEMA } from './dema/dema';
+export { TEMA } from './tema/tema';
 export { MACD } from './macd/macd';
 export { RSI } from './rsi/rsi';
 export { BB } from './bb/bb';
