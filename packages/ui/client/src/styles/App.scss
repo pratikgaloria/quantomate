@@ -19,7 +19,19 @@ body {
   flex-direction: column;
 }
 
-.app-content {
+.app-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  background: #f8f9fa;
+  overflow-y: auto;
+  height: 100vh;
+}
+
+.backtest-page {
   flex: 1;
   display: grid;
   grid-template-columns: 320px 1fr;
@@ -28,6 +40,16 @@ body {
   max-width: 1800px;
   margin: 0 auto;
   width: 100%;
+}
+
+.screener-page {
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  color: #888;
+  font-size: 1.1rem;
 }
 
 .controls-panel,
@@ -73,7 +95,7 @@ body {
   height: 350px;
   width: 100%;
   position: relative;
-  
+
   /* Ensure child divs take full height */
   > div {
     height: 100% !important;
@@ -218,7 +240,7 @@ body {
 }
 
 @media (max-width: 1024px) {
-  .app-content {
+  .backtest-page {
     grid-template-columns: 1fr;
   }
 

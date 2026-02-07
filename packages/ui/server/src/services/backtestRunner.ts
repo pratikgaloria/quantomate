@@ -1,6 +1,5 @@
-import { Dataset, Strategy, Backtest } from '@quantomate/core';
-import { SMA } from '@quantomate/indicators';
-import { PivotTrendStrategy } from '@quantomate/strategies';
+import { Dataset, Backtest } from '@quantomate/core';
+import { PivotTrendStrategy, GoldenCrossStrategy } from '@quantomate/strategies';
 import { fetchStockData, StockData } from './stockDataFetcher';
 
 interface BacktestRequest {
@@ -87,22 +86,10 @@ function createStrategy(strategyId: string, parameters: Record<string, any>) {
       const fastPeriod = parameters.fastPeriod || 50;
       const slowPeriod = parameters.slowPeriod || 200;
 
-      const fastSMA = new SMA('fastSMA', { attribute: 'close', period: fastPeriod } as any);
-      const slowSMA = new SMA('slowSMA', { attribute: 'close', period: slowPeriod } as any);
-
-      return new Strategy<any, StockData>('Golden Cross', {
-        indicators: [fastSMA as any, slowSMA as any],
-        direction: parameters.direction,
-        entryWhen: (quote) => {
-          const fast = quote.getIndicator('fastSMA');
-          const slow = quote.getIndicator('slowSMA');
-          return fast > slow;
-        },
-        exitWhen: (quote) => {
-          const fast = quote.getIndicator('fastSMA');
-          const slow = quote.getIndicator('slowSMA');
-          return fast < slow;
-        },
+      return new GoldenCrossStrategy('Golden Cross', {
+        fastPeriod,
+        slowPeriod,
+        source: 'close'
       });
     }
     case 'pivot-trend': {
