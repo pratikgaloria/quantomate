@@ -8,6 +8,7 @@ export interface RSIMeanReversionParams {
   smaPeriod?: number;
   useTrendFilter: boolean;
   source: string;
+  direction?: 'long' | 'short' | 'both';
 }
 
 export class RSIMeanReversionStrategy extends Strategy<any, any> {
@@ -31,6 +32,7 @@ export class RSIMeanReversionStrategy extends Strategy<any, any> {
 
     super(name, {
       indicators,
+      direction: params.direction,
       entryWhen: (quote: Quote<any>) => {
         const rsiValue = quote.getIndicator('rsi');
         

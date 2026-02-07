@@ -5,6 +5,7 @@ export interface GoldenCrossParams {
   fastPeriod: number;
   slowPeriod: number;
   source: string;
+  direction?: 'long' | 'short' | 'both';
 }
 
 export class GoldenCrossStrategy extends Strategy<any, any> {
@@ -35,6 +36,7 @@ export class GoldenCrossStrategy extends Strategy<any, any> {
 
     super(name, {
       indicators: [fastEMA, slowSMA, prevFastEMAIndicator, prevSlowSMAIndicator],
+      direction: params.direction,
       entryWhen: (quote: Quote<any>) => {
         const fastEMAValue = quote.getIndicator('fastEMA');
         const slowSMAValue = quote.getIndicator('slowSMA');

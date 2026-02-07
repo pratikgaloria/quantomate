@@ -80,7 +80,7 @@ export class Strategy<P = unknown, T = number, O = unknown> {
     }
 
     let newPositionValue: TradePositionType = 'idle';
-    let isShort = !!position.options?.short;
+    let isShort = position.options?.short;
 
     if (position.value === 'hold' || position.value === 'entry') {
       const exitFn = isShort ? this._options.exitShortWhen : this._options.exitWhen;
@@ -105,7 +105,7 @@ export class Strategy<P = unknown, T = number, O = unknown> {
       position,
       new TradePosition(newPositionValue, {
         ...position.options,
-        short: isShort,
+        ...(isShort !== undefined ? { short: isShort } : {}),
         exitReason: newPositionValue === 'exit' ? 'strategy' : undefined,
       }) as TradePosition<O>
     );
@@ -122,5 +122,24 @@ export class Strategy<P = unknown, T = number, O = unknown> {
    */
   backtest(dataset: Dataset<T>, runner: BacktestRunner<T>): BacktestReport<T> {
     return new Backtest(dataset, this).run(runner);
+  }
+
+  /**
+   * Scans the dataset for the most recent entry signal.
+   * @param dataset - `Dataset` to scan.
+   * @returns `Quote<T>` of the most recent entry signal or `undefined`.
+   */
+  scan(dataset: Dataset<T>): Quote<T> | undefined {
+    dataset.prepare(this);
+
+    for (let i = dataset.length - 1; i >= 0; i--) {
+      const quote = dataset.at(i)!;
+      const strategyValue = quote.getStrategy(this.name);
+      if (strategyValue && strategyValue.position.value === 'entry') {
+        return quote;
+      }
+    }
+
+    return undefined;
   }
 }

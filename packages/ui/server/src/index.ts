@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import strategiesRouter from './routes/strategies';
 import backtestRouter from './routes/backtest';
+import scanRouter from './routes/scanner';
 
 const app = express();
 const PORT = 3001;
@@ -13,6 +14,7 @@ app.use(express.json());
 // Routes
 app.use('/api/strategies', strategiesRouter);
 app.use('/api/backtest', backtestRouter);
+app.use('/api/scan', scanRouter);
 
 // Health check
 app.get('/health', (req: Request, res: Response) => {

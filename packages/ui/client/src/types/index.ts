@@ -52,3 +52,17 @@ export interface BacktestResponse {
     trades: any[];
   };
 }
+export interface ScanResult {
+  symbol: string;
+  hasSignal: boolean;
+  signalDate?: string;
+  direction?: 'long' | 'short';
+  entryPrice?: number;
+  currentPrice?: number;
+  movePercentage?: number;
+  barsSinceSignal?: number;
+  lastClose?: number;
+  error?: string;
+}
+
+export type ScanResponse = ScanResult[];

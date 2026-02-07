@@ -80,7 +80,7 @@ export async function runBacktest(request: BacktestRequest) {
   };
 }
 
-function createStrategy(strategyId: string, parameters: Record<string, any>) {
+export function createStrategy(strategyId: string, parameters: Record<string, any>) {
   switch (strategyId) {
     case 'golden-cross': {
       const fastPeriod = parameters.fastPeriod || 50;
