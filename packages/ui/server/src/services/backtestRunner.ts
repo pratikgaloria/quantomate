@@ -1,5 +1,5 @@
 import { Dataset, Backtest } from '@quantomate/core';
-import { PivotTrendStrategy, GoldenCrossStrategy } from '@quantomate/strategies';
+import { PivotTrendStrategy, GoldenCrossStrategy, RSIMeanReversionStrategy, BollingerBandsStrategy, MACDStrategy } from '@quantomate/strategies';
 import { fetchStockData, StockData } from './stockDataFetcher';
 
 interface BacktestRequest {
@@ -94,6 +94,15 @@ export function createStrategy(strategyId: string, parameters: Record<string, an
     }
     case 'pivot-trend': {
       return new PivotTrendStrategy('Pivot Trend', parameters);
+    }
+    case 'rsi-mean-reversion': {
+      return new RSIMeanReversionStrategy('RSI Mean Reversion', parameters);
+    }
+    case 'bollinger-bands': {
+      return new BollingerBandsStrategy('Bollinger Bands', parameters);
+    }
+    case 'macd': {
+      return new MACDStrategy('MACD', parameters);
     }
     default:
       throw new Error(`Unknown strategy: ${strategyId}`);

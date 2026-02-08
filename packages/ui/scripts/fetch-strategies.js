@@ -49,6 +49,110 @@ async function fetchStrategies() {
                         description: 'Trading direction'
                     }
                 ]
+            },
+            {
+                id: 'rsi-mean-reversion',
+                name: 'RSI Mean Reversion',
+                description: 'Buy when RSI is oversold and sell when it is overbought, with optional trend filtering.',
+                parameters: [
+                    {
+                        name: 'rsiPeriod',
+                        type: 'number',
+                        default: 14,
+                        min: 2,
+                        max: 50,
+                        description: 'RSI period'
+                    },
+                    {
+                        name: 'oversoldThreshold',
+                        type: 'number',
+                        default: 30,
+                        min: 5,
+                        max: 50,
+                        description: 'Oversold threshold'
+                    },
+                    {
+                        name: 'overboughtThreshold',
+                        type: 'number',
+                        default: 70,
+                        min: 50,
+                        max: 95,
+                        description: 'Overbought threshold'
+                    },
+                    {
+                        name: 'useTrendFilter',
+                        type: 'boolean',
+                        default: false,
+                        description: 'Use SMA trend filter'
+                    },
+                    {
+                        name: 'smaPeriod',
+                        type: 'number',
+                        default: 50,
+                        min: 10,
+                        max: 300,
+                        description: 'SMA trend filter period'
+                    },
+                    {
+                        name: 'direction',
+                        type: 'select',
+                        default: 'long',
+                        options: ['long', 'short', 'both'],
+                        description: 'Trading direction'
+                    }
+                ]
+            },
+            {
+                id: 'bollinger-bands',
+                name: 'Bollinger Bands',
+                description: 'Buy when price crosses below the lower band and sell when it crosses above the upper band.',
+                parameters: [
+                    {
+                        name: 'period',
+                        type: 'number',
+                        default: 20,
+                        min: 5,
+                        max: 100,
+                        description: 'BB period'
+                    },
+                    {
+                        name: 'multiplier',
+                        type: 'number',
+                        default: 2,
+                        min: 0.5,
+                        max: 5,
+                        description: 'Standard deviation multiplier'
+                    },
+                    {
+                        name: 'direction',
+                        type: 'select',
+                        default: 'long',
+                        options: ['long', 'short', 'both'],
+                        description: 'Trading direction'
+                    }
+                ]
+            },
+            {
+                id: 'macd',
+                name: 'MACD',
+                description: 'Buy when MACD line crosses above the signal line and sell when it crosses below.',
+                parameters: [
+                    {
+                        name: 'signalPeriod',
+                        type: 'number',
+                        default: 9,
+                        min: 2,
+                        max: 50,
+                        description: 'Signal line smoothing period'
+                    },
+                    {
+                        name: 'direction',
+                        type: 'select',
+                        default: 'long',
+                        options: ['long', 'short', 'both'],
+                        description: 'Trading direction'
+                    }
+                ]
             }
         ];
 
