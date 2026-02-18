@@ -11,25 +11,27 @@ export class StrategyValue<O = unknown> {
   }
 }
 
-type positionFn = <T>(quote: Quote<T>) => boolean;
-type RiskFn = <T, O>(quote: Quote<T>, position: TradePosition<O>) => boolean;
+export interface StrategyContext<T = any> {
+  getQuote: (datasetId: string) => Quote<T> | undefined;
+  primaryQuote: Quote<T>;
+}
+
+type positionFn<T> = (quote: Quote<T>, context: StrategyContext<any>) => boolean;
+type RiskFn<T, O> = (quote: Quote<T>, position: TradePosition<O>, context: StrategyContext<any>) => boolean;
 
 export type StrategyDirection = 'long' | 'short' | 'both';
 
-type StrategyOptionsCommon<P, T> = {
+export type StrategyOptions<P, T> = {
   indicators?: Indicator<P, T>[];
   onTrigger?: (positionType: TradePositionType, quote: Quote<T>) => void;
-  stopLossWhen?: RiskFn;
-  takeProfitWhen?: RiskFn;
+  stopLossWhen?: RiskFn<T, any>;
+  takeProfitWhen?: RiskFn<T, any>;
   direction?: StrategyDirection;
+  entryWhen?: positionFn<T>;
+  exitWhen?: positionFn<T>;
+  entryShortWhen?: positionFn<T>;
+  exitShortWhen?: positionFn<T>;
 };
-
-export type StrategyOptions<P, T> = {
-  entryWhen?: positionFn;
-  exitWhen?: positionFn;
-  entryShortWhen?: positionFn;
-  exitShortWhen?: positionFn;
-} & StrategyOptionsCommon<P, T>;
 
 /**
  * Defines a strategy that can be back-tested.
@@ -53,11 +55,12 @@ export class Strategy<P = unknown, T = number, O = unknown> {
 
   apply(
     quote: Quote<T>,
-    position: TradePosition<O> = new TradePosition<O>('idle')
+    position: TradePosition<O> = new TradePosition<O>('idle'),
+    context: StrategyContext<T> = { primaryQuote: quote, getQuote: () => undefined }
   ) {
     if (
       (position.value === 'hold' || position.value === 'entry') &&
-      this._options.stopLossWhen?.(quote, position)
+      this._options.stopLossWhen?.(quote, position, context)
     ) {
       return new StrategyValue(
         new TradePosition('exit', {
@@ -69,7 +72,7 @@ export class Strategy<P = unknown, T = number, O = unknown> {
 
     if (
       (position.value === 'hold' || position.value === 'entry') &&
-      this._options.takeProfitWhen?.(quote, position)
+      this._options.takeProfitWhen?.(quote, position, context)
     ) {
       return new StrategyValue(
         new TradePosition('exit', {
@@ -84,7 +87,7 @@ export class Strategy<P = unknown, T = number, O = unknown> {
 
     if (position.value === 'hold' || position.value === 'entry') {
       const exitFn = isShort ? this._options.exitShortWhen : this._options.exitWhen;
-      if (exitFn?.(quote)) {
+      if (exitFn?.(quote, context)) {
         newPositionValue = 'exit';
       }
     } else {
@@ -92,10 +95,10 @@ export class Strategy<P = unknown, T = number, O = unknown> {
       const canEnterLong = direction === 'long' || direction === 'both';
       const canEnterShort = direction === 'short' || direction === 'both';
 
-      if (canEnterLong && this._options.entryWhen?.(quote)) {
+      if (canEnterLong && this._options.entryWhen?.(quote, context)) {
         newPositionValue = 'entry';
         isShort = false;
-      } else if (canEnterShort && this._options.entryShortWhen?.(quote)) {
+      } else if (canEnterShort && this._options.entryShortWhen?.(quote, context)) {
         newPositionValue = 'entry';
         isShort = true;
       }

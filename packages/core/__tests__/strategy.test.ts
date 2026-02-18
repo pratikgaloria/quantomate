@@ -38,7 +38,7 @@ describe('Strategy', () => {
       strategy.apply(quote);
 
       expect(entryFn).toHaveBeenCalled();
-      expect(entryFn).toHaveBeenCalledWith(quote);
+      expect(entryFn).toHaveBeenCalledWith(quote, expect.anything());
     });
 
     it('Should update quote with exit when last-quote position was hold and exitWhen returns true', () => {
@@ -55,7 +55,7 @@ describe('Strategy', () => {
       strategy.apply(quote, new TradePosition('hold'));
 
       expect(exitFn).toHaveBeenCalled();
-      expect(exitFn).toHaveBeenCalledWith(quote);
+      expect(exitFn).toHaveBeenCalledWith(quote, expect.anything());
     });
 
     it('Should update quote with idle when when entryWhen or exitWhen return false', () => {

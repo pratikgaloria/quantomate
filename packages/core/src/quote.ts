@@ -12,21 +12,28 @@ import { StrategyValue } from './strategy';
  */
 export class Quote<T = number> {
   private _value: T;
+  private _timestamp?: number;
   private _indicators: { [key: string | number]: number };
   private _strategies: { [key: string | number]: StrategyValue };
 
   /**
    * Creates a quote after type-casting the given value.
    * @param value - Any value.
+   * @param timestamp - Optional Unix timestamp (ms).
    */
-  constructor(value: T) {
+  constructor(value: T, timestamp?: number) {
     this._value = this.sanitize(value);
+    this._timestamp = timestamp;
     this._indicators = {};
     this._strategies = {};
   }
 
   get value() {
     return this._value;
+  }
+
+  get timestamp() {
+    return this._timestamp;
   }
 
   get indicators() {

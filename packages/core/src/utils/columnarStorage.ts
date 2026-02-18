@@ -2,6 +2,7 @@ import { StrategyValue } from '../strategy';
 
 export class ColumnarStorage<T = number> {
   private numericValues: Float64Array;
+  private timestamps: Float64Array;
   private objectValues: T[];
   private isNumeric: boolean = true; // Assume numeric by default until object seen
   private indicators: Map<string, Float64Array>;
@@ -13,6 +14,8 @@ export class ColumnarStorage<T = number> {
     this.capacity = initialCapacity;
     this._length = 0;
     this.numericValues = new Float64Array(initialCapacity);
+    this.timestamps = new Float64Array(initialCapacity);
+    this.timestamps.fill(NaN);
     this.objectValues = [];
     this.indicators = new Map();
     this.strategies = new Map();
@@ -21,11 +24,11 @@ export class ColumnarStorage<T = number> {
   /**
    * Add a value to the storage
    */
-  addValue(value: T): void {
+  addValue(value: T, timestamp?: number): void {
     if (this._length >= this.capacity) {
       this.resize();
     }
-    
+
     if (typeof value === 'number') {
       this.numericValues[this._length] = value;
     } else {
@@ -33,6 +36,11 @@ export class ColumnarStorage<T = number> {
       this.isNumeric = false;
       this.objectValues[this._length] = value;
     }
+
+    if (timestamp !== undefined) {
+      this.timestamps[this._length] = timestamp;
+    }
+
     this._length++;
   }
 
@@ -41,21 +49,30 @@ export class ColumnarStorage<T = number> {
    */
   getValue(index: number): T {
     const actualIndex = index < 0 ? this._length + index : index;
-    
+
     if (this.isNumeric) {
       return this.numericValues[actualIndex] as unknown as T;
     } else {
-      // If mixed or object, prefer object value if exists, else numeric (if it was a number)
-      // But simpler to just return objectValues[i] if !isNumeric? 
-      // Wait, if we started with numbers then switched, objectValues has holes.
-      // We should probably migrate numericValues to objectValues if we switch?
-      // Or just check both.
-      
       if (this.objectValues[actualIndex] !== undefined) {
         return this.objectValues[actualIndex];
       }
       return this.numericValues[actualIndex] as unknown as T;
     }
+  }
+
+  /**
+   * Get timestamp at index
+   */
+  getTimestamp(index: number): number {
+    const actualIndex = index < 0 ? this._length + index : index;
+    return this.timestamps[actualIndex];
+  }
+
+  /**
+   * Get all timestamps
+   */
+  getTimestamps(): Float64Array {
+    return this.timestamps.subarray(0, this._length);
   }
 
   /**
@@ -146,11 +163,17 @@ export class ColumnarStorage<T = number> {
    */
   private resize(): void {
     const newCapacity = this.capacity * 2;
-    
+
     // Resize numeric values
     const newNumericValues = new Float64Array(newCapacity);
     newNumericValues.set(this.numericValues);
     this.numericValues = newNumericValues;
+
+    // Resize timestamps
+    const newTimestamps = new Float64Array(newCapacity);
+    newTimestamps.set(this.timestamps);
+    newTimestamps.fill(NaN, this._length);
+    this.timestamps = newTimestamps;
 
     // Object values array grows automatically, but we update capacity
     // (no action needed for objectValues array itself as it's a JS array)
@@ -178,14 +201,18 @@ export class ColumnarStorage<T = number> {
   /**
    * Mutate value at index
    */
-  mutateValue(index: number, value: T): void {
+  mutateValue(index: number, value: T, timestamp?: number): void {
     const actualIndex = index < 0 ? this._length + index : index;
-    
+
     if (typeof value === 'number') {
       this.numericValues[actualIndex] = value;
     } else {
       this.isNumeric = false;
       this.objectValues[actualIndex] = value;
+    }
+
+    if (timestamp !== undefined) {
+      this.timestamps[actualIndex] = timestamp;
     }
   }
 }

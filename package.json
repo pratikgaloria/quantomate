@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "description": "",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "build": "npm run build -w @quantomate/core && npm run build -w @quantomate/indicators && npm run build -w @quantomate/strategies",
+    "test": "npm test --workspaces"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -11,7 +14,8 @@
     "packages/core",
     "packages/indicators",
     "packages/strategies",
-    "packages/playground"
+    "packages/playground",
+    "packages/ui"
   ],
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

@@ -26,17 +26,20 @@ export type BacktestRunner<T> = {
 export class Backtest<P = unknown, T = number, O = unknown> {
   protected _dataset: Dataset<T>;
   protected _strategy: Strategy<P, T, O>;
+  protected _secondaryDatasets: Dataset<any>[];
 
   /**
    * Runs a back-test over a dataset for a given strategy.
    * @param dataset - `Dataset` over which strategy should be back-tested.
    * @param strategy - `Strategy` that should be back-tested.
+   * @param secondaryDatasets - Optional array of additional datasets for multi-timeframe rules.
    */
-  constructor(dataset: Dataset<T>, strategy: Strategy<P, T, O>) {
+  constructor(dataset: Dataset<T>, strategy: Strategy<P, T, O>, secondaryDatasets: Dataset<any>[] = []) {
     this._strategy = strategy;
     this._dataset = dataset;
+    this._secondaryDatasets = secondaryDatasets;
 
-    this._dataset.prepare(strategy);
+    this._dataset.prepare(strategy, secondaryDatasets);
   }
 
   get strategy() {

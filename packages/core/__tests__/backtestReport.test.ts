@@ -21,7 +21,8 @@ describe('BacktestReport', () => {
       const backtestReport = new BacktestReport(1000);
       const quote = new Quote(1);
 
-      backtestReport.markEntry(50, quote);
+      quote.setStrategy('test-strategy', { position: { value: 'entry', options: {} } } as any);
+      backtestReport.markEntry(50, quote, 'test-strategy');
       // Entry at 50: buy 1000/50 = 20 shares, capital becomes 0
       expect(backtestReport.finalCapital).toBe(0);
       expect(backtestReport.sharesOwned).toBe(20);
@@ -30,6 +31,7 @@ describe('BacktestReport', () => {
         quote,
         tradedValue: 50,
         shares: 20,
+        short: false,
         currentCapital: 0,
       }]);
     });
@@ -43,7 +45,7 @@ describe('BacktestReport', () => {
       quote1.setStrategy('test-strategy', { position: { value: 'entry', options: {} } } as any);
       quote2.setStrategy('test-strategy', { position: { value: 'exit', options: {} } } as any);
 
-      backtestReport.markEntry(50, quote1);
+      backtestReport.markEntry(50, quote1, 'test-strategy');
       backtestReport.markExit(100, quote2, 'test-strategy');
 
       // Entry at 50: buy 1000/50 = 20 shares
@@ -58,8 +60,8 @@ describe('BacktestReport', () => {
       expect(backtestReport.returns).toBe(1000);
       expect(backtestReport.returnsPercentage).toBe(100);
       expect(backtestReport.trades).toStrictEqual([
-        { type: 'entry', quote: quote1, tradedValue: 50, shares: 20, currentCapital: 0 },
-        { type: 'exit', quote: quote2, tradedValue: 100, shares: 20, currentCapital: 2000, exitReason: undefined, exitContext: undefined }
+        { type: 'entry', quote: quote1, tradedValue: 50, shares: 20, short: false, currentCapital: 0 },
+        { type: 'exit', quote: quote2, tradedValue: 100, shares: 20, short: false, currentCapital: 2000, exitReason: undefined, exitContext: undefined }
       ])
     });
 
@@ -70,7 +72,7 @@ describe('BacktestReport', () => {
       quote1.setStrategy('test-strategy', { position: { value: 'entry', options: {} } } as any);
       quote2.setStrategy('test-strategy', { position: { value: 'exit', options: {} } } as any);
 
-      backtestReport.markEntry(50, quote1);
+      backtestReport.markEntry(50, quote1, 'test-strategy');
       backtestReport.markExit(25, quote2, 'test-strategy');
 
       // Entry at 50: buy 1000/50 = 20 shares

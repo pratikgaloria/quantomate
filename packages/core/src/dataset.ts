@@ -1,7 +1,7 @@
 import { Indicator, Strategy } from './';
 import { TradePosition } from './position';
 import { Quote } from './quote';
-import { StrategyValue } from './strategy';
+import { StrategyValue, StrategyContext } from './strategy';
 import { ColumnarStorage } from './utils/columnarStorage';
 
 export type IndicatorMetadata<T> = {
@@ -14,6 +14,12 @@ export type StrategyMetadata<T> = {
   strategy: Strategy<unknown, T>;
 };
 
+export interface DatasetOptions<T> {
+  id?: string;
+  timeframe?: string;
+  timestampField?: T extends object ? keyof T : string;
+}
+
 /**
  * Creates a dataset using columnar storage for efficient memory usage.
  * Uses typed arrays internally instead of Quote objects.
@@ -22,26 +28,48 @@ export class Dataset<T = number> {
   protected storage: ColumnarStorage<T>;
   protected _indicators: IndicatorMetadata<T>[];
   protected _strategies: StrategyMetadata<T>[];
+  protected _options: DatasetOptions<T>;
 
   /**
    * Creates a dataset after type-casting given data values.
    * @param data - Array of values or Quote objects.
+   * @param options - Optional configuration (id, timeframe, timestampField).
    */
-  constructor(data?: T[] | Quote<T>[]) {
+  constructor(data?: T[] | Quote<T>[], options: DatasetOptions<T> = {}) {
     this._indicators = [];
     this._strategies = [];
+    this._options = options;
     this.storage = new ColumnarStorage<T>();
 
     if (data) {
       for (let i = 0; i < data.length; i++) {
         const item = data[i];
         if (item instanceof Quote) {
-          this.storage.addValue(item.value);
+          const timestamp = item.timestamp ?? this.extractTimestamp(item.value);
+          this.storage.addValue(item.value, timestamp);
         } else {
-          this.storage.addValue(item);
+          this.storage.addValue(item, this.extractTimestamp(item));
         }
       }
     }
+  }
+
+  get id(): string | undefined {
+    return this._options.id;
+  }
+
+  get timeframe(): string | undefined {
+    return this._options.timeframe;
+  }
+
+  private extractTimestamp(value: T): number | undefined {
+    if (this._options.timestampField && typeof value === 'object' && value !== null) {
+      const ts = (value as any)[this._options.timestampField];
+      if (ts instanceof Date) return ts.getTime();
+      if (typeof ts === 'number') return ts;
+      if (typeof ts === 'string') return new Date(ts).getTime();
+    }
+    return undefined;
   }
 
   /**
@@ -98,7 +126,8 @@ export class Dataset<T = number> {
    */
   private createQuoteAt(index: number): Quote<T> {
     const value = this.storage.getValue(index);
-    const quote = new Quote(value);
+    const timestamp = this.storage.getTimestamp(index);
+    const quote = new Quote(value, isNaN(timestamp) ? undefined : timestamp);
 
     // Populate indicators
     for (const name of this.storage.getIndicatorNames()) {
@@ -120,11 +149,15 @@ export class Dataset<T = number> {
   /**
    * Adds a given quote to the end of the dataset.
    * @param quote - `Quote` or value.
+   * @param timestamp - Optional Unix timestamp (ms).
+   * @param secondaryDatasets - Optional secondary datasets for MTF strategy calculation.
    * @returns self reference.
    */
-  add(quote: Quote<T> | T): this {
+  add(quote: Quote<T> | T, timestamp?: number, secondaryDatasets: Dataset<T>[] = []): this {
     const value = quote instanceof Quote ? quote.value : quote;
-    this.storage.addValue(value);
+    const ts = timestamp ?? (quote instanceof Quote ? quote.timestamp : this.extractTimestamp(quote));
+
+    this.storage.addValue(value, ts);
     const newIndex = this.storage.length - 1;
 
     // If adding a Quote object, preserve its existing indicators and strategies
@@ -141,11 +174,11 @@ export class Dataset<T = number> {
     for (let i = 0; i < this.indicators.length; i++) {
       const ind = this.indicators[i];
       let indicatorValue: number;
-      
+
       // Try incremental calculation first (O(1) instead of O(n))
       if (ind.indicator.hasIncremental() && this.length > 1) {
         const prevValue = this.storage.getIndicator(newIndex - 1, ind.name);
-        
+
         if (prevValue !== undefined && !isNaN(prevValue)) {
           // Create temporary quote for incremental calculation
           const tempQuote = new Quote(value);
@@ -171,20 +204,28 @@ export class Dataset<T = number> {
         this.length > 1
           ? this.storage.getStrategy(newIndex - 1, strat.name)
           : undefined;
-      
+
       const lastPosition = lastStrategyValue
         ? lastStrategyValue.position
         : new TradePosition('idle');
-      
+
       const tempQuote = new Quote(value);
-      
+
       // Populate indicators on tempQuote so strategy can use them
       for (const ind of this.indicators) {
         const val = this.storage.getIndicator(newIndex, ind.name);
         tempQuote.setIndicator(ind.name, val);
       }
 
-      const newPosition = strat.strategy.apply(tempQuote, lastPosition).position;
+      const context: StrategyContext<T> = {
+        primaryQuote: tempQuote,
+        getQuote: (id: string) => {
+          const ds = secondaryDatasets?.find((d) => d.id === id);
+          return ts !== undefined ? ds?.sync(ts) : undefined;
+        },
+      };
+
+      const newPosition = strat.strategy.apply(tempQuote, lastPosition, context).position;
       const updatedPosition = TradePosition.update(lastPosition, newPosition);
 
       this.storage.setStrategy(newIndex, strat.name, new StrategyValue(updatedPosition));
@@ -194,11 +235,42 @@ export class Dataset<T = number> {
   }
 
   /**
+   * Synchronizes with another dataset by timestamp.
+   * Returns the quote at or before the given timestamp.
+   * Useful for multi-timeframe analysis.
+   * @param timestamp - target Unix timestamp (ms).
+   * @returns Synchronized Quote or undefined.
+   */
+  sync(timestamp: number): Quote<T> | undefined {
+    const timestamps = this.storage.getTimestamps();
+    if (timestamps.length === 0) return undefined;
+
+    // Binary search to find the last index where timestamps[index] <= timestamp
+    let low = 0;
+    let high = timestamps.length - 1;
+    let resultIndex = -1;
+
+    while (low <= high) {
+      const mid = Math.floor((low + high) / 2);
+      if (timestamps[mid] <= timestamp) {
+        resultIndex = mid; // Found a candidate
+        low = mid + 1; // Try to find a later one
+      } else {
+        high = mid - 1;
+      }
+    }
+
+    if (resultIndex === -1) return undefined;
+    return this.createQuoteAt(resultIndex);
+  }
+
+  /**
    * Prepares the dataset for the given strategy.
    * @param strategy - `Strategy`.
+   * @param secondaryDatasets - Optional array of additional datasets for multi-timeframe rules.
    * @returns self reference.
    */
-  prepare(strategy: Strategy<unknown, T>): this {
+  prepare(strategy: Strategy<unknown, T>, secondaryDatasets: Dataset<T>[] = []): this {
     if (strategy.options.indicators) {
       for (const indicator of strategy.options.indicators) {
         this.apply(indicator);
@@ -216,7 +288,15 @@ export class Dataset<T = number> {
         ? lastStrategyValue.position
         : new TradePosition('idle');
 
-      const newPosition = strategy.apply(quote, lastPosition).position;
+      const context: StrategyContext<T> = {
+        primaryQuote: quote,
+        getQuote: (id: string) => {
+          const ds = secondaryDatasets.find((d) => d.id === id);
+          return quote.timestamp !== undefined ? ds?.sync(quote.timestamp) : undefined;
+        },
+      };
+
+      const newPosition = strategy.apply(quote, lastPosition, context).position;
       const updatedPosition = TradePosition.update(lastPosition, newPosition);
 
       this.storage.setStrategy(
@@ -237,9 +317,9 @@ export class Dataset<T = number> {
    */
   mutateAt(at: number, quote: Quote<T>): this {
     const actualIndex = at < 0 ? this.length + at : at;
-    
-    // Update value
-    this.storage.mutateValue(actualIndex, quote.value);
+
+    // Update value and timestamp
+    this.storage.mutateValue(actualIndex, quote.value, quote.timestamp);
 
     // Update indicators
     for (const [name, value] of Object.entries(quote.indicators)) {
@@ -262,11 +342,11 @@ export class Dataset<T = number> {
    */
   valueAt(position: number, attribute?: string): number {
     const value = this.storage.getValue(position);
-    
+
     if (attribute && typeof value === 'object') {
       return (value as any)[attribute];
     }
-    
+
     return typeof value === 'number' ? value : 0;
   }
 
