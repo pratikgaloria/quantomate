@@ -8,6 +8,10 @@ export function Sidebar() {
         <i className="la la-layer-group"></i>
       </div>
       <nav className="sidebar-nav">
+        <NavLink to="/dashboard" className={({ isActive }) => isActive ? 'active' : ''}>
+          <i className="la la-tachometer-alt"></i>
+          <span>Dashboard</span>
+        </NavLink>
         <NavLink to="/backtest" className={({ isActive }) => isActive ? 'active' : ''}>
           <i className="la la-chart-area"></i>
           <span>Backtest</span>
