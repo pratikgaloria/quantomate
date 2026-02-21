@@ -1,0 +1,125 @@
+.chart-card {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: #d0d0d0;
+  }
+
+  .chart-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+
+    .chart-card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #111;
+      margin: 0;
+    }
+
+    .chart-card-options {
+      .options-btn {
+        background: transparent;
+        border: none;
+        color: #888;
+        font-size: 1.25rem;
+        cursor: pointer;
+        padding: 0.25rem;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s, color 0.2s;
+
+        &:hover {
+          background: #f5f5f5;
+          color: #333;
+        }
+      }
+    }
+  }
+
+  .chart-card-top-content {
+    margin-bottom: 1rem;
+
+    .value-display {
+      .main-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #111;
+        line-height: 1.2;
+        margin-bottom: 0.25rem;
+      }
+
+      .sub-value {
+        font-size: 0.9rem;
+        color: #666;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        .percentage {
+          font-weight: 500;
+          padding: 2px 6px;
+          border-radius: 4px;
+          font-size: 0.8rem;
+
+          &.positive {
+            background: #ecfdf5;
+            color: #059669;
+          }
+
+          &.negative {
+            background: #fef2f2;
+            color: #dc2626;
+          }
+        }
+      }
+    }
+  }
+
+  .chart-card-content {
+    flex: 1;
+    min-height: 250px;
+    position: relative;
+    width: 100%;
+    /* Ensure content stays within padding */
+    overflow: hidden;
+  }
+
+  .chart-card-bottom-content {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: #555;
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      .label {
+        font-size: 0.8rem;
+        color: #888;
+        margin-bottom: 0.25rem;
+      }
+
+      .value {
+        font-weight: 600;
+        color: #333;
+      }
+    }
+  }
+}

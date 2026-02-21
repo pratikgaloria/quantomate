@@ -1,0 +1,92 @@
+.dashboard-page {
+  padding: 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .chart-container {
+    width: 100%;
+    height: 300px; /* Or whatever height fits nicely */
+  }
+
+  .value-display {
+    .main-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #111;
+      line-height: 1.1;
+      margin-bottom: 0.5rem;
+    }
+
+    .sub-value {
+      font-size: 0.95rem;
+      color: #666;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      .percentage {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+
+        &.positive {
+          background: #dcfce7;
+          color: #166534;
+        }
+
+        &.negative {
+          background: #fee2e2;
+          color: #b91c1c;
+        }
+      }
+    }
+  }
+
+  .allocation-footer {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    margin-top: 1rem;
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-bottom: 0.25rem;
+      }
+
+      .label {
+        font-size: 0.8rem;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .value {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #111;
+      }
+    }
+  }
+}
