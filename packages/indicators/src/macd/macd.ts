@@ -12,14 +12,18 @@ export class MACD<T> extends Indicator<IIndicatorParamsMACD<T>, T> {
       function (this: MACD<T>, dataset: Dataset<T>) {
         const datasetLength = dataset.length;
 
-        if (datasetLength === 1) {
-          return 0;
+        if (datasetLength < 26) {
+          return NaN;
         }
 
-        return (
-          (dataset.at(datasetLength - 1)?.getIndicator('ema12') ?? 0) -
-          (dataset.at(datasetLength - 1)?.getIndicator('ema26') ?? 0)
-        );
+        const fastEMA = dataset.at(datasetLength - 1)?.getIndicator('ema12');
+        const slowEMA = dataset.at(datasetLength - 1)?.getIndicator('ema26');
+
+        if (fastEMA === undefined || slowEMA === undefined || isNaN(fastEMA) || isNaN(slowEMA)) {
+          return NaN;
+        }
+
+        return fastEMA - slowEMA;
       },
       {
         params,

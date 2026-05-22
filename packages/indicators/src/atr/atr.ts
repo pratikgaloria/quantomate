@@ -55,59 +55,23 @@ export class ATR<T = number> extends Indicator<IIndicatorParamsATR<T>, T> {
         const { high, low, close, period = 14 } = params;
         const datasetLength = dataset.length;
 
-        if (datasetLength < 2) {
-          // Need at least 2 quotes to calculate True Range
+        if (datasetLength < period) {
           return NaN;
         }
 
-        // Check if we have previous ATR value for incremental calculation
+        const currentTR = calculateTrueRange(dataset, datasetLength - 1, high, low, close);
         const lastATR = dataset.at(-2)?.getIndicator(this.name);
-        const lastTrueRange = dataset.at(-1)?.getIndicator(`${this.name}_tr`);
 
-        // If we have previous ATR and True Range, use incremental calculation
-        if (
-          lastATR !== undefined &&
-          !isNaN(lastATR) &&
-          lastTrueRange !== undefined &&
-          !isNaN(lastTrueRange) &&
-          datasetLength > period
-        ) {
-          // Get the oldest True Range that's being dropped
-          const oldestIndex = datasetLength - period;
-          const oldestTrueRange = dataset
-            .at(oldestIndex)
-            ?.getIndicator(`${this.name}_tr`);
-
-          if (oldestTrueRange !== undefined && !isNaN(oldestTrueRange)) {
-            // Incremental calculation: new ATR = (old ATR * period - oldest TR + newest TR) / period
-            return (lastATR * period - oldestTrueRange + lastTrueRange) / period;
-          }
+        if (lastATR !== undefined && !isNaN(lastATR)) {
+          // Wilder's Smoothing / RMA formula
+          return (lastATR * (period - 1) + currentTR) / period;
         }
 
-        // Fallback: calculate True Range for all quotes and then calculate ATR
-        if (datasetLength < period + 1) {
-          // Not enough data for full period, calculate average of available True Ranges
-          let sumTR = 0;
-          let count = 0;
-
-          for (let i = 1; i < datasetLength; i++) {
-            const tr = calculateTrueRange(dataset, i, high, low, close);
-            sumTR += tr;
-            count++;
-          }
-
-          return count > 0 ? sumTR / count : NaN;
-        }
-
-        // Calculate True Range for the last 'period' quotes
+        // Initial calculation: SMA of first 'period' True Ranges
         let sumTR = 0;
-        const startIndex = Math.max(1, datasetLength - period);
-
-        for (let i = startIndex; i < datasetLength; i++) {
-          const tr = calculateTrueRange(dataset, i, high, low, close);
-          sumTR += tr;
+        for (let i = 0; i < period; i++) {
+          sumTR += calculateTrueRange(dataset, i, high, low, close);
         }
-
         return sumTR / period;
       },
       {
@@ -124,7 +88,7 @@ export class ATR<T = number> extends Indicator<IIndicatorParamsATR<T>, T> {
             // Calculate True Range for all quotes
             for (let i = 0; i < dataset.length; i++) {
               const quote = dataset.at(i)!;
-              
+
               if (i > 0) {
                 // True Range requires previous close
                 const tr = calculateTrueRange(
@@ -147,7 +111,7 @@ export class ATR<T = number> extends Indicator<IIndicatorParamsATR<T>, T> {
                 );
                 quote.setIndicator(trIndicatorName, high - low);
               }
-              
+
               dataset.mutateAt(i, quote);
             }
           }

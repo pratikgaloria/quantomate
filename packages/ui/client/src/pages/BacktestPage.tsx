@@ -11,10 +11,11 @@ export function BacktestPage() {
   const [strategies, setStrategies] = useState<StrategyMetadata[]>([]);
   const [selectedStrategy, setSelectedStrategy] = useState<string>('');
   const [parameters, setParameters] = useState<Record<string, any>>({});
-  const [symbol, setSymbol] = useState('AAPL');
-  const [startDate, setStartDate] = useState('2023-01-01');
-  const [endDate, setEndDate] = useState('2024-01-01');
-  const [capital, setCapital] = useState(10000);
+  const [symbol, setSymbol] = useState('NVDA');
+  const [startDate, setStartDate] = useState('2024-01-01');
+  const [endDate, setEndDate] = useState('2025-01-01');
+  const [interval, setInterval] = useState('5m');
+  const [capital, setCapital] = useState(100000);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<BacktestResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +28,19 @@ export function BacktestPage() {
   const loadStrategies = async () => {
     try {
       const response = await axios.get('/api/strategies');
-      setStrategies(response.data.strategies);
+      const loadedStrategies = response.data.strategies;
+      setStrategies(loadedStrategies);
+
+      // Pre-select Strong Pullback if available
+      const strongPullback = loadedStrategies.find((s: any) => s.id === 'strong-pullback');
+      if (strongPullback) {
+        setSelectedStrategy('strong-pullback');
+        const defaultParams: Record<string, any> = {};
+        strongPullback.parameters.forEach((param: any) => {
+          defaultParams[param.name] = param.default;
+        });
+        setParameters(defaultParams);
+      }
     } catch (err: any) {
       setError('Failed to load strategies: ' + err.message);
     }
@@ -67,6 +80,7 @@ export function BacktestPage() {
           symbol,
           startDate,
           endDate,
+          interval,
         },
         config: {
           capital,
@@ -132,17 +146,17 @@ export function BacktestPage() {
                   />
                 )}
                 {param.type === 'select' && (
-                    <select
-                      value={parameters[param.name] ?? param.default}
-                      onChange={(e) => handleParameterChange(param.name, e.target.value)}
-                    >
-                      {param.options?.map(opt => (
-                        <option key={opt} value={opt}>
-                          {opt.charAt(0).toUpperCase() + opt.slice(1)}
-                        </option>
-                      ))}
-                    </select>
-                  )}
+                  <select
+                    value={parameters[param.name] ?? param.default}
+                    onChange={(e) => handleParameterChange(param.name, e.target.value)}
+                  >
+                    {param.options?.map(opt => (
+                      <option key={opt} value={opt}>
+                        {opt.charAt(0).toUpperCase() + opt.slice(1)}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
             ))}
           </CollapsibleSection>
@@ -174,6 +188,18 @@ export function BacktestPage() {
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
             />
+          </div>
+          <div className="form-group">
+            <label>Interval</label>
+            <select
+              value={interval}
+              onChange={(e) => setInterval(e.target.value)}
+            >
+              <option value="1d">Daily</option>
+              <option value="1h">1 Hour</option>
+              <option value="15m">15 Minutes</option>
+              <option value="5m">5 Minutes</option>
+            </select>
           </div>
           <div className="form-group">
             <label>Initial Capital ($)</label>
@@ -237,6 +263,14 @@ export function BacktestPage() {
                 <div className="metric">
                   <span className="metric-label">Strategy Exits</span>
                   <span className="metric-value">{result.report.strategyExits}</span>
+                </div>
+                <div className="metric">
+                  <span className="metric-label">Total Commissions</span>
+                  <span className="metric-value">${result.report.totalCommissions.toFixed(2)}</span>
+                </div>
+                <div className="metric">
+                  <span className="metric-label">Total Slippage</span>
+                  <span className="metric-value">${result.report.totalSlippage.toFixed(2)}</span>
                 </div>
               </div>
             </CollapsibleSection>

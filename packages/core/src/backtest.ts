@@ -7,6 +7,8 @@ export interface BacktestConfiguration {
   capital: number;
   name?: string;
   entryPriceField?: 'close' | 'open' | 'high' | 'low' | (<T>(quote: Quote<T>) => number);
+  commission?: number; // Cost per share
+  slippage?: number;   // Percentage (e.g. 0.0002 for 0.02%)
 }
 
 export type BacktestTrigger<T> = (
@@ -56,7 +58,7 @@ export class Backtest<P = unknown, T = number, O = unknown> {
    * @returns `BacktestReport`.
    */
   run({ config, onEntry, onExit }: BacktestRunner<T>) {
-    const report = new BacktestReport<T>(config.capital);
+    const report = new BacktestReport<T>(config.capital, config);
 
     for (let i = 0; i < this._dataset.length; i++) {
       const quote = this._dataset.at(i)!;
@@ -66,7 +68,7 @@ export class Backtest<P = unknown, T = number, O = unknown> {
         i === this._dataset.length - 1 &&
         (position.value === 'entry' || position.value === 'hold')
       ) {
-        report.markExit(onExit(quote, i, []), quote, this.strategy.name);
+        report.markExit(onExit(quote, i, this._dataset.quotes), quote, this.strategy.name);
       } else {
         if (position.value === 'entry') {
           const entryPrice = this.getEntryPrice(quote, config);
@@ -81,9 +83,9 @@ export class Backtest<P = unknown, T = number, O = unknown> {
             new StrategyValue(positionWithEntry)
           );
 
-          report.markEntry(onEntry(quote, i, []), quote, this.strategy.name);
+          report.markEntry(onEntry(quote, i, this._dataset.quotes), quote, this.strategy.name);
         } else if (position.value === 'exit') {
-          report.markExit(onExit(quote, i, []), quote, this.strategy.name);
+          report.markExit(onExit(quote, i, this._dataset.quotes), quote, this.strategy.name);
         }
       }
     }

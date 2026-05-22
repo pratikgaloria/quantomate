@@ -36,6 +36,10 @@ export class Quote<T = number> {
     return this._timestamp;
   }
 
+  set timestamp(value: number | undefined) {
+    this._timestamp = value;
+  }
+
   get indicators() {
     return this._indicators;
   }

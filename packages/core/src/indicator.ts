@@ -114,19 +114,20 @@ export class Indicator<P, T = number> {
 
     const tempDataset = new Dataset<T>();
     let lastValue = NaN;
-    
+
     for (let i = 0; i < dataset.length; i++) {
       const quote = dataset.at(i)!;
       tempDataset.add(quote);
-      
-      const indicatorValue = (i > 0 && this.hasIncremental()) 
+
+      const indicatorValue = (i > 0 && this.hasIncremental())
         ? this.calculateIncremental(lastValue, quote, tempDataset)
         : this.calculate(tempDataset);
-      
+
       lastValue = indicatorValue;
       const quoteWithIndicator = quote.setIndicator(this.name, indicatorValue);
-      
+
       dataset.mutateAt(i, quoteWithIndicator);
+      tempDataset.mutateAt(i, quoteWithIndicator);
     }
 
     return dataset;

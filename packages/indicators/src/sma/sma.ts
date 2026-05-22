@@ -14,7 +14,7 @@ export class SMA<T = number> extends Indicator<IIndicatorParamsSMA<T>, T> {
         const datasetLength = dataset.length;
 
         if (datasetLength < period) {
-          return dataset.valueAt(-1, attribute as string);
+          return NaN;
         }
 
         // Full calculation: sum last N values
@@ -32,22 +32,22 @@ export class SMA<T = number> extends Indicator<IIndicatorParamsSMA<T>, T> {
     // Add incremental calculation (O(1) update) after super()
     this.withIncremental((prevSMA: number, newQuote: Quote<T>, dataset: Dataset<T>) => {
       const { attribute, period = 5 } = params;
-      
+
       if (dataset.length < period) {
-        return dataset.valueAt(-1, attribute as string);
+        return NaN;
       }
-      
+
       if (dataset.length === period) {
         // First full SMA, calculate normally
         return this.calculate(dataset);
       }
-      
+
       // Incremental: remove oldest, add newest
       const oldestValue = dataset.valueAt(-period - 1, attribute as string);
-      const newestValue = typeof newQuote.value === 'object' 
+      const newestValue = typeof newQuote.value === 'object'
         ? (newQuote.value as any)[attribute as string]
         : newQuote.value as number;
-      
+
       return prevSMA + (newestValue - oldestValue) / period;
     });
   }

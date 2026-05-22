@@ -86,9 +86,8 @@ export class BB<T = number> extends Indicator<IIndicatorParamsBB<T>, T> {
         const datasetLength = dataset.length;
 
         if (datasetLength < period) {
-          // Not enough data, return the current value
-          const currentValue = Number(dataset.valueAt(-1, attribute as string));
-          return currentValue;
+          // Not enough data
+          return NaN;
         }
 
         const bands = calculateBollingerBands(

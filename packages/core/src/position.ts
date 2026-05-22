@@ -36,6 +36,7 @@ type TradePositionOptions<O> = O & {
   entryPrice?: number;
   entryDate?: Date;
   exitReason?: 'stop-loss' | 'take-profit' | 'strategy';
+  exitRatio?: number; // 0 to 1, default is 1 (100%)
 };
 
 export class TradePosition<O = unknown> {
@@ -60,10 +61,16 @@ export class TradePosition<O = unknown> {
       ...oldPosition._options,
       ...newPosition.options,
     } as TradePositionOptions<O>;
-    
-    return new TradePosition<O>(
-      newTradingPositionMap[oldPosition.value][newPosition.value],
-      mergedOptions
-    );
+
+    let nextValue = newTradingPositionMap[oldPosition.value][newPosition.value];
+
+    // Support partial exits: if we just exited partially, we should remain in 'hold' state
+    if (oldPosition.value === 'exit' && (oldPosition.options?.exitRatio ?? 1.0) < 1.0) {
+      if (newPosition.value === 'hold' || newPosition.value === 'idle') {
+        nextValue = 'hold';
+      }
+    }
+
+    return new TradePosition<O>(nextValue, mergedOptions);
   }
 }

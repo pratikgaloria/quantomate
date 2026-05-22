@@ -44,6 +44,8 @@ export interface BacktestResponse {
     stopLossExits: number;
     takeProfitExits: number;
     strategyExits: number;
+    totalCommissions: number;
+    totalSlippage: number;
     trades: any[];
   };
   chartData: {

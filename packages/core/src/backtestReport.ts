@@ -23,6 +23,8 @@ type BacktestReportTrades<T> = {
   short?: boolean;
   exitReason?: 'stop-loss' | 'take-profit' | 'strategy';
   exitContext?: ExitContext;
+  commission?: number;
+  slippage?: number;
 };
 
 export class BacktestReport<T = number> {
@@ -45,12 +47,16 @@ export class BacktestReport<T = number> {
   stopLossExits: number;
   takeProfitExits: number;
   strategyExits: number;
+  totalCommissions: number = 0;
+  totalSlippage: number = 0;
+  private config: { commission?: number; slippage?: number };
 
   /**
    * Defines the initial capital for the back-test.
    * @param initialCapital - Initial capital for the back-test.
+   * @param config - Optional configuration for costs.
    */
-  constructor(initialCapital: number) {
+  constructor(initialCapital: number, config: { commission?: number; slippage?: number } = {}) {
     this.profit = 0;
     this.loss = 0;
     this.numberOfTrades = 0;
@@ -68,6 +74,7 @@ export class BacktestReport<T = number> {
     this.stopLossExits = 0;
     this.takeProfitExits = 0;
     this.strategyExits = 0;
+    this.config = config;
   }
 
   private updateCapital(value: number) {
@@ -78,7 +85,6 @@ export class BacktestReport<T = number> {
     this.returns = this.finalCapital - this.initialCapital;
     this.returnsPercentage =
       ((this.finalCapital - this.initialCapital) * 100) / this.initialCapital;
-    this.numberOfTrades += 1;
   }
 
   /**
@@ -88,28 +94,43 @@ export class BacktestReport<T = number> {
   markEntry(tradedValue: number, quote: Quote<T>, strategyName: string) {
     const position = quote.getStrategy(strategyName).position;
     this.isShort = !!position.options?.short;
-    this.entryTradedValue = tradedValue;
+
+    // Apply slippage to entry price
+    const slippageFactor = this.isShort ? (1 - (this.config.slippage || 0)) : (1 + (this.config.slippage || 0));
+    const effectiveEntryPrice = tradedValue * slippageFactor;
+    const slippageCost = Math.abs(effectiveEntryPrice - tradedValue);
+
+    this.entryTradedValue = effectiveEntryPrice;
 
     // Calculate shares with all available capital
-    const shares = this.finalCapital / tradedValue;
+    const shares = this.finalCapital / effectiveEntryPrice;
     this.sharesOwned = shares;
+
+    // Apply commission
+    const commissionCost = shares * (this.config.commission || 0);
+    this.totalCommissions += commissionCost;
+    this.totalSlippage += (shares * slippageCost);
 
     if (this.isShort) {
       // For short: selling shares we don't own. 
-      // We get cash from sale, but we'll need to buy them back later.
-      // Simplification: We hold the initial capital + sale proceeds as cash.
-      this.finalCapital = this.finalCapital + (shares * tradedValue);
+      this.finalCapital = this.finalCapital + (shares * effectiveEntryPrice) - commissionCost;
     } else {
-      this.finalCapital = 0; // All capital used to buy shares
+      // For long: All capital used to buy shares plus commissions
+      const totalCostPerShare = effectiveEntryPrice + (this.config.commission || 0);
+      const adjustedShares = this.finalCapital / totalCostPerShare;
+      this.sharesOwned = adjustedShares;
+      this.finalCapital = 0;
     }
-    
+
     this.trades.push({
       type: 'entry',
       quote,
-      tradedValue,
-      shares,
+      tradedValue: effectiveEntryPrice,
+      shares: this.sharesOwned,
       short: this.isShort,
       currentCapital: this.finalCapital,
+      commission: commissionCost,
+      slippage: slippageCost,
     });
   }
 
@@ -120,6 +141,7 @@ export class BacktestReport<T = number> {
   markExit(tradedValue: number, quote: Quote<T>, strategyName: string) {
     const position = quote.getStrategy(strategyName).position;
     const exitReason = position.options?.exitReason;
+    const exitRatio = Math.min(1.0, Math.max(0, position.options?.exitRatio ?? 1.0));
 
     if (exitReason === 'stop-loss') {
       this.stopLossExits++;
@@ -129,48 +151,83 @@ export class BacktestReport<T = number> {
       this.strategyExits++;
     }
 
-    const exitContext = this.buildExitContext(quote, position, tradedValue);
-    
+    const sharesToExit = this.sharesOwned * exitRatio;
+    if (sharesToExit <= 0) return;
+
+    // Apply slippage to exit price
+    const slippageFactor = this.isShort ? (1 + (this.config.slippage || 0)) : (1 - (this.config.slippage || 0));
+    const effectiveExitPrice = tradedValue * slippageFactor;
+    const slippageCost = Math.abs(effectiveExitPrice - tradedValue);
+
+    // Apply commission
+    const commissionCost = sharesToExit * (this.config.commission || 0);
+    this.totalCommissions += commissionCost;
+    this.totalSlippage += (sharesToExit * slippageCost);
+
+    const exitContext = this.buildExitContext(quote, position, effectiveExitPrice);
+
+    let proceeds = 0;
+    let costOfExitedShares = 0;
+
     if (this.isShort) {
       // For short exit: buying back shares.
-      // Cash decreases by (shares * tradedValue)
-      this.finalCapital = this.finalCapital - (this.sharesOwned * tradedValue);
+      // Cash decreases by (sharesToExit * price) + commission
+      proceeds = (sharesToExit * effectiveExitPrice) + commissionCost;
+      this.finalCapital = this.finalCapital - proceeds;
+
+      // Profit calculation: (EntryPrice * shares) - (ExitPrice * shares) - total commissions
+      // For partial: (EntryPrice - ExitPrice) * sharesToExit - exitCommission
+      // Note: Entry commission was already deducted from capital.
+      costOfExitedShares = sharesToExit * this.entryTradedValue;
+      const profitFromExit = costOfExitedShares - (sharesToExit * effectiveExitPrice) - commissionCost;
+      this.recordProfit(profitFromExit);
     } else {
       // For long exit: selling shares.
-      // Cash becomes the proceeds.
-      const proceeds = this.sharesOwned * tradedValue;
-      this.finalCapital = proceeds;
+      // Cash increases by proceeds minus commission
+      const saleProceeds = (sharesToExit * effectiveExitPrice) - commissionCost;
+      this.finalCapital += saleProceeds;
+
+      costOfExitedShares = sharesToExit * this.entryTradedValue;
+      const profitFromExit = saleProceeds - costOfExitedShares;
+      this.recordProfit(profitFromExit);
     }
-    
+
     this.trades.push({
       type: 'exit',
       quote,
-      tradedValue,
-      shares: this.sharesOwned,
+      tradedValue: effectiveExitPrice,
+      shares: sharesToExit,
       short: this.isShort,
       currentCapital: this.finalCapital,
       exitReason,
       exitContext,
+      commission: commissionCost,
+      slippage: slippageCost,
     });
-    
-    const hasWon = this.finalCapital > this.currentCapital;
 
-    if (hasWon) {
-      this.profit += this.finalCapital - this.currentCapital;
-      this.numberOfWinningTrades += 1;
-    } else {
-      this.loss += this.currentCapital - this.finalCapital;
-      this.numberOfLosingTrades += 1;
+    this.sharesOwned -= sharesToExit;
+
+    if (this.sharesOwned <= 0.000001) { // Floating point safety
+      this.sharesOwned = 0;
+      this.isShort = false;
+      this.currentCapital = this.finalCapital;
+      this.numberOfTrades += 1;
     }
 
+    this.updateTotals();
+  }
+
+  private recordProfit(profitAmount: number) {
+    if (profitAmount > 0) {
+      this.profit += profitAmount;
+      this.numberOfWinningTrades += 1;
+    } else {
+      this.loss += Math.abs(profitAmount);
+      this.numberOfLosingTrades += 1;
+    }
     this.winningRate =
       this.numberOfWinningTrades /
       (this.numberOfWinningTrades + this.numberOfLosingTrades);
-
-    this.sharesOwned = 0; // Reset shares after exit
-    this.isShort = false;
-    this.currentCapital = this.finalCapital;
-    this.updateTotals();
   }
 
   private buildExitContext<T>(
@@ -259,6 +316,20 @@ export class BacktestReport<T = number> {
       avgLossPercent: avgLoss,
       avgHoldTimeMs: avgHoldTime,
       trades: stopLossTrades,
+    };
+  }
+
+  summary() {
+    return {
+      initialCapital: this.initialCapital,
+      finalCapital: this.finalCapital,
+      returnsPercentage: this.returnsPercentage,
+      totalTrades: this.numberOfTrades,
+      winningRate: this.winningRate,
+      totalCommissions: this.totalCommissions,
+      totalSlippage: this.totalSlippage,
+      stopLossExits: this.stopLossExits,
+      takeProfitExits: this.takeProfitExits,
     };
   }
 }

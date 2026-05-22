@@ -3,18 +3,6 @@
 ## Overview
 Enable trading strategies to define conditions based on multiple datasets (different timeframes) simultaneously. This is a fundamental shift from single-dataset logic to a synchronized multi-dataset architecture.
 
-## Roadmap
-
-### Phase 1: Dataset & Quote Fundamentals ✅
-- [x] **Dataset Identity**: Add `id` or `name` to `Dataset` class.
-- [x] **Time Awareness**:
-    - Add `metadata` to `Dataset` to specify the timeframe (e.g., '5m', '1h', '1d').
-    - Standardize timestamp retrieval from `Quote<T>` (via mandatory field or configurable `timestampField`).
-- [x] **Synchronization Utility**:
-    - Implement `dataset.sync(timestamp)` to return the last available quote at or before a given time.
-    - Optimize with binary search for historical data.
-
-### Phase 2: Strategy Architecture Evolution ✅
 - [x] **Multi-Dataset Strategy**:
     - Update `Strategy` to hold references to secondary datasets. (Handled via passing to `prepare` and `apply`)
     - Enhance `StrategyOptions` to support MTF rules. (Rules now accept `StrategyContext`)

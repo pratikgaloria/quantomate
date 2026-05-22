@@ -14,3 +14,6 @@ export { WilliamsR } from './williamsR/williamsR';
 export { CCI } from './cci/cci';
 export { PivotTrend, PIVOT_TREND_UP, PIVOT_TREND_DOWN, PIVOT_TREND_NEUTRAL } from './pivotTrend/pivotTrend';
 export { AVWAP } from './avwap/avwap';
+export { RVOL } from './rvol/rvol';
+export { Slope } from './slope/slope';
+export { VWAP } from './vwap/vwap';

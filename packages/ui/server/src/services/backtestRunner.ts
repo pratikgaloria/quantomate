@@ -1,5 +1,5 @@
 import { Dataset, Backtest } from '@quantomate/core';
-import { PivotTrendStrategy, GoldenCrossStrategy, RSIMeanReversionStrategy, BollingerBandsStrategy, MACDStrategy, OhiainStrategy } from '@quantomate/strategies';
+import { PivotTrendStrategy, GoldenCrossStrategy, RSIMeanReversionStrategy, BollingerBandsStrategy, MACDStrategy, OhiainStrategy, StrongPullback } from '@quantomate/strategies';
 import { fetchStockData, StockData } from './stockDataFetcher';
 
 interface BacktestRequest {
@@ -19,65 +19,115 @@ interface BacktestRequest {
 export async function runBacktest(request: BacktestRequest) {
   const { strategyId, parameters, stock, config } = request;
 
-  // Fetch stock data
+  const interval = stock.interval || '1d';
+
+  // Fetch data with warmup period
+  const warmupDays = interval === '1d' ? 100 : 30;
+  const warmupStartDate = getWarmupDate(stock.startDate, warmupDays);
+
   const stockData = await fetchStockData(
     stock.symbol,
-    stock.startDate,
+    warmupStartDate,
     stock.endDate,
-    stock.interval || '1d'
+    interval
   );
 
   if (stockData.length === 0) {
     throw new Error('No stock data available for the specified period');
   }
 
-  // Create dataset
-  const dataset = new Dataset(stockData);
+  const dataset = new Dataset(stockData, { id: interval });
 
-  // Create strategy based on strategyId
+  const secondaryDatasets: Dataset<StockData>[] = [];
+  if (strategyId === 'strong-pullback') {
+    if (interval !== '1d') {
+      const dailyWarmupStartDate = getWarmupDate(stock.startDate, 100);
+      const dailyData = await fetchStockData(
+        stock.symbol,
+        dailyWarmupStartDate,
+        stock.endDate,
+        '1d'
+      );
+      if (dailyData.length > 0) {
+        const dailyDataset = new Dataset(dailyData, { id: 'daily' });
+        StrongPullback.prepareDaily(dailyDataset, parameters.dailyEmaPeriod || 50);
+        secondaryDatasets.push(dailyDataset as any);
+      }
+    } else {
+      StrongPullback.prepareDaily(dataset, parameters.dailyEmaPeriod || 50);
+      const dailyDataset = new Dataset(stockData, { id: 'daily' });
+      StrongPullback.prepareDaily(dailyDataset, parameters.dailyEmaPeriod || 50);
+      secondaryDatasets.push(dailyDataset as any);
+    }
+  }
+
   const strategy = createStrategy(strategyId, parameters);
 
-  // Run backtest (pivot-trend uses open for entry/exit; others use close)
-  const backtest = new Backtest(dataset, strategy);
-  const useOpenPrice = strategyId === 'pivot-trend';
-  const report = backtest.run({
-    config: {
-      capital: config.capital,
-    },
-    onEntry: (quote) =>
-      useOpenPrice ? (quote.value as StockData).open : (quote.value as StockData).close,
-    onExit: (quote) =>
-      useOpenPrice ? (quote.value as StockData).open : (quote.value as StockData).close,
-  });
+  const fullReport = backtestStrategy(dataset, strategy, secondaryDatasets, config, parameters);
 
-  // Prepare chart data
-  const chartData = prepareChartData(dataset, report, strategy.name);
+  const startTs = new Date(stock.startDate).getTime();
+  const chartData = prepareChartData(dataset, fullReport, strategy.name, startTs);
+
+  const filteredTrades = fullReport.trades.filter(t => {
+    const quoteTs = (t.quote.value as any).date.getTime();
+    return quoteTs >= startTs;
+  });
 
   return {
     report: {
-      initialCapital: report.initialCapital,
-      finalCapital: report.finalCapital,
-      returns: report.returns,
-      returnsPercentage: report.returnsPercentage,
-      numberOfTrades: report.numberOfTrades,
-      numberOfWinningTrades: report.numberOfWinningTrades,
-      numberOfLosingTrades: report.numberOfLosingTrades,
-      winningRate: report.winningRate,
-      profit: report.profit,
-      loss: report.loss,
-      stopLossExits: (report as any).stopLossExits || 0,
-      takeProfitExits: (report as any).takeProfitExits || 0,
-      strategyExits: (report as any).strategyExits || 0,
-      trades: report.trades.map((trade) => ({
+      initialCapital: fullReport.initialCapital,
+      finalCapital: fullReport.finalCapital,
+      returns: fullReport.returns,
+      returnsPercentage: fullReport.returnsPercentage,
+      numberOfTrades: filteredTrades.length,
+      numberOfWinningTrades: filteredTrades.filter(t => t.type === 'exit' && t.currentCapital > (t as any).entryCapital).length,
+      winningRate: fullReport.winningRate,
+      profit: fullReport.profit,
+      loss: fullReport.loss,
+      stopLossExits: (fullReport as any).stopLossExits || 0,
+      takeProfitExits: (fullReport as any).takeProfitExits || 0,
+      strategyExits: (fullReport as any).strategyExits || 0,
+      totalCommissions: (fullReport as any).totalCommissions || 0,
+      totalSlippage: (fullReport as any).totalSlippage || 0,
+      trades: filteredTrades.map((trade) => ({
         type: trade.type,
         tradedValue: trade.tradedValue,
         date: (trade.quote.value as any).date,
         short: trade.short,
         exitReason: trade.exitReason,
+        shares: trade.shares,
+        commission: (trade as any).commission,
+        slippage: (trade as any).slippage,
       })),
     },
     chartData,
   };
+}
+
+function getWarmupDate(dateStr: string, days: number): string {
+  const date = new Date(dateStr);
+  date.setDate(date.getDate() - days);
+  return date.toISOString().split('T')[0];
+}
+
+function backtestStrategy(dataset: Dataset<StockData>, strategy: any, secondaryDatasets: Dataset<any>[], config: any, parameters: any) {
+  const backtest = new Backtest(dataset, strategy, secondaryDatasets);
+
+  return backtest.run({
+    config: {
+      capital: config.capital,
+      commission: parameters.commission || 0,
+      slippage: parameters.slippage || 0,
+    },
+    onEntry: (quote, index, quotes) => {
+      const nextBar = quotes[index + 1];
+      return nextBar ? (nextBar.value as StockData).open : (quote.value as StockData).close;
+    },
+    onExit: (quote, index, quotes) => {
+      const nextBar = quotes[index + 1];
+      return nextBar ? (nextBar.value as StockData).open : (quote.value as StockData).close;
+    },
+  });
 }
 
 export function createStrategy(strategyId: string, parameters: Record<string, any>) {
@@ -89,7 +139,8 @@ export function createStrategy(strategyId: string, parameters: Record<string, an
       return new GoldenCrossStrategy('Golden Cross', {
         fastPeriod,
         slowPeriod,
-        source: 'close'
+        source: 'close',
+        ...parameters
       });
     }
     case 'pivot-trend': {
@@ -107,22 +158,23 @@ export function createStrategy(strategyId: string, parameters: Record<string, an
     case 'ohiain': {
       return new OhiainStrategy('Ohiain', parameters);
     }
+    case 'strong-pullback': {
+      return new StrongPullback(parameters);
+    }
     default:
       throw new Error(`Unknown strategy: ${strategyId}`);
   }
 }
 
-function prepareChartData(dataset: any, report: any, strategyName: string) {
+function prepareChartData(dataset: any, report: any, strategyName: string, startTs?: number) {
   const prices: any[] = [];
   const equity: any[] = [];
   const trades: any[] = [];
 
-  // Build a map of dates to capital values from trades
   const capitalByDate = new Map<string, number>();
   let currentCapital = report.initialCapital;
   let position: { shares: number; entryPrice: number } | null = null;
 
-  // Process trades to calculate capital at each trade point
   report.trades.forEach((trade: any) => {
     const value = trade.quote._value as StockData;
     const dateStr = value.date.toString();
@@ -134,7 +186,6 @@ function prepareChartData(dataset: any, report: any, strategyName: string) {
       };
       capitalByDate.set(dateStr, currentCapital);
     } else if (trade.type === 'exit' && position) {
-      // Calculate P&L
       const exitValue = position.shares * trade.tradedValue;
       const entryValue = position.shares * position.entryPrice;
       const pnl = exitValue - entryValue;
@@ -144,29 +195,19 @@ function prepareChartData(dataset: any, report: any, strategyName: string) {
     }
   });
 
-  // Build equity curve with interpolated values
   let lastKnownCapital = report.initialCapital;
-  position = null; // Reset position for second pass
-  
+  position = null;
+
   for (let i = 0; i < dataset.length; i++) {
     const quote = dataset.at(i);
     const value = quote.value as StockData;
     const dateStr = value.date.toString();
+    const quoteTs = value.date.getTime();
 
-    prices.push({
-      date: value.date,
-      open: value.open,
-      high: value.high,
-      low: value.low,
-      close: value.close,
-    });
-
-    // Use actual capital if we have it, otherwise use last known
     if (capitalByDate.has(dateStr)) {
       lastKnownCapital = capitalByDate.get(dateStr)!;
     }
 
-    // Track position state for unrealized P&L
     const currentTrade = report.trades.find((t: any) => t.quote._value.date.toString() === dateStr);
     if (currentTrade) {
       if (currentTrade.type === 'entry') {
@@ -179,7 +220,16 @@ function prepareChartData(dataset: any, report: any, strategyName: string) {
       }
     }
 
-    // If we're in a position, calculate unrealized P&L
+    if (startTs && quoteTs < startTs) continue;
+
+    prices.push({
+      date: value.date,
+      open: value.open,
+      high: value.high,
+      low: value.low,
+      close: value.close,
+    });
+
     let displayCapital = lastKnownCapital;
     if (position) {
       const currentValue = position.shares * value.close;
@@ -194,9 +244,10 @@ function prepareChartData(dataset: any, report: any, strategyName: string) {
     });
   }
 
-  // Add trade markers
   report.trades.forEach((trade: any) => {
     const value = trade.quote._value as StockData;
+    if (startTs && value.date.getTime() < startTs) return;
+
     trades.push({
       date: value.date,
       type: trade.type,

@@ -13,7 +13,9 @@ export class StrategyValue<O = unknown> {
 
 export interface StrategyContext<T = any> {
   getQuote: (datasetId: string) => Quote<T> | undefined;
+  getQuoteBefore: (datasetId: string) => Quote<T> | undefined;
   primaryQuote: Quote<T>;
+  previousPrimaryQuote?: Quote<T>;
 }
 
 type positionFn<T> = (quote: Quote<T>, context: StrategyContext<any>) => boolean;
@@ -22,7 +24,7 @@ type RiskFn<T, O> = (quote: Quote<T>, position: TradePosition<O>, context: Strat
 export type StrategyDirection = 'long' | 'short' | 'both';
 
 export type StrategyOptions<P, T> = {
-  indicators?: Indicator<P, T>[];
+  indicators?: Indicator<any, T>[];
   onTrigger?: (positionType: TradePositionType, quote: Quote<T>) => void;
   stopLossWhen?: RiskFn<T, any>;
   takeProfitWhen?: RiskFn<T, any>;
@@ -56,7 +58,11 @@ export class Strategy<P = unknown, T = number, O = unknown> {
   apply(
     quote: Quote<T>,
     position: TradePosition<O> = new TradePosition<O>('idle'),
-    context: StrategyContext<T> = { primaryQuote: quote, getQuote: () => undefined }
+    context: StrategyContext<T> = {
+      primaryQuote: quote,
+      getQuote: () => undefined,
+      getQuoteBefore: () => undefined
+    }
   ) {
     if (
       (position.value === 'hold' || position.value === 'entry') &&

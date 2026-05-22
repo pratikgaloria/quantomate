@@ -14,11 +14,13 @@ export interface OhiainParams {
   periodEMA50: number;
   periodATR: number;
   source: string;
+  direction?: 'long' | 'short' | 'both';
 }
 
 export interface OhiainPositionOptions {
   stopLossPrice?: number;
   takeProfitPrice?: number;
+  short?: boolean;
 }
 
 export class OhiainStrategy extends Strategy<OhiainParams, any, OhiainPositionOptions> {
@@ -29,6 +31,7 @@ export class OhiainStrategy extends Strategy<OhiainParams, any, OhiainPositionOp
       periodEMA50 = 50,
       periodATR = 14,
       source = 'close',
+      direction = 'both',
     } = params;
 
     const ema9 = new EMA<any>('ema9', { period: periodEMA9, attribute: source });
@@ -54,8 +57,18 @@ export class OhiainStrategy extends Strategy<OhiainParams, any, OhiainPositionOp
       }
     );
 
+    const prevLow = new Indicator<any, any>(
+      'prevLow',
+      (dataset: Dataset<any>) => {
+        const currentIndex = dataset.length - 1;
+        if (currentIndex < 1) return NaN;
+        return dataset.valueAt(currentIndex - 1, 'low');
+      }
+    );
+
     super(name, {
-      indicators: [ema9, ema21, ema50, atr, prevHigh, prevClose],
+      indicators: [ema9, ema21, ema50, atr, prevHigh, prevLow, prevClose],
+      direction,
       entryWhen: (quote: Quote<any>) => {
         const ema9Val = quote.getIndicator('ema9');
         const ema21Val = quote.getIndicator('ema21');
@@ -93,16 +106,16 @@ export class OhiainStrategy extends Strategy<OhiainParams, any, OhiainPositionOp
 
         // A. Breakout trigger: Close > PrevHigh
         if (currentClose > prevH) {
-            // Ensure we are not extended from 9 EMA too much (e.g. within 2 ATR)
-            if (currentClose < ema9Val + 2 * atrVal) {
-                return true;
-            }
+          // Ensure we are not extended from 9 EMA too much (e.g. within 2 ATR)
+          if (currentClose < ema9Val + 2 * atrVal) {
+            return true;
+          }
         }
 
         // B. Pullback trigger: Close > EMA9 AND Low < EMA9 (Touch and bounce)
         const currentLow = typeof quote.value === 'object' ? (quote.value as any)['low'] : currentClose;
         if (currentLow < ema9Val && currentClose > ema9Val && ema9Val > ema21Val) {
-             return true;
+          return true;
         }
 
         return false;
@@ -113,18 +126,52 @@ export class OhiainStrategy extends Strategy<OhiainParams, any, OhiainPositionOp
         const currentClose = typeof quote.value === 'object' ? (quote.value as any)[source] : quote.value;
 
         if (ema21Val !== undefined && !isNaN(ema21Val) && currentClose < ema21Val) {
-            return true;
+          return true;
         }
         return false;
+      },
+      entryShortWhen: (quote: Quote<any>) => {
+        const ema9Val = quote.getIndicator('ema9');
+        const ema50Val = quote.getIndicator('ema50');
+        const ema21Val = quote.getIndicator('ema21');
+        const atrVal = quote.getIndicator('atr');
+        const prevL = quote.getIndicator('prevLow');
+
+        const currentClose = typeof quote.value === 'object' ? (quote.value as any)[source] : quote.value;
+
+        if (ema9Val === undefined || ema50Val === undefined || ema21Val === undefined || atrVal === undefined || prevL === undefined || isNaN(ema9Val) || isNaN(ema50Val) || isNaN(ema21Val) || isNaN(atrVal) || isNaN(prevL)) {
+          return false;
+        }
+
+        // 1. Trend: Close < EMA50
+        if (currentClose >= ema50Val) return false;
+
+        // 2. Extension Check: Close > EMA50 - 4 * ATR
+        if (currentClose <= ema50Val - 4 * atrVal) return false;
+
+        // 3. Entry Triggers
+        // A. Breakout trigger: Close < PrevLow
+        if (currentClose < prevL && currentClose > ema9Val - 2 * atrVal) return true;
+
+        // B. Pullback trigger: Close < EMA9 AND High > EMA9
+        const currentHigh = typeof quote.value === 'object' ? (quote.value as any)['high'] : currentClose;
+        if (currentHigh > ema9Val && currentClose < ema9Val && ema9Val < ema21Val) return true;
+
+        return false;
+      },
+      exitShortWhen: (quote: Quote<any>) => {
+        const ema21Val = quote.getIndicator('ema21');
+        const currentClose = typeof quote.value === 'object' ? (quote.value as any)[source] : quote.value;
+        return ema21Val !== undefined && !isNaN(ema21Val) && currentClose > ema21Val;
       },
       stopLossWhen: (quote: Quote<any>, position: TradePosition<any>) => {
         const options = position.options as OhiainPositionOptions | undefined;
         // Check dynamic stop loss first
         if (options && options.stopLossPrice !== undefined) {
-            const currentLow = typeof quote.value === 'object' ? (quote.value as any)['low'] : quote.value;
-            if (currentLow < options.stopLossPrice) {
-                return true;
-            }
+          const price = typeof quote.value === 'object' ? (quote.value as any)[options.short ? 'high' : 'low'] : quote.value;
+          if (options.short ? price > options.stopLossPrice : price < options.stopLossPrice) {
+            return true;
+          }
         }
         return false;
       },
@@ -132,10 +179,10 @@ export class OhiainStrategy extends Strategy<OhiainParams, any, OhiainPositionOp
         const options = position.options as OhiainPositionOptions | undefined;
         // Check dynamic take profit first
         if (options && options.takeProfitPrice !== undefined) {
-             const currentHigh = typeof quote.value === 'object' ? (quote.value as any)['high'] : quote.value;
-             if (currentHigh >= options.takeProfitPrice) {
-                 return true;
-             }
+          const price = typeof quote.value === 'object' ? (quote.value as any)[options.short ? 'low' : 'high'] : quote.value;
+          if (options.short ? price < options.takeProfitPrice : price > options.takeProfitPrice) {
+            return true;
+          }
         }
         return false;
       }
@@ -151,29 +198,37 @@ export class OhiainStrategy extends Strategy<OhiainParams, any, OhiainPositionOp
 
     // If we just entered (transition from idle/hold to entry)
     if (result.position.value === 'entry' && position.value !== 'entry') {
-        const currentLow = typeof quote.value === 'object' ? (quote.value as any)['low'] : quote.value;
-        const currentClose = typeof quote.value === 'object' ? (quote.value as any)['close'] : quote.value;
+      const isShort = !!result.position.options?.short;
+      const currentLow = typeof quote.value === 'object' ? (quote.value as any)['low'] : (quote.value as any);
+      const currentHigh = typeof quote.value === 'object' ? (quote.value as any)['high'] : (quote.value as any);
+      const currentClose = typeof quote.value === 'object' ? (quote.value as any)['close'] : (quote.value as any);
 
-        // Stop Loss = Low of the entry candle
-        const stopLossPrice = currentLow;
+      let stopLossPrice: number;
+      let takeProfitPrice: number | undefined = undefined;
 
-        // Risk = Entry Price (Close) - Stop Loss
-        const risk = currentClose - stopLossPrice;
-
-        // Take Profit = Entry Price + 2 * Risk (2R)
-        // If risk is 0 or negative (shouldn't happen with proper data), ignore TP
-        let takeProfitPrice = undefined;
+      if (isShort) {
+        // Stop Loss = High of the entry candle
+        stopLossPrice = currentHigh;
+        const risk = stopLossPrice - currentClose;
         if (risk > 0) {
-            takeProfitPrice = currentClose + 2 * risk;
+          takeProfitPrice = currentClose - 2 * risk;
         }
+      } else {
+        // Stop Loss = Low of the entry candle
+        stopLossPrice = currentLow;
+        const risk = currentClose - stopLossPrice;
+        if (risk > 0) {
+          takeProfitPrice = currentClose + 2 * risk;
+        }
+      }
 
-        const newPos = new TradePosition('entry', {
-            ...result.position.options,
-            stopLossPrice,
-            takeProfitPrice
-        });
+      const newPos = new TradePosition('entry', {
+        ...result.position.options,
+        stopLossPrice,
+        takeProfitPrice
+      });
 
-        return new StrategyValue(newPos);
+      return new StrategyValue(newPos);
     }
 
     return result;

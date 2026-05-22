@@ -5,3 +5,4 @@ export * from './pivotTrend/pivotTrend';
 export * from './bollingerBands/bollingerBands';
 export * from './macd/macd';
 export * from './ohiain/ohiain';
+export * from './strongPullback/strongPullback';

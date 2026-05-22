@@ -63,8 +63,9 @@ export class Dataset<T = number> {
   }
 
   private extractTimestamp(value: T): number | undefined {
-    if (this._options.timestampField && typeof value === 'object' && value !== null) {
-      const ts = (value as any)[this._options.timestampField];
+    if (typeof value === 'object' && value !== null) {
+      const field = (this._options.timestampField as string) || 'timestamp';
+      const ts = (value as any)[field];
       if (ts instanceof Date) return ts.getTime();
       if (typeof ts === 'number') return ts;
       if (typeof ts === 'string') return new Date(ts).getTime();
@@ -210,6 +211,7 @@ export class Dataset<T = number> {
         : new TradePosition('idle');
 
       const tempQuote = new Quote(value);
+      if (ts !== undefined) tempQuote.timestamp = ts;
 
       // Populate indicators on tempQuote so strategy can use them
       for (const ind of this.indicators) {
@@ -219,9 +221,14 @@ export class Dataset<T = number> {
 
       const context: StrategyContext<T> = {
         primaryQuote: tempQuote,
+        previousPrimaryQuote: this.at(newIndex - 1),
         getQuote: (id: string) => {
           const ds = secondaryDatasets?.find((d) => d.id === id);
           return ts !== undefined ? ds?.sync(ts) : undefined;
+        },
+        getQuoteBefore: (id: string) => {
+          const ds = secondaryDatasets?.find((d) => d.id === id);
+          return ts !== undefined ? ds?.syncBefore(ts) : undefined;
         },
       };
 
@@ -265,6 +272,35 @@ export class Dataset<T = number> {
   }
 
   /**
+   * Synchronizes with another dataset by timestamp, returning the quote strictly BEFORE the given timestamp.
+   * Useful for avoiding lookahead bias in multi-timeframe analysis.
+   * @param timestamp - target Unix timestamp (ms).
+   * @returns Synchronized Quote or undefined.
+   */
+  syncBefore(timestamp: number): Quote<T> | undefined {
+    const timestamps = this.storage.getTimestamps();
+    if (timestamps.length === 0) return undefined;
+
+    // Binary search to find the last index where timestamps[index] < timestamp
+    let low = 0;
+    let high = timestamps.length - 1;
+    let resultIndex = -1;
+
+    while (low <= high) {
+      const mid = Math.floor((low + high) / 2);
+      if (timestamps[mid] < timestamp) {
+        resultIndex = mid;
+        low = mid + 1;
+      } else {
+        high = mid - 1;
+      }
+    }
+
+    if (resultIndex === -1) return undefined;
+    return this.createQuoteAt(resultIndex);
+  }
+
+  /**
    * Prepares the dataset for the given strategy.
    * @param strategy - `Strategy`.
    * @param secondaryDatasets - Optional array of additional datasets for multi-timeframe rules.
@@ -290,9 +326,14 @@ export class Dataset<T = number> {
 
       const context: StrategyContext<T> = {
         primaryQuote: quote,
+        previousPrimaryQuote: i > 0 ? this.at(i - 1) : undefined,
         getQuote: (id: string) => {
           const ds = secondaryDatasets.find((d) => d.id === id);
           return quote.timestamp !== undefined ? ds?.sync(quote.timestamp) : undefined;
+        },
+        getQuoteBefore: (id: string) => {
+          const ds = secondaryDatasets.find((d) => d.id === id);
+          return quote.timestamp !== undefined ? ds?.syncBefore(quote.timestamp) : undefined;
         },
       };
 
@@ -341,9 +382,14 @@ export class Dataset<T = number> {
    * @returns value
    */
   valueAt(position: number, attribute?: string): number {
-    const value = this.storage.getValue(position);
+    const actualIndex = position < 0 ? this.length + position : position;
+    if (actualIndex < 0 || actualIndex >= this.length) {
+      return NaN;
+    }
 
-    if (attribute && typeof value === 'object') {
+    const value = this.storage.getValue(actualIndex);
+
+    if (attribute && typeof value === 'object' && value !== null) {
       return (value as any)[attribute];
     }
 

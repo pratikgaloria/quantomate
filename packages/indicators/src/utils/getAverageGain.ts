@@ -7,11 +7,8 @@ const getAverageGain = (array: number[], period: number) => {
   }
 
   let averageGain = 0;
-  for (let i = datasetLength - 2; i > datasetLength - requiredLength; i--) {
-    const currentValue = array[i];
-    const previousValue = array[i - 1];
-
-    const difference = currentValue - previousValue;
+  for (let i = datasetLength - 1; i >= datasetLength - period; i--) {
+    const difference = array[i] - array[i - 1];
     averageGain += difference > 0 ? difference : 0;
   }
 
