@@ -1,0 +1,23 @@
+{
+  "name": "@quantomate/db",
+  "version": "0.1.0",
+  "description": "Database access and client for Quantomate Research",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc && mkdir -p dist/generated && cp -r src/generated/client dist/generated/",
+    "prisma:generate": "prisma generate",
+    "prisma:push": "prisma db push"
+  },
+  "dependencies": {
+    "@prisma/client": "^7.8.0",
+    "@prisma/adapter-pg": "^7.8.0",
+    "dotenv": "^16.4.5",
+    "pg": "^8.20.0"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.20.0",
+    "prisma": "^7.8.0",
+    "typescript": "^5.3.3"
+  }
+}

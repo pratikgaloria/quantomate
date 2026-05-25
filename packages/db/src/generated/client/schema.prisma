@@ -1,0 +1,68 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/client"
+}
+
+model Symbol {
+  id        String   @id // Ticker (e.g. AAPL, TSLA)
+  sector    String?
+  industry  String?
+  name      String?
+  updatedAt DateTime @updatedAt
+
+  prices  HistoricalPrice[]
+  signals StrategySignal[]
+  metrics FundamentalMetric?
+
+  @@map("symbols")
+}
+
+model HistoricalPrice {
+  symbolId String
+  date     DateTime
+  open     Float
+  high     Float
+  low      Float
+  close    Float
+  volume   Float
+
+  symbol Symbol @relation(fields: [symbolId], references: [id], onDelete: Cascade)
+
+  @@id([symbolId, date])
+  @@map("historical_prices")
+}
+
+model StrategySignal {
+  id          String   @id @default(uuid())
+  symbolId    String
+  strategyId  String // e.g. "rsi-mean-reversion", "golden-cross"
+  signalValue String // "BUY", "SELL", "HOLD"
+  price       Float // Price at trigger
+  triggeredAt DateTime // Date of the candle triggering it
+  updatedAt   DateTime @updatedAt
+
+  symbol Symbol @relation(fields: [symbolId], references: [id], onDelete: Cascade)
+
+  @@unique([symbolId, strategyId])
+  @@map("strategy_signals")
+}
+
+model FundamentalMetric {
+  symbolId     String   @id
+  peRatio      Float?
+  forwardPe    Float?
+  priceToSales Float?
+  evToEbitda   Float?
+  fcfYield     Float?
+  revGrowth    Float?
+  epsGrowth    Float?
+  updatedAt    DateTime @updatedAt
+
+  symbol Symbol @relation(fields: [symbolId], references: [id], onDelete: Cascade)
+
+  @@map("fundamental_metrics")
+}
