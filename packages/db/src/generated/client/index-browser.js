@@ -135,7 +135,8 @@ exports.Prisma.HistoricalPriceScalarFieldEnum = {
   high: 'high',
   low: 'low',
   close: 'close',
-  volume: 'volume'
+  volume: 'volume',
+  interval: 'interval'
 };
 
 exports.Prisma.StrategySignalScalarFieldEnum = {

@@ -7,7 +7,8 @@
   "scripts": {
     "build": "tsc && mkdir -p dist/generated && cp -r src/generated/client dist/generated/",
     "prisma:generate": "prisma generate",
-    "prisma:push": "prisma db push"
+    "prisma:push": "prisma db push",
+    "test": "echo 'No tests for DB'"
   },
   "dependencies": {
     "@prisma/client": "^7.8.0",

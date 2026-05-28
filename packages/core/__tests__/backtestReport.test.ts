@@ -33,6 +33,8 @@ describe('BacktestReport', () => {
         shares: 20,
         short: false,
         currentCapital: 0,
+        commission: 0,
+        slippage: 0,
       }]);
     });
   });
@@ -60,8 +62,8 @@ describe('BacktestReport', () => {
       expect(backtestReport.returns).toBe(1000);
       expect(backtestReport.returnsPercentage).toBe(100);
       expect(backtestReport.trades).toStrictEqual([
-        { type: 'entry', quote: quote1, tradedValue: 50, shares: 20, short: false, currentCapital: 0 },
-        { type: 'exit', quote: quote2, tradedValue: 100, shares: 20, short: false, currentCapital: 2000, exitReason: undefined, exitContext: undefined }
+        { type: 'entry', quote: quote1, tradedValue: 50, shares: 20, short: false, currentCapital: 0, commission: 0, slippage: 0 },
+        { type: 'exit', quote: quote2, tradedValue: 100, shares: 20, short: false, currentCapital: 2000, exitReason: undefined, exitContext: undefined, commission: 0, slippage: 0 }
       ])
     });
 

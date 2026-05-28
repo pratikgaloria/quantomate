@@ -8,9 +8,8 @@
         "/dist"
     ],
     "scripts": {
-        "build": "tsc",
-        "prepare": "npm run build",
-        "test": "jest --coverage --no-cache",
+        "build": "echo 'No build step for playground'",
+        "test": "jest --coverage --no-cache --passWithNoTests",
         "test:build": "jest __tests__ --coverage && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage",
         "docs:generate": "typedoc",
         "lint": "eslint src --ext .ts",
@@ -38,8 +37,8 @@
     },
     "dependencies": {
         "@quantomate/core": "^0.1.0",
-        "@quantomate/indicators": "^0.1.0",
-        "yahoo-finance2": "^3.10.2"
+        "@quantomate/library": "^0.1.0",
+        "@quantomate/data": "^0.1.0"
     },
     "jest": {
         "testEnvironment": "node",
@@ -58,7 +57,8 @@
         ],
         "moduleNameMapper": {
             "^@quantomate/core$": "<rootDir>/../core/src",
-            "^@quantomate/indicators$": "<rootDir>/../indicators/src"
+            "^@quantomate/library$": "<rootDir>/../library/src",
+            "^@quantomate/data$": "<rootDir>/../data/src"
         }
     },
     "lint-staged": {

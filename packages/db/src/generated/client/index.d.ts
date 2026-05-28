@@ -2340,6 +2340,7 @@ export namespace Prisma {
     low: number | null
     close: number | null
     volume: number | null
+    interval: string | null
   }
 
   export type HistoricalPriceMaxAggregateOutputType = {
@@ -2350,6 +2351,7 @@ export namespace Prisma {
     low: number | null
     close: number | null
     volume: number | null
+    interval: string | null
   }
 
   export type HistoricalPriceCountAggregateOutputType = {
@@ -2360,6 +2362,7 @@ export namespace Prisma {
     low: number
     close: number
     volume: number
+    interval: number
     _all: number
   }
 
@@ -2388,6 +2391,7 @@ export namespace Prisma {
     low?: true
     close?: true
     volume?: true
+    interval?: true
   }
 
   export type HistoricalPriceMaxAggregateInputType = {
@@ -2398,6 +2402,7 @@ export namespace Prisma {
     low?: true
     close?: true
     volume?: true
+    interval?: true
   }
 
   export type HistoricalPriceCountAggregateInputType = {
@@ -2408,6 +2413,7 @@ export namespace Prisma {
     low?: true
     close?: true
     volume?: true
+    interval?: true
     _all?: true
   }
 
@@ -2505,6 +2511,7 @@ export namespace Prisma {
     low: number
     close: number
     volume: number
+    interval: string
     _count: HistoricalPriceCountAggregateOutputType | null
     _avg: HistoricalPriceAvgAggregateOutputType | null
     _sum: HistoricalPriceSumAggregateOutputType | null
@@ -2534,6 +2541,7 @@ export namespace Prisma {
     low?: boolean
     close?: boolean
     volume?: boolean
+    interval?: boolean
     symbol?: boolean | SymbolDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["historicalPrice"]>
 
@@ -2545,6 +2553,7 @@ export namespace Prisma {
     low?: boolean
     close?: boolean
     volume?: boolean
+    interval?: boolean
     symbol?: boolean | SymbolDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["historicalPrice"]>
 
@@ -2556,6 +2565,7 @@ export namespace Prisma {
     low?: boolean
     close?: boolean
     volume?: boolean
+    interval?: boolean
     symbol?: boolean | SymbolDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["historicalPrice"]>
 
@@ -2567,9 +2577,10 @@ export namespace Prisma {
     low?: boolean
     close?: boolean
     volume?: boolean
+    interval?: boolean
   }
 
-  export type HistoricalPriceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"symbolId" | "date" | "open" | "high" | "low" | "close" | "volume", ExtArgs["result"]["historicalPrice"]>
+  export type HistoricalPriceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"symbolId" | "date" | "open" | "high" | "low" | "close" | "volume" | "interval", ExtArgs["result"]["historicalPrice"]>
   export type HistoricalPriceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     symbol?: boolean | SymbolDefaultArgs<ExtArgs>
   }
@@ -2593,6 +2604,7 @@ export namespace Prisma {
       low: number
       close: number
       volume: number
+      interval: string
     }, ExtArgs["result"]["historicalPrice"]>
     composites: {}
   }
@@ -3024,6 +3036,7 @@ export namespace Prisma {
     readonly low: FieldRef<"HistoricalPrice", 'Float'>
     readonly close: FieldRef<"HistoricalPrice", 'Float'>
     readonly volume: FieldRef<"HistoricalPrice", 'Float'>
+    readonly interval: FieldRef<"HistoricalPrice", 'String'>
   }
     
 
@@ -5771,7 +5784,8 @@ export namespace Prisma {
     high: 'high',
     low: 'low',
     close: 'close',
-    volume: 'volume'
+    volume: 'volume',
+    interval: 'interval'
   };
 
   export type HistoricalPriceScalarFieldEnum = (typeof HistoricalPriceScalarFieldEnum)[keyof typeof HistoricalPriceScalarFieldEnum]
@@ -5965,6 +5979,7 @@ export namespace Prisma {
     low?: FloatFilter<"HistoricalPrice"> | number
     close?: FloatFilter<"HistoricalPrice"> | number
     volume?: FloatFilter<"HistoricalPrice"> | number
+    interval?: StringFilter<"HistoricalPrice"> | string
     symbol?: XOR<SymbolScalarRelationFilter, SymbolWhereInput>
   }
 
@@ -5976,11 +5991,12 @@ export namespace Prisma {
     low?: SortOrder
     close?: SortOrder
     volume?: SortOrder
+    interval?: SortOrder
     symbol?: SymbolOrderByWithRelationInput
   }
 
   export type HistoricalPriceWhereUniqueInput = Prisma.AtLeast<{
-    symbolId_date?: HistoricalPriceSymbolIdDateCompoundUniqueInput
+    symbolId_date_interval?: HistoricalPriceSymbolIdDateIntervalCompoundUniqueInput
     AND?: HistoricalPriceWhereInput | HistoricalPriceWhereInput[]
     OR?: HistoricalPriceWhereInput[]
     NOT?: HistoricalPriceWhereInput | HistoricalPriceWhereInput[]
@@ -5991,8 +6007,9 @@ export namespace Prisma {
     low?: FloatFilter<"HistoricalPrice"> | number
     close?: FloatFilter<"HistoricalPrice"> | number
     volume?: FloatFilter<"HistoricalPrice"> | number
+    interval?: StringFilter<"HistoricalPrice"> | string
     symbol?: XOR<SymbolScalarRelationFilter, SymbolWhereInput>
-  }, "symbolId_date">
+  }, "symbolId_date_interval">
 
   export type HistoricalPriceOrderByWithAggregationInput = {
     symbolId?: SortOrder
@@ -6002,6 +6019,7 @@ export namespace Prisma {
     low?: SortOrder
     close?: SortOrder
     volume?: SortOrder
+    interval?: SortOrder
     _count?: HistoricalPriceCountOrderByAggregateInput
     _avg?: HistoricalPriceAvgOrderByAggregateInput
     _max?: HistoricalPriceMaxOrderByAggregateInput
@@ -6020,6 +6038,7 @@ export namespace Prisma {
     low?: FloatWithAggregatesFilter<"HistoricalPrice"> | number
     close?: FloatWithAggregatesFilter<"HistoricalPrice"> | number
     volume?: FloatWithAggregatesFilter<"HistoricalPrice"> | number
+    interval?: StringWithAggregatesFilter<"HistoricalPrice"> | string
   }
 
   export type StrategySignalWhereInput = {
@@ -6242,6 +6261,7 @@ export namespace Prisma {
     low: number
     close: number
     volume: number
+    interval?: string
     symbol: SymbolCreateNestedOneWithoutPricesInput
   }
 
@@ -6253,6 +6273,7 @@ export namespace Prisma {
     low: number
     close: number
     volume: number
+    interval?: string
   }
 
   export type HistoricalPriceUpdateInput = {
@@ -6262,6 +6283,7 @@ export namespace Prisma {
     low?: FloatFieldUpdateOperationsInput | number
     close?: FloatFieldUpdateOperationsInput | number
     volume?: FloatFieldUpdateOperationsInput | number
+    interval?: StringFieldUpdateOperationsInput | string
     symbol?: SymbolUpdateOneRequiredWithoutPricesNestedInput
   }
 
@@ -6273,6 +6295,7 @@ export namespace Prisma {
     low?: FloatFieldUpdateOperationsInput | number
     close?: FloatFieldUpdateOperationsInput | number
     volume?: FloatFieldUpdateOperationsInput | number
+    interval?: StringFieldUpdateOperationsInput | string
   }
 
   export type HistoricalPriceCreateManyInput = {
@@ -6283,6 +6306,7 @@ export namespace Prisma {
     low: number
     close: number
     volume: number
+    interval?: string
   }
 
   export type HistoricalPriceUpdateManyMutationInput = {
@@ -6292,6 +6316,7 @@ export namespace Prisma {
     low?: FloatFieldUpdateOperationsInput | number
     close?: FloatFieldUpdateOperationsInput | number
     volume?: FloatFieldUpdateOperationsInput | number
+    interval?: StringFieldUpdateOperationsInput | string
   }
 
   export type HistoricalPriceUncheckedUpdateManyInput = {
@@ -6302,6 +6327,7 @@ export namespace Prisma {
     low?: FloatFieldUpdateOperationsInput | number
     close?: FloatFieldUpdateOperationsInput | number
     volume?: FloatFieldUpdateOperationsInput | number
+    interval?: StringFieldUpdateOperationsInput | string
   }
 
   export type StrategySignalCreateInput = {
@@ -6617,9 +6643,10 @@ export namespace Prisma {
     isNot?: SymbolWhereInput
   }
 
-  export type HistoricalPriceSymbolIdDateCompoundUniqueInput = {
+  export type HistoricalPriceSymbolIdDateIntervalCompoundUniqueInput = {
     symbolId: string
     date: Date | string
+    interval: string
   }
 
   export type HistoricalPriceCountOrderByAggregateInput = {
@@ -6630,6 +6657,7 @@ export namespace Prisma {
     low?: SortOrder
     close?: SortOrder
     volume?: SortOrder
+    interval?: SortOrder
   }
 
   export type HistoricalPriceAvgOrderByAggregateInput = {
@@ -6648,6 +6676,7 @@ export namespace Prisma {
     low?: SortOrder
     close?: SortOrder
     volume?: SortOrder
+    interval?: SortOrder
   }
 
   export type HistoricalPriceMinOrderByAggregateInput = {
@@ -6658,6 +6687,7 @@ export namespace Prisma {
     low?: SortOrder
     close?: SortOrder
     volume?: SortOrder
+    interval?: SortOrder
   }
 
   export type HistoricalPriceSumOrderByAggregateInput = {
@@ -7166,6 +7196,7 @@ export namespace Prisma {
     low: number
     close: number
     volume: number
+    interval?: string
   }
 
   export type HistoricalPriceUncheckedCreateWithoutSymbolInput = {
@@ -7175,6 +7206,7 @@ export namespace Prisma {
     low: number
     close: number
     volume: number
+    interval?: string
   }
 
   export type HistoricalPriceCreateOrConnectWithoutSymbolInput = {
@@ -7269,6 +7301,7 @@ export namespace Prisma {
     low?: FloatFilter<"HistoricalPrice"> | number
     close?: FloatFilter<"HistoricalPrice"> | number
     volume?: FloatFilter<"HistoricalPrice"> | number
+    interval?: StringFilter<"HistoricalPrice"> | string
   }
 
   export type StrategySignalUpsertWithWhereUniqueWithoutSymbolInput = {
@@ -7508,6 +7541,7 @@ export namespace Prisma {
     low: number
     close: number
     volume: number
+    interval?: string
   }
 
   export type StrategySignalCreateManySymbolInput = {
@@ -7526,6 +7560,7 @@ export namespace Prisma {
     low?: FloatFieldUpdateOperationsInput | number
     close?: FloatFieldUpdateOperationsInput | number
     volume?: FloatFieldUpdateOperationsInput | number
+    interval?: StringFieldUpdateOperationsInput | string
   }
 
   export type HistoricalPriceUncheckedUpdateWithoutSymbolInput = {
@@ -7535,6 +7570,7 @@ export namespace Prisma {
     low?: FloatFieldUpdateOperationsInput | number
     close?: FloatFieldUpdateOperationsInput | number
     volume?: FloatFieldUpdateOperationsInput | number
+    interval?: StringFieldUpdateOperationsInput | string
   }
 
   export type HistoricalPriceUncheckedUpdateManyWithoutSymbolInput = {
@@ -7544,6 +7580,7 @@ export namespace Prisma {
     low?: FloatFieldUpdateOperationsInput | number
     close?: FloatFieldUpdateOperationsInput | number
     volume?: FloatFieldUpdateOperationsInput | number
+    interval?: StringFieldUpdateOperationsInput | string
   }
 
   export type StrategySignalUpdateWithoutSymbolInput = {

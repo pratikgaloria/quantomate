@@ -1,10 +1,7 @@
 import { Dataset, Strategy, Quote, Indicator, TradePosition, Backtest } from '@quantomate/core';
 import type { StrategyContext } from '@quantomate/core';
-import { SMA } from '@quantomate/indicators';
-import YahooFinance from 'yahoo-finance2';
+import { SMA } from '@quantomate/library';
 import fs from 'fs';
-
-const yahooFinance = new (YahooFinance as any)();
 
 // 1. Define the Golden Cross Strategy exactly as per Pine Script
 export class GoldenCrossTV extends Strategy<any, any> {

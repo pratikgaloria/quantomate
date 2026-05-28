@@ -6,9 +6,12 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "test": "echo 'No tests for Data'"
   },
   "dependencies": {
+    "@quantomate/core": "file:../core",
+    "@quantomate/library": "file:../library",
     "@quantomate/db": "^0.1.0",
     "yahoo-finance2": "^3.11.2"
   },

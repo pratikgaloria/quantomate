@@ -1,4 +1,4 @@
-import { GoldenCrossStrategy } from '@quantomate/strategies';
+import { GoldenCrossStrategy } from '@quantomate/library';
 import { Dataset } from '@quantomate/core';
 
 console.log('Checking GoldenCrossStrategy...');

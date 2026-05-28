@@ -1,25 +1,30 @@
 import { prisma } from "@quantomate/db";
-import YahooFinance from "yahoo-finance2";
-
-const yahooFinance = new YahooFinance();
+import { IDataProvider } from "./providers/IDataProvider";
+import { YahooFinanceProvider } from "./providers/YahooFinanceProvider";
 
 export class DataService {
+  public static provider: IDataProvider = new YahooFinanceProvider();
+
   /**
    * Get historical price data for a symbol.
-   * If not in database or outdated, fetches from Yahoo Finance, stores in DB, and returns all.
+   * If not in database or outdated, fetches from data provider, stores in DB, and returns all.
    */
-  static async getHistoricalData(symbolId: string, limit?: number): Promise<any[]> {
+  static async getHistoricalData(
+    symbolId: string,
+    limit?: number,
+    interval: string = "1d"
+  ): Promise<any[]> {
     // 1. Ensure symbol metadata exists in db
     const symbolMeta = await this.ensureSymbolExists(symbolId);
 
-    // 2. Find latest price in database
+    // 2. Find latest price in database for this interval
     const latestPrice = await prisma.historicalPrice.findFirst({
-      where: { symbolId },
+      where: { symbolId, interval },
       orderBy: { date: "desc" },
     });
 
     const now = new Date();
-    const SYNC_TTL = 12 * 60 * 60 * 1000; // 12 hours cache TTL for Yahoo Finance sync
+    const SYNC_TTL = 12 * 60 * 60 * 1000; // 12 hours cache TTL for provider sync
     const isSyncedRecently =
       symbolMeta && now.getTime() - symbolMeta.updatedAt.getTime() < SYNC_TTL;
 
@@ -27,16 +32,16 @@ export class DataService {
       if (!latestPrice) {
         // Missing entirely: fetch 5 years
         console.log(
-          `No local data found for ${symbolId}. Fetching 5 years history from Yahoo Finance...`,
+          `No local data found for ${symbolId} (${interval}). Fetching 5 years history...`,
         );
         const startFrom = new Date();
         startFrom.setFullYear(startFrom.getFullYear() - 5);
-        await this.fetchAndStoreHistoricalData(symbolId, startFrom, now);
+        await this.fetchAndStoreHistoricalData(symbolId, startFrom, now, interval);
       } else {
         // Data exists: check if outdated.
         // If latest price date is older than 24 hours, query from the day after the latestPrice date to today.
         const startFrom = new Date(
-          latestPrice.date.getTime() + 24 * 60 * 60 * 1000,
+          latestPrice.date.getTime() + 24 * 60 * 60 * 1000
         );
 
         const startFromStr = startFrom.toISOString().split("T")[0];
@@ -44,14 +49,14 @@ export class DataService {
 
         if (startFromStr <= todayStr) {
           console.log(
-            `Local data for ${symbolId} is outdated (latest: ${
+            `Local data for ${symbolId} (${interval}) is outdated (latest: ${
               latestPrice.date.toISOString().split("T")[0]
             }). Fetching incremental updates...`,
           );
-          await this.fetchAndStoreHistoricalData(symbolId, startFrom, now);
+          await this.fetchAndStoreHistoricalData(symbolId, startFrom, now, interval);
         } else {
           console.log(
-            `Local data for ${symbolId} is up to date (latest: ${
+            `Local data for ${symbolId} (${interval}) is up to date (latest: ${
               latestPrice.date.toISOString().split("T")[0]
             }).`,
           );
@@ -65,14 +70,14 @@ export class DataService {
       });
     } else {
       console.log(
-        `Local data for ${symbolId} was synced recently (within 12h). Skipping Yahoo Finance fetch.`,
+        `Local data for ${symbolId} (${interval}) was synced recently (within 12h). Skipping fetch.`,
       );
     }
 
     // 3. Return sorted historical prices from the database (applying limit if provided)
     if (limit !== undefined) {
       const prices = await prisma.historicalPrice.findMany({
-        where: { symbolId },
+        where: { symbolId, interval },
         orderBy: { date: "desc" },
         take: limit,
       });
@@ -80,14 +85,14 @@ export class DataService {
     }
 
     return prisma.historicalPrice.findMany({
-      where: { symbolId },
+      where: { symbolId, interval },
       orderBy: { date: "asc" },
     });
   }
 
   /**
    * Ensure that the Symbol row exists in the Symbol table.
-   * Fetches metadata from yahoo-finance2 if it does not exist.
+   * Fetches metadata from data provider if it does not exist.
    */
   private static async ensureSymbolExists(symbolId: string): Promise<any> {
     let symbolExists = await prisma.symbol.findUnique({
@@ -96,20 +101,17 @@ export class DataService {
 
     if (!symbolExists) {
       console.log(
-        `Symbol ${symbolId} not found in database. Fetching metadata from Yahoo Finance...`,
+        `Symbol ${symbolId} not found in database. Fetching metadata...`,
       );
       let name = symbolId;
       let sector = "Unknown";
       let industry = "Unknown";
 
       try {
-        const summary = await yahooFinance.quoteSummary(symbolId, {
-          modules: ["summaryProfile", "price"],
-        });
-
-        name = summary.price?.longName || summary.price?.shortName || symbolId;
-        sector = summary.summaryProfile?.sector || "Unknown";
-        industry = summary.summaryProfile?.industry || "Unknown";
+        const fundamentals = await DataService.provider.getFundamentals(symbolId);
+        name = fundamentals.name || symbolId;
+        sector = fundamentals.sector || "Unknown";
+        industry = fundamentals.industry || "Unknown";
       } catch (error) {
         console.warn(
           `Failed to fetch metadata for symbol ${symbolId}:`,
@@ -137,48 +139,32 @@ export class DataService {
     symbolId: string,
     start: Date,
     end: Date,
+    interval: string = "1d"
   ): Promise<void> {
     const period1 = start.toISOString().split("T")[0];
-    let period2 = end.toISOString().split("T")[0];
+    const period2 = end.toISOString().split("T")[0];
 
     if (period1 > period2) {
       return;
     }
 
-    if (period1 === period2) {
-      const nextDay = new Date(end.getTime() + 24 * 60 * 60 * 1000);
-      period2 = nextDay.toISOString().split("T")[0];
-    }
-
     try {
-      const quotes = await yahooFinance.historical(symbolId, {
-        period1,
-        period2,
-        interval: "1d",
-      });
+      const quotes = await DataService.provider.getHistoricalData(symbolId, start, end, interval);
 
       if (!quotes || quotes.length === 0) {
         return;
       }
 
-      // Filter invalid rows and map
-      const dataToInsert = quotes
-        .filter(
-          (q: any) =>
-            q.open !== null &&
-            q.high !== null &&
-            q.low !== null &&
-            q.close !== null,
-        )
-        .map((q: any) => ({
-          symbolId,
-          date: new Date(q.date),
-          open: Number(q.open),
-          high: Number(q.high),
-          low: Number(q.low),
-          close: Number(q.close),
-          volume: Number(q.volume || 0),
-        }));
+      const dataToInsert = quotes.map((q: any) => ({
+        symbolId,
+        date: q.date,
+        open: q.open,
+        high: q.high,
+        low: q.low,
+        close: q.close,
+        volume: q.volume,
+        interval,
+      }));
 
       if (dataToInsert.length > 0) {
         await prisma.historicalPrice.createMany({
@@ -186,13 +172,13 @@ export class DataService {
           skipDuplicates: true,
         });
         console.log(
-          `Saved ${dataToInsert.length} historical prices for ${symbolId}.`,
+          `Saved ${dataToInsert.length} historical prices (${interval}) for ${symbolId}.`,
         );
       }
     } catch (error) {
       console.error(
         `Error fetching/storing historical data for ${symbolId}:`,
-        error,
+        error
       );
     }
   }

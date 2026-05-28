@@ -29,10 +29,11 @@ model HistoricalPrice {
   low      Float
   close    Float
   volume   Float
+  interval String   @default("1d")
 
   symbol Symbol @relation(fields: [symbolId], references: [id], onDelete: Cascade)
 
-  @@id([symbolId, date])
+  @@id([symbolId, date, interval])
   @@map("historical_prices")
 }
 

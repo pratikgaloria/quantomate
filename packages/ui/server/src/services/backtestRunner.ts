@@ -1,5 +1,5 @@
 import { Dataset, Backtest } from '@quantomate/core';
-import { PivotTrendStrategy, GoldenCrossStrategy, RSIMeanReversionStrategy, BollingerBandsStrategy, MACDStrategy, OhiainStrategy, StrongPullback } from '@quantomate/strategies';
+import { PivotTrendStrategy, GoldenCrossStrategy, RSIMeanReversionStrategy, BollingerBandsStrategy, MACDStrategy, OhiainStrategy, StrongPullback } from '@quantomate/library';
 import { fetchStockData, StockData } from './stockDataFetcher';
 
 interface BacktestRequest {
