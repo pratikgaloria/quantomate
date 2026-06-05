@@ -136,4 +136,5 @@ export interface IDataProvider {
   getEarnings(symbol: string): Promise<EarningsData | null>;
 
   getScreener(scrId: string, count?: number): Promise<ScreenerResult | null>;
+  search(query: string): Promise<any>;
 }

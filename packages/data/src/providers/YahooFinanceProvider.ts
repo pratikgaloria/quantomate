@@ -359,4 +359,14 @@ export class YahooFinanceProvider implements IDataProvider {
       return null;
     }
   }
+
+  async search(query: string): Promise<any> {
+    try {
+      const result = await yahooFinance.search(query, {}, { validateResult: false }) as any;
+      return result.quotes || [];
+    } catch (error) {
+      console.error(`YahooFinanceProvider: Failed to search for ${query}:`, error);
+      return [];
+    }
+  }
 }
