@@ -173,7 +173,7 @@ function prepareChartData(dataset: any, report: any, strategyName: string, start
 
   const capitalByDate = new Map<string, number>();
   let currentCapital = report.initialCapital;
-  let position: { shares: number; entryPrice: number } | null = null;
+  let position: { shares: number; entryPrice: number; short: boolean } | null = null;
 
   report.trades.forEach((trade: any) => {
     const value = trade.quote._value as StockData;
@@ -183,12 +183,13 @@ function prepareChartData(dataset: any, report: any, strategyName: string, start
       position = {
         shares: trade.shares,
         entryPrice: trade.tradedValue,
+        short: !!trade.short,
       };
       capitalByDate.set(dateStr, currentCapital);
     } else if (trade.type === 'exit' && position) {
       const exitValue = position.shares * trade.tradedValue;
       const entryValue = position.shares * position.entryPrice;
-      const pnl = exitValue - entryValue;
+      const pnl = position.short ? (entryValue - exitValue) : (exitValue - entryValue);
       currentCapital += pnl;
       capitalByDate.set(dateStr, currentCapital);
       position = null;
@@ -214,6 +215,7 @@ function prepareChartData(dataset: any, report: any, strategyName: string, start
         position = {
           shares: currentTrade.shares,
           entryPrice: currentTrade.tradedValue,
+          short: !!currentTrade.short,
         };
       } else if (currentTrade.type === 'exit') {
         position = null;
@@ -234,7 +236,7 @@ function prepareChartData(dataset: any, report: any, strategyName: string, start
     if (position) {
       const currentValue = position.shares * value.close;
       const entryValue = position.shares * position.entryPrice;
-      const unrealizedPnL = currentValue - entryValue;
+      const unrealizedPnL = position.short ? (entryValue - currentValue) : (currentValue - entryValue);
       displayCapital = lastKnownCapital + unrealizedPnL;
     }
 

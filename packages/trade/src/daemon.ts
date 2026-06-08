@@ -12,6 +12,9 @@ import {
   PaperBroker, 
   KiteLiveFeed, 
   KiteInstrumentMapper,
+  TradierLiveFeed,
+  TradierInstrumentMapper,
+  CompositeLiveFeed,
   DataService
 } from '@quantomate/data';
 import { LiveTradingEngine } from './liveEngine';
@@ -228,10 +231,19 @@ async function reconcileEngine(): Promise<void> {
       return;
     }
 
-    // 5. Initialize Live Feed (use KiteLiveFeed if India market is present, otherwise fallback/mock)
+    const hasUSMarket = openBots.some(bot => getMarketForSymbol(bot.symbol) === 'us');
+    const tradierApiKey = process.env.TRADIER_API_KEY;
+
+    // 5. Initialize Live Feed (use KiteLiveFeed if India market is present, TradierLiveFeed if US is present, otherwise fallback/mock)
+    const activeFeeds: any[] = [];
+
     if (hasIndiaMarket && apiKey && session) {
-      currentFeed = new KiteLiveFeed(apiKey, session.accessToken);
-      
+      log.info('Daemon', 'Initializing Zerodha/Kite Live Feed...');
+      const kiteFeed = new KiteLiveFeed(apiKey, session.accessToken);
+      activeFeeds.push({
+        feed: kiteFeed,
+        matches: (sym: string) => getMarketForSymbol(sym) === 'india'
+      });
       // Warm up instrument mapping cache
       try {
         log.info('Daemon', 'Loading Zerodha instrument tokens...');
@@ -239,10 +251,21 @@ async function reconcileEngine(): Promise<void> {
       } catch (err) {
         log.error('Daemon', 'Failed to load instruments mapper:', err);
       }
-    } else {
-      // Fallback/Mock feed for US/Crypto
-      log.info('Daemon', 'US/Crypto live mode using mock or fallback feed.');
-      // Stub feed structure
+    }
+
+    if (hasUSMarket && tradierApiKey) {
+      log.info('Daemon', 'Initializing Tradier Live Feed for US market...');
+      const useSandbox = process.env.TRADIER_ENV !== 'production';
+      const tradierFeed = new TradierLiveFeed(tradierApiKey, useSandbox);
+      activeFeeds.push({
+        feed: tradierFeed,
+        matches: (sym: string) => getMarketForSymbol(sym) === 'us'
+      });
+    }
+
+    if (activeFeeds.length === 0) {
+      // Fallback/Mock feed
+      log.info('Daemon', 'No active feeds open. Using fallback/mock feed.');
       currentFeed = {
         connect: async () => log.info('Feed', 'Mock connected'),
         disconnect: async () => log.info('Feed', 'Mock disconnected'),
@@ -250,6 +273,11 @@ async function reconcileEngine(): Promise<void> {
         unsubscribe: () => {},
         onDisconnect: () => {},
       };
+    } else if (activeFeeds.length === 1) {
+      currentFeed = activeFeeds[0].feed;
+    } else {
+      log.info('Daemon', 'Using CompositeLiveFeed for multi-market execution...');
+      currentFeed = new CompositeLiveFeed(activeFeeds);
     }
 
     // 6. Get Broker Instance
@@ -274,9 +302,17 @@ async function reconcileEngine(): Promise<void> {
       strategies,
       interval: '5m', // default interval for indicators
       startDate: new Date().toISOString(),
-      resolveOptionSymbol: (underlying, optionType, underlyingPrice) => {
-        const opt = KiteInstrumentMapper.findATMOption(underlying, optionType, underlyingPrice);
-        return opt?.tradingsymbol;
+      resolveOptionSymbol: async (underlying, optionType, underlyingPrice) => {
+        const market = getMarketForSymbol(underlying);
+        if (market === 'india') {
+          const opt = KiteInstrumentMapper.findATMOption(underlying, optionType, underlyingPrice);
+          return opt?.tradingsymbol;
+        } else if (market === 'us' && tradierApiKey) {
+          const useSandbox = process.env.TRADIER_ENV !== 'production';
+          const opt = await TradierInstrumentMapper.findATMOption(underlying, optionType, underlyingPrice, tradierApiKey, useSandbox);
+          return opt?.symbol;
+        }
+        return undefined;
       }
     });
 
@@ -323,6 +359,8 @@ async function init() {
       { name: "Nifty 50 - Index Option RSI Reversion", strategy: "IndexOptionRsiReversion", symbol: "NIFTY 50", parameters: { rsiPeriod: 14, oversoldThreshold: 30, overboughtThreshold: 70, source: 'close' } },
       { name: "Nifty Bank - Index Option Momentum", strategy: "IndexOptionMomentum", symbol: "NIFTY BANK", parameters: { fastPeriod: 9, slowPeriod: 20, source: 'close' } },
       { name: "Nifty Bank - Index Option RSI Reversion", strategy: "IndexOptionRsiReversion", symbol: "NIFTY BANK", parameters: { rsiPeriod: 14, oversoldThreshold: 30, overboughtThreshold: 70, source: 'close' } },
+      { name: "SPY - Option Momentum", strategy: "IndexOptionMomentum", symbol: "SPY", parameters: { fastPeriod: 9, slowPeriod: 20, source: 'close' } },
+      { name: "AAPL - Option Momentum", strategy: "IndexOptionMomentum", symbol: "AAPL", parameters: { fastPeriod: 9, slowPeriod: 20, source: 'close' } }
     ];
 
     for (const bot of defaultBots) {
@@ -335,7 +373,7 @@ async function init() {
 
     const defaultSettings = [
       { key: 'trading_mode', value: 'paper' },
-      { key: 'enabled_markets', value: JSON.stringify(['india']) }
+      { key: 'enabled_markets', value: JSON.stringify(['india', 'us']) }
     ];
 
     for (const s of defaultSettings) {
@@ -343,6 +381,16 @@ async function init() {
       if (!existing) {
         await prisma.systemSetting.create({ data: s });
         log.info('Daemon', `Seeded setting: ${s.key} = ${s.value}`);
+      } else if (s.key === 'enabled_markets') {
+        const currentMarkets = JSON.parse(existing.value) as string[];
+        if (!currentMarkets.includes('us')) {
+          currentMarkets.push('us');
+          await prisma.systemSetting.update({
+            where: { key: s.key },
+            data: { value: JSON.stringify(currentMarkets) }
+          });
+          log.info('Daemon', `Updated setting enabled_markets to include 'us': ${JSON.stringify(currentMarkets)}`);
+        }
       }
     }
 

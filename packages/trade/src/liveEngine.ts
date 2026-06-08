@@ -5,7 +5,7 @@ export interface LiveEngineConfig {
   symbols: string[];
   strategies: Strategy<any, any, any>[];
   initialCapital?: number;
-  resolveOptionSymbol?: (underlying: string, optionType: 'CE' | 'PE', underlyingPrice: number) => string | undefined;
+  resolveOptionSymbol?: (underlying: string, optionType: 'CE' | 'PE', underlyingPrice: number) => Promise<string | undefined> | string | undefined;
   interval?: string;
   startDate?: string;
 }
@@ -131,7 +131,7 @@ export class LiveTradingEngine {
 
     if (this.config.resolveOptionSymbol) {
       const optionType = isShort ? 'PE' : 'CE';
-      const resolved = this.config.resolveOptionSymbol(symbol, optionType, currentPrice);
+      const resolved = await this.config.resolveOptionSymbol(symbol, optionType, currentPrice);
       if (resolved) {
         orderSymbol = resolved;
         console.log(`[OptionMapper] Mapped entry signal on ${symbol} to ATM ${optionType} option: ${orderSymbol}`);
@@ -186,12 +186,22 @@ export class LiveTradingEngine {
     let orderSymbol = symbol;
 
     if (this.config.resolveOptionSymbol) {
-      const prefix = (symbol.toUpperCase().includes('NIFTY 50') || symbol.toUpperCase() === 'NIFTY') ? 'NIFTY' : 'BANKNIFTY';
+      const prefix = (symbol.toUpperCase().includes('NIFTY 50') || symbol.toUpperCase() === 'NIFTY') ? 'NIFTY' :
+                     (symbol.toUpperCase().includes('BANK') || symbol.toUpperCase() === 'BANKNIFTY') ? 'BANKNIFTY' :
+                     symbol.toUpperCase();
       const suffix = isShort ? 'PE' : 'CE';
+      const usSuffix = isShort ? 'P' : 'C';
       
       const positions = await this.broker.getPositions();
       const openPosition = positions.find(
-        (pos) => pos.symbol.startsWith(prefix) && pos.symbol.endsWith(suffix) && pos.qty > 0
+        (pos) => {
+          const posSym = pos.symbol.toUpperCase();
+          const isIndianMatch = posSym.startsWith(prefix) && posSym.endsWith(suffix);
+          const isUSMatch = posSym.startsWith(prefix) && (
+            posSym.substring(prefix.length + 6, prefix.length + 7) === usSuffix
+          );
+          return (isIndianMatch || isUSMatch) && pos.qty > 0;
+        }
       );
       if (openPosition) {
         orderSymbol = openPosition.symbol;

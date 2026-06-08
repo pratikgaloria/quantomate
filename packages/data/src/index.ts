@@ -9,6 +9,9 @@ export * from './providers/KiteProvider';
 export * from './providers/KiteLiveFeed';
 export * from './providers/ILiveFeed';
 export * from './providers/HistoricalMockFeed';
+export * from './providers/TradierLiveFeed';
+export * from './providers/TradierInstrumentMapper';
+export * from './providers/CompositeLiveFeed';
 
 
 

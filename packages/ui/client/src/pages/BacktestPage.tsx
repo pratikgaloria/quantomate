@@ -19,6 +19,8 @@ export function BacktestPage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<BacktestResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [periodRange, setPeriodRange] = useState<string>('custom');
 
   // Load strategies on mount
   useEffect(() => {
@@ -60,6 +62,52 @@ export function BacktestPage() {
 
   const handleParameterChange = (name: string, value: any) => {
     setParameters(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handlePeriodRangeChange = (range: string) => {
+    setPeriodRange(range);
+    if (range === 'custom') return;
+
+    const end = new Date();
+    const start = new Date();
+
+    const getFormattedDate = (d: Date) => {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    };
+
+    if (range === 'yesterday') {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      setStartDate(getFormattedDate(yesterday));
+      setEndDate(getFormattedDate(yesterday));
+    } else if (range === '1w') {
+      start.setDate(end.getDate() - 7);
+      setStartDate(getFormattedDate(start));
+      setEndDate(getFormattedDate(end));
+    } else if (range === '1m') {
+      start.setMonth(end.getMonth() - 1);
+      setStartDate(getFormattedDate(start));
+      setEndDate(getFormattedDate(end));
+    } else if (range === '6m') {
+      start.setMonth(end.getMonth() - 6);
+      setStartDate(getFormattedDate(start));
+      setEndDate(getFormattedDate(end));
+    } else if (range === '1y') {
+      start.setFullYear(end.getFullYear() - 1);
+      setStartDate(getFormattedDate(start));
+      setEndDate(getFormattedDate(end));
+    } else if (range === '3y') {
+      start.setFullYear(end.getFullYear() - 3);
+      setStartDate(getFormattedDate(start));
+      setEndDate(getFormattedDate(end));
+    } else if (range === '5y') {
+      start.setFullYear(end.getFullYear() - 5);
+      setStartDate(getFormattedDate(start));
+      setEndDate(getFormattedDate(end));
+    }
   };
 
   const runBacktest = async () => {
@@ -120,47 +168,17 @@ export function BacktestPage() {
           {selectedStrategyMeta && (
             <p className="description">{selectedStrategyMeta.description}</p>
           )}
+          {selectedStrategyMeta && selectedStrategyMeta.parameters.length > 0 && (
+            <button
+              type="button"
+              className="adjust-params-button"
+              onClick={() => setIsModalOpen(true)}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+              Adjust Parameters
+            </button>
+          )}
         </div>
-
-        {/* Parameters */}
-        {selectedStrategyMeta && selectedStrategyMeta.parameters.length > 0 && (
-          <CollapsibleSection title="Parameters" className="parameters-section">
-            {selectedStrategyMeta.parameters.map(param => (
-              <div key={param.name} className="form-group">
-                <label>{param.description}</label>
-                {param.type === 'number' && (
-                  <input
-                    type="number"
-                    value={parameters[param.name] ?? param.default}
-                    min={param.min}
-                    max={param.max}
-                    onChange={(e) => handleParameterChange(param.name, Number(e.target.value))}
-                  />
-                )}
-                {param.type === 'string' && (
-                  <input
-                    type="text"
-                    value={parameters[param.name] ?? param.default ?? ''}
-                    onChange={(e) => handleParameterChange(param.name, e.target.value)}
-                    placeholder={String(param.default ?? '')}
-                  />
-                )}
-                {param.type === 'select' && (
-                  <select
-                    value={parameters[param.name] ?? param.default}
-                    onChange={(e) => handleParameterChange(param.name, e.target.value)}
-                  >
-                    {param.options?.map(opt => (
-                      <option key={opt} value={opt}>
-                        {opt.charAt(0).toUpperCase() + opt.slice(1)}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              </div>
-            ))}
-          </CollapsibleSection>
-        )}
 
         {/* Stock Configuration */}
         <CollapsibleSection title="Stock & Period" className="stock-section">
@@ -174,11 +192,30 @@ export function BacktestPage() {
             />
           </div>
           <div className="form-group">
+            <label>Period</label>
+            <select
+              value={periodRange}
+              onChange={(e) => handlePeriodRangeChange(e.target.value)}
+            >
+              <option value="custom">Custom Range</option>
+              <option value="yesterday">Yesterday</option>
+              <option value="1w">1 Week</option>
+              <option value="1m">1 Month</option>
+              <option value="6m">6 Months</option>
+              <option value="1y">1 Year</option>
+              <option value="3y">3 Years</option>
+              <option value="5y">5 Years</option>
+            </select>
+          </div>
+          <div className="form-group">
             <label>Start Date</label>
             <input
               type="date"
               value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
+              onChange={(e) => {
+                setStartDate(e.target.value);
+                setPeriodRange('custom');
+              }}
             />
           </div>
           <div className="form-group">
@@ -186,7 +223,10 @@ export function BacktestPage() {
             <input
               type="date"
               value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
+              onChange={(e) => {
+                setEndDate(e.target.value);
+                setPeriodRange('custom');
+              }}
             />
           </div>
           <div className="form-group">
@@ -210,6 +250,7 @@ export function BacktestPage() {
               min={100}
             />
           </div>
+
         </CollapsibleSection>
 
         <button
@@ -303,6 +344,57 @@ export function BacktestPage() {
           </div>
         )}
       </div>
+
+      {/* Parameters Modal */}
+      {isModalOpen && selectedStrategyMeta && (
+        <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>{selectedStrategyMeta.name} Parameters</h3>
+              <button className="close-button" onClick={() => setIsModalOpen(false)}>&times;</button>
+            </div>
+            <div className="modal-body">
+              {selectedStrategyMeta.parameters.map(param => (
+                <div key={param.name} className="form-group">
+                  <label>{param.description}</label>
+                  {param.type === 'number' && (
+                    <input
+                      type="number"
+                      value={parameters[param.name] ?? param.default}
+                      min={param.min}
+                      max={param.max}
+                      onChange={(e) => handleParameterChange(param.name, Number(e.target.value))}
+                    />
+                  )}
+                  {param.type === 'string' && (
+                    <input
+                      type="text"
+                      value={parameters[param.name] ?? param.default ?? ''}
+                      onChange={(e) => handleParameterChange(param.name, e.target.value)}
+                      placeholder={String(param.default ?? '')}
+                    />
+                  )}
+                  {param.type === 'select' && (
+                    <select
+                      value={parameters[param.name] ?? param.default}
+                      onChange={(e) => handleParameterChange(param.name, e.target.value)}
+                    >
+                      {param.options?.map(opt => (
+                        <option key={opt} value={opt}>
+                          {opt.charAt(0).toUpperCase() + opt.slice(1)}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+              ))}
+            </div>
+            <div className="modal-footer">
+              <button className="save-button" onClick={() => setIsModalOpen(false)}>Apply</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
