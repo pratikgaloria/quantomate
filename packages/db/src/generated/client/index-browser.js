@@ -219,6 +219,20 @@ exports.Prisma.TradingBotScalarFieldEnum = {
   parameters: 'parameters',
   symbol: 'symbol',
   active: 'active',
+  allocationSessionId: 'allocationSessionId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.AllocationSessionScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  capital: 'capital',
+  virtualCash: 'virtualCash',
+  maxDrawdownPct: 'maxDrawdownPct',
+  enabledMarkets: 'enabledMarkets',
+  provider: 'provider',
+  active: 'active',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -259,7 +273,8 @@ exports.Prisma.ModelName = {
   TradingOrder: 'TradingOrder',
   TradingPosition: 'TradingPosition',
   SystemSetting: 'SystemSetting',
-  TradingBot: 'TradingBot'
+  TradingBot: 'TradingBot',
+  AllocationSession: 'AllocationSession'
 };
 
 /**

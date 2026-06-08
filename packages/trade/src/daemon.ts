@@ -26,12 +26,11 @@ import {
 } from '@quantomate/library';
 import { isMarketOpen } from './utils/market-scheduler';
 import { IBroker, Strategy } from '@quantomate/core';
+import { SessionManager } from './sessionManager';
 
 dotenv.config();
-// Fallback to workspace root .env if variables are not resolved in local package environment
-if (!process.env.ZERODHA_API_KEY) {
-  dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
-}
+// Load workspace root .env to ensure global environment configurations are read
+dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 
 const app = express();
 const PORT = process.env.DAEMON_PORT ? parseInt(process.env.DAEMON_PORT, 10) : 8082;
@@ -82,38 +81,60 @@ async function getSystemSettings(): Promise<Settings> {
 }
 
 // Helper: Instantiates strategies with parameters
-function instantiateStrategy(strategyType: string, botName: string, symbol: string, parameters: any): Strategy<any, any, any> {
+function instantiateStrategy(
+  strategyType: string,
+  botName: string,
+  symbol: string,
+  parameters: any,
+  allocationSessionId?: string | null
+): Strategy<any, any, any> {
   const name = `${strategyType}_${symbol}_${botName}`;
   const params = parameters || {};
   
+  let strategy: Strategy<any, any, any>;
   switch (strategyType) {
     case 'GoldenCross':
-      return new GoldenCrossStrategy(name, {
+      strategy = new GoldenCrossStrategy(name, {
         fastPeriod: params.fastPeriod ?? 9,
         slowPeriod: params.slowPeriod ?? 20,
       });
+      break;
     case 'RSIMeanReversion':
-      return new RSIMeanReversionStrategy(name, {
+      strategy = new RSIMeanReversionStrategy(name, {
         rsiPeriod: params.rsiPeriod ?? 14,
         oversoldThreshold: params.oversoldThreshold ?? 30,
         overboughtThreshold: params.overboughtThreshold ?? 70,
       });
+      break;
     case 'IndexOptionMomentum':
-      return new IndexOptionMomentumStrategy(name, {
+      strategy = new IndexOptionMomentumStrategy(name, {
         fastPeriod: params.fastPeriod ?? 9,
         slowPeriod: params.slowPeriod ?? 20,
         source: params.source ?? 'close',
       });
+      break;
     case 'IndexOptionRsiReversion':
-      return new IndexOptionRsiReversionStrategy(name, {
+      strategy = new IndexOptionRsiReversionStrategy(name, {
         rsiPeriod: params.rsiPeriod ?? 14,
         oversoldThreshold: params.oversoldThreshold ?? 30,
         overboughtThreshold: params.overboughtThreshold ?? 70,
         source: params.source ?? 'close',
       });
+      break;
     default:
       throw new Error(`Unsupported strategy type: ${strategyType}`);
   }
+
+  // Configure options routing and criteria
+  strategy.options.tradeOptions = params.tradeOptions === true || strategyType.includes('Option');
+  if (params.optionSelector) {
+    strategy.options.optionSelector = params.optionSelector;
+  }
+  if (allocationSessionId) {
+    strategy.options.allocationSessionId = allocationSessionId;
+  }
+
+  return strategy;
 }
 
 // Stop the active trading engine
@@ -183,12 +204,16 @@ async function reconcileEngine(): Promise<void> {
       where: { active: true }
     });
 
+    // Load sessions in SessionManager
+    await SessionManager.getInstance().loadSessions();
+
     // 2. Filter bots that belong to open & enabled markets
     const openBots = activeBots.filter(bot => {
       const market = getMarketForSymbol(bot.symbol);
       return settings.enabledMarkets.includes(market) && isMarketOpen(market);
     });
 
+    lastOpenBotsHash = openBots.map(b => `${b.id}:${b.symbol}`).sort().join(',');
     activeEngineBotsCount = openBots.length;
 
     if (openBots.length === 0) {
@@ -293,7 +318,7 @@ async function reconcileEngine(): Promise<void> {
     // 7. Instantiate strategies
     const symbols = Array.from(new Set(openBots.map(b => b.symbol.toUpperCase())));
     const strategies = openBots.map(bot => {
-      return instantiateStrategy(bot.strategy, bot.name, bot.symbol, bot.parameters);
+      return instantiateStrategy(bot.strategy, bot.name, bot.symbol, bot.parameters, bot.allocationSessionId);
     });
 
     // 8. Create LiveTradingEngine
@@ -302,14 +327,14 @@ async function reconcileEngine(): Promise<void> {
       strategies,
       interval: '5m', // default interval for indicators
       startDate: new Date().toISOString(),
-      resolveOptionSymbol: async (underlying, optionType, underlyingPrice) => {
+      resolveOptionSymbol: async (underlying, optionType, underlyingPrice, selector) => {
         const market = getMarketForSymbol(underlying);
         if (market === 'india') {
-          const opt = KiteInstrumentMapper.findATMOption(underlying, optionType, underlyingPrice);
+          const opt = KiteInstrumentMapper.findATMOption(underlying, optionType, underlyingPrice, selector);
           return opt?.tradingsymbol;
         } else if (market === 'us' && tradierApiKey) {
           const useSandbox = process.env.TRADIER_ENV !== 'production';
-          const opt = await TradierInstrumentMapper.findATMOption(underlying, optionType, underlyingPrice, tradierApiKey, useSandbox);
+          const opt = await TradierInstrumentMapper.findATMOption(underlying, optionType, underlyingPrice, tradierApiKey, useSandbox, selector);
           return opt?.symbol;
         }
         return undefined;
@@ -318,6 +343,7 @@ async function reconcileEngine(): Promise<void> {
 
     await engine.start();
     isEngineRunning = true;
+    activeEngineBotsCount = openBots.length;
     log.info('Daemon', 'LiveTradingEngine started successfully.');
   } catch (error) {
     log.error('Daemon', 'Error starting live trading engine:', error);
@@ -350,26 +376,8 @@ setInterval(async () => {
   }
 }, 60000);
 
-// Seed database on startup
 async function init() {
   try {
-    // Seed default settings and bots
-    const defaultBots = [
-      { name: "Nifty 50 - Index Option Momentum", strategy: "IndexOptionMomentum", symbol: "NIFTY 50", parameters: { fastPeriod: 9, slowPeriod: 20, source: 'close' } },
-      { name: "Nifty 50 - Index Option RSI Reversion", strategy: "IndexOptionRsiReversion", symbol: "NIFTY 50", parameters: { rsiPeriod: 14, oversoldThreshold: 30, overboughtThreshold: 70, source: 'close' } },
-      { name: "Nifty Bank - Index Option Momentum", strategy: "IndexOptionMomentum", symbol: "NIFTY BANK", parameters: { fastPeriod: 9, slowPeriod: 20, source: 'close' } },
-      { name: "Nifty Bank - Index Option RSI Reversion", strategy: "IndexOptionRsiReversion", symbol: "NIFTY BANK", parameters: { rsiPeriod: 14, oversoldThreshold: 30, overboughtThreshold: 70, source: 'close' } },
-      { name: "SPY - Option Momentum", strategy: "IndexOptionMomentum", symbol: "SPY", parameters: { fastPeriod: 9, slowPeriod: 20, source: 'close' } },
-      { name: "AAPL - Option Momentum", strategy: "IndexOptionMomentum", symbol: "AAPL", parameters: { fastPeriod: 9, slowPeriod: 20, source: 'close' } }
-    ];
-
-    for (const bot of defaultBots) {
-      const existing = await prisma.tradingBot.findUnique({ where: { name: bot.name } });
-      if (!existing) {
-        await prisma.tradingBot.create({ data: bot });
-        log.info('Daemon', `Seeded default bot: ${bot.name}`);
-      }
-    }
 
     const defaultSettings = [
       { key: 'trading_mode', value: 'paper' },
@@ -391,6 +399,41 @@ async function init() {
           });
           log.info('Daemon', `Updated setting enabled_markets to include 'us': ${JSON.stringify(currentMarkets)}`);
         }
+      }
+    }
+
+    // Seed default allocation sessions
+    const defaultSessions = [
+      {
+        name: 'India Options Session',
+        capital: 200000,
+        virtualCash: 200000,
+        maxDrawdownPct: 10,
+        enabledMarkets: ['india'],
+        provider: 'paper',
+        active: true,
+      },
+      {
+        name: 'US Equities Session',
+        capital: 5000,
+        virtualCash: 5000,
+        maxDrawdownPct: 10,
+        enabledMarkets: ['us'],
+        provider: 'paper',
+        active: true,
+      }
+    ];
+
+    for (const ds of defaultSessions) {
+      const existing = await prisma.allocationSession.findUnique({ where: { name: ds.name } });
+      if (!existing) {
+        await prisma.allocationSession.create({
+          data: {
+            ...ds,
+            enabledMarkets: JSON.stringify(ds.enabledMarkets),
+          }
+        });
+        log.info('Daemon', `Seeded default allocation session: ${ds.name}`);
       }
     }
 

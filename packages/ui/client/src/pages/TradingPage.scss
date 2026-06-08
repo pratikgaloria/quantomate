@@ -26,41 +26,127 @@
     color: #64748b;
   }
 
-  .status-badge {
-    display: inline-flex;
+  .header-actions {
+    display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.35rem 0.85rem;
-    border-radius: 9999px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    gap: 1rem;
+    flex-wrap: wrap;
 
-    .dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: currentColor;
-    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0.85rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 
-    &.offline {
-      background-color: #fee2e2;
-      color: #b91c1c;
-    }
-
-    &.running {
-      background-color: #dcfce7;
-      color: #15803d;
-      
       .dot {
-        animation: pulse-green 1.5s infinite;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+      }
+
+      &.offline {
+        background-color: #fee2e2;
+        color: #b91c1c;
+      }
+
+      &.running {
+        background-color: #dcfce7;
+        color: #15803d;
+        
+        .dot {
+          animation: pulse-green 1.5s infinite;
+        }
+      }
+
+      &.idle {
+        background-color: #f1f5f9;
+        color: #64748b;
       }
     }
 
-    &.idle {
-      background-color: #f1f5f9;
-      color: #64748b;
+    .connection-status-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0.85rem;
+      border-radius: 9999px;
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      font-size: 0.75rem;
+      font-weight: 600;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+
+      .status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        transition: all 0.2s ease;
+
+        &.connected {
+          background-color: #16a34a;
+          box-shadow: 0 0 6px rgba(22, 163, 74, 0.6);
+        }
+
+        &.disconnected {
+          background-color: #94a3b8;
+        }
+      }
+
+      .connection-label {
+        color: #475569;
+      }
+
+      .btn-connect-sm {
+        background-color: #16a34a;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 0.15rem 0.5rem;
+        font-size: 0.65rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background-color 0.15s ease, transform 0.1s ease;
+        text-transform: uppercase;
+        margin-left: 0.25rem;
+
+        &:hover {
+          background-color: #15803d;
+          transform: scale(1.05);
+        }
+
+        &:active {
+          transform: scale(0.95);
+        }
+      }
+    }
+
+    .settings-toggle-btn {
+      background: white;
+      border: 1px solid #cbd5e1;
+      color: #475569;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.1rem;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+      &:hover {
+        background: #f8fafc;
+        border-color: #94a3b8;
+        color: #0f172a;
+        transform: rotate(45deg);
+      }
     }
   }
 }

@@ -34,6 +34,10 @@ export const MARKET_SCHEDULES: Record<string, MarketSchedule> = {
  * Checks if a specific market is open at the given date/time
  */
 export function isMarketOpen(marketKey: string, time: Date = new Date()): boolean {
+  if (process.env.BYPASS_MARKET_HOURS === 'true') {
+    return true;
+  }
+
   const schedule = MARKET_SCHEDULES[marketKey.toLowerCase()];
   if (!schedule) {
     return false;

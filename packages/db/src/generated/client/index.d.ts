@@ -63,6 +63,11 @@ export type SystemSetting = $Result.DefaultSelection<Prisma.$SystemSettingPayloa
  * 
  */
 export type TradingBot = $Result.DefaultSelection<Prisma.$TradingBotPayload>
+/**
+ * Model AllocationSession
+ * 
+ */
+export type AllocationSession = $Result.DefaultSelection<Prisma.$AllocationSessionPayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -284,6 +289,16 @@ export class PrismaClient<
     * ```
     */
   get tradingBot(): Prisma.TradingBotDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.allocationSession`: Exposes CRUD operations for the **AllocationSession** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more AllocationSessions
+    * const allocationSessions = await prisma.allocationSession.findMany()
+    * ```
+    */
+  get allocationSession(): Prisma.AllocationSessionDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -727,7 +742,8 @@ export namespace Prisma {
     TradingOrder: 'TradingOrder',
     TradingPosition: 'TradingPosition',
     SystemSetting: 'SystemSetting',
-    TradingBot: 'TradingBot'
+    TradingBot: 'TradingBot',
+    AllocationSession: 'AllocationSession'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -743,7 +759,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "symbol" | "historicalPrice" | "strategySignal" | "fundamentalMetric" | "tradingSession" | "tradingAccount" | "tradingOrder" | "tradingPosition" | "systemSetting" | "tradingBot"
+      modelProps: "symbol" | "historicalPrice" | "strategySignal" | "fundamentalMetric" | "tradingSession" | "tradingAccount" | "tradingOrder" | "tradingPosition" | "systemSetting" | "tradingBot" | "allocationSession"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1487,6 +1503,80 @@ export namespace Prisma {
           }
         }
       }
+      AllocationSession: {
+        payload: Prisma.$AllocationSessionPayload<ExtArgs>
+        fields: Prisma.AllocationSessionFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AllocationSessionFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AllocationSessionPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AllocationSessionFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AllocationSessionPayload>
+          }
+          findFirst: {
+            args: Prisma.AllocationSessionFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AllocationSessionPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AllocationSessionFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AllocationSessionPayload>
+          }
+          findMany: {
+            args: Prisma.AllocationSessionFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AllocationSessionPayload>[]
+          }
+          create: {
+            args: Prisma.AllocationSessionCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AllocationSessionPayload>
+          }
+          createMany: {
+            args: Prisma.AllocationSessionCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.AllocationSessionCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AllocationSessionPayload>[]
+          }
+          delete: {
+            args: Prisma.AllocationSessionDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AllocationSessionPayload>
+          }
+          update: {
+            args: Prisma.AllocationSessionUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AllocationSessionPayload>
+          }
+          deleteMany: {
+            args: Prisma.AllocationSessionDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AllocationSessionUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.AllocationSessionUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AllocationSessionPayload>[]
+          }
+          upsert: {
+            args: Prisma.AllocationSessionUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AllocationSessionPayload>
+          }
+          aggregate: {
+            args: Prisma.AllocationSessionAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAllocationSession>
+          }
+          groupBy: {
+            args: Prisma.AllocationSessionGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AllocationSessionGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AllocationSessionCountArgs<ExtArgs>
+            result: $Utils.Optional<AllocationSessionCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1605,6 +1695,7 @@ export namespace Prisma {
     tradingPosition?: TradingPositionOmit
     systemSetting?: SystemSettingOmit
     tradingBot?: TradingBotOmit
+    allocationSession?: AllocationSessionOmit
   }
 
   /* Types for Logging */
@@ -1757,6 +1848,37 @@ export namespace Prisma {
    */
   export type TradingAccountCountOutputTypeCountPositionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: TradingPositionWhereInput
+  }
+
+
+  /**
+   * Count Type AllocationSessionCountOutputType
+   */
+
+  export type AllocationSessionCountOutputType = {
+    bots: number
+  }
+
+  export type AllocationSessionCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    bots?: boolean | AllocationSessionCountOutputTypeCountBotsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * AllocationSessionCountOutputType without action
+   */
+  export type AllocationSessionCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AllocationSessionCountOutputType
+     */
+    select?: AllocationSessionCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * AllocationSessionCountOutputType without action
+   */
+  export type AllocationSessionCountOutputTypeCountBotsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TradingBotWhereInput
   }
 
 
@@ -11848,6 +11970,7 @@ export namespace Prisma {
     strategy: string | null
     symbol: string | null
     active: boolean | null
+    allocationSessionId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -11858,6 +11981,7 @@ export namespace Prisma {
     strategy: string | null
     symbol: string | null
     active: boolean | null
+    allocationSessionId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -11869,6 +11993,7 @@ export namespace Prisma {
     parameters: number
     symbol: number
     active: number
+    allocationSessionId: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -11881,6 +12006,7 @@ export namespace Prisma {
     strategy?: true
     symbol?: true
     active?: true
+    allocationSessionId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -11891,6 +12017,7 @@ export namespace Prisma {
     strategy?: true
     symbol?: true
     active?: true
+    allocationSessionId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -11902,6 +12029,7 @@ export namespace Prisma {
     parameters?: true
     symbol?: true
     active?: true
+    allocationSessionId?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -11986,6 +12114,7 @@ export namespace Prisma {
     parameters: JsonValue
     symbol: string
     active: boolean
+    allocationSessionId: string | null
     createdAt: Date
     updatedAt: Date
     _count: TradingBotCountAggregateOutputType | null
@@ -12014,8 +12143,10 @@ export namespace Prisma {
     parameters?: boolean
     symbol?: boolean
     active?: boolean
+    allocationSessionId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    allocationSession?: boolean | TradingBot$allocationSessionArgs<ExtArgs>
   }, ExtArgs["result"]["tradingBot"]>
 
   export type TradingBotSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -12025,8 +12156,10 @@ export namespace Prisma {
     parameters?: boolean
     symbol?: boolean
     active?: boolean
+    allocationSessionId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    allocationSession?: boolean | TradingBot$allocationSessionArgs<ExtArgs>
   }, ExtArgs["result"]["tradingBot"]>
 
   export type TradingBotSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -12036,8 +12169,10 @@ export namespace Prisma {
     parameters?: boolean
     symbol?: boolean
     active?: boolean
+    allocationSessionId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    allocationSession?: boolean | TradingBot$allocationSessionArgs<ExtArgs>
   }, ExtArgs["result"]["tradingBot"]>
 
   export type TradingBotSelectScalar = {
@@ -12047,15 +12182,27 @@ export namespace Prisma {
     parameters?: boolean
     symbol?: boolean
     active?: boolean
+    allocationSessionId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type TradingBotOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "strategy" | "parameters" | "symbol" | "active" | "createdAt" | "updatedAt", ExtArgs["result"]["tradingBot"]>
+  export type TradingBotOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "strategy" | "parameters" | "symbol" | "active" | "allocationSessionId" | "createdAt" | "updatedAt", ExtArgs["result"]["tradingBot"]>
+  export type TradingBotInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    allocationSession?: boolean | TradingBot$allocationSessionArgs<ExtArgs>
+  }
+  export type TradingBotIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    allocationSession?: boolean | TradingBot$allocationSessionArgs<ExtArgs>
+  }
+  export type TradingBotIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    allocationSession?: boolean | TradingBot$allocationSessionArgs<ExtArgs>
+  }
 
   export type $TradingBotPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "TradingBot"
-    objects: {}
+    objects: {
+      allocationSession: Prisma.$AllocationSessionPayload<ExtArgs> | null
+    }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       name: string
@@ -12063,6 +12210,7 @@ export namespace Prisma {
       parameters: Prisma.JsonValue
       symbol: string
       active: boolean
+      allocationSessionId: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["tradingBot"]>
@@ -12459,6 +12607,7 @@ export namespace Prisma {
    */
   export interface Prisma__TradingBotClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    allocationSession<T extends TradingBot$allocationSessionArgs<ExtArgs> = {}>(args?: Subset<T, TradingBot$allocationSessionArgs<ExtArgs>>): Prisma__AllocationSessionClient<$Result.GetResult<Prisma.$AllocationSessionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -12494,6 +12643,7 @@ export namespace Prisma {
     readonly parameters: FieldRef<"TradingBot", 'Json'>
     readonly symbol: FieldRef<"TradingBot", 'String'>
     readonly active: FieldRef<"TradingBot", 'Boolean'>
+    readonly allocationSessionId: FieldRef<"TradingBot", 'String'>
     readonly createdAt: FieldRef<"TradingBot", 'DateTime'>
     readonly updatedAt: FieldRef<"TradingBot", 'DateTime'>
   }
@@ -12513,6 +12663,10 @@ export namespace Prisma {
      */
     omit?: TradingBotOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingBotInclude<ExtArgs> | null
+    /**
      * Filter, which TradingBot to fetch.
      */
     where: TradingBotWhereUniqueInput
@@ -12531,6 +12685,10 @@ export namespace Prisma {
      */
     omit?: TradingBotOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingBotInclude<ExtArgs> | null
+    /**
      * Filter, which TradingBot to fetch.
      */
     where: TradingBotWhereUniqueInput
@@ -12548,6 +12706,10 @@ export namespace Prisma {
      * Omit specific fields from the TradingBot
      */
     omit?: TradingBotOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingBotInclude<ExtArgs> | null
     /**
      * Filter, which TradingBot to fetch.
      */
@@ -12597,6 +12759,10 @@ export namespace Prisma {
      */
     omit?: TradingBotOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingBotInclude<ExtArgs> | null
+    /**
      * Filter, which TradingBot to fetch.
      */
     where?: TradingBotWhereInput
@@ -12644,6 +12810,10 @@ export namespace Prisma {
      * Omit specific fields from the TradingBot
      */
     omit?: TradingBotOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingBotInclude<ExtArgs> | null
     /**
      * Filter, which TradingBots to fetch.
      */
@@ -12693,6 +12863,10 @@ export namespace Prisma {
      */
     omit?: TradingBotOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingBotInclude<ExtArgs> | null
+    /**
      * The data needed to create a TradingBot.
      */
     data: XOR<TradingBotCreateInput, TradingBotUncheckedCreateInput>
@@ -12726,6 +12900,10 @@ export namespace Prisma {
      */
     data: TradingBotCreateManyInput | TradingBotCreateManyInput[]
     skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingBotIncludeCreateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -12740,6 +12918,10 @@ export namespace Prisma {
      * Omit specific fields from the TradingBot
      */
     omit?: TradingBotOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingBotInclude<ExtArgs> | null
     /**
      * The data needed to update a TradingBot.
      */
@@ -12792,6 +12974,10 @@ export namespace Prisma {
      * Limit how many TradingBots to update.
      */
     limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingBotIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -12806,6 +12992,10 @@ export namespace Prisma {
      * Omit specific fields from the TradingBot
      */
     omit?: TradingBotOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingBotInclude<ExtArgs> | null
     /**
      * The filter to search for the TradingBot to update in case it exists.
      */
@@ -12833,6 +13023,10 @@ export namespace Prisma {
      */
     omit?: TradingBotOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingBotInclude<ExtArgs> | null
+    /**
      * Filter which TradingBot to delete.
      */
     where: TradingBotWhereUniqueInput
@@ -12853,6 +13047,25 @@ export namespace Prisma {
   }
 
   /**
+   * TradingBot.allocationSession
+   */
+  export type TradingBot$allocationSessionArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AllocationSession
+     */
+    select?: AllocationSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AllocationSession
+     */
+    omit?: AllocationSessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AllocationSessionInclude<ExtArgs> | null
+    where?: AllocationSessionWhereInput
+  }
+
+  /**
    * TradingBot without action
    */
   export type TradingBotDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -12864,6 +13077,1188 @@ export namespace Prisma {
      * Omit specific fields from the TradingBot
      */
     omit?: TradingBotOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingBotInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model AllocationSession
+   */
+
+  export type AggregateAllocationSession = {
+    _count: AllocationSessionCountAggregateOutputType | null
+    _avg: AllocationSessionAvgAggregateOutputType | null
+    _sum: AllocationSessionSumAggregateOutputType | null
+    _min: AllocationSessionMinAggregateOutputType | null
+    _max: AllocationSessionMaxAggregateOutputType | null
+  }
+
+  export type AllocationSessionAvgAggregateOutputType = {
+    capital: number | null
+    virtualCash: number | null
+    maxDrawdownPct: number | null
+  }
+
+  export type AllocationSessionSumAggregateOutputType = {
+    capital: number | null
+    virtualCash: number | null
+    maxDrawdownPct: number | null
+  }
+
+  export type AllocationSessionMinAggregateOutputType = {
+    id: string | null
+    name: string | null
+    capital: number | null
+    virtualCash: number | null
+    maxDrawdownPct: number | null
+    provider: string | null
+    active: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AllocationSessionMaxAggregateOutputType = {
+    id: string | null
+    name: string | null
+    capital: number | null
+    virtualCash: number | null
+    maxDrawdownPct: number | null
+    provider: string | null
+    active: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AllocationSessionCountAggregateOutputType = {
+    id: number
+    name: number
+    capital: number
+    virtualCash: number
+    maxDrawdownPct: number
+    enabledMarkets: number
+    provider: number
+    active: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type AllocationSessionAvgAggregateInputType = {
+    capital?: true
+    virtualCash?: true
+    maxDrawdownPct?: true
+  }
+
+  export type AllocationSessionSumAggregateInputType = {
+    capital?: true
+    virtualCash?: true
+    maxDrawdownPct?: true
+  }
+
+  export type AllocationSessionMinAggregateInputType = {
+    id?: true
+    name?: true
+    capital?: true
+    virtualCash?: true
+    maxDrawdownPct?: true
+    provider?: true
+    active?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type AllocationSessionMaxAggregateInputType = {
+    id?: true
+    name?: true
+    capital?: true
+    virtualCash?: true
+    maxDrawdownPct?: true
+    provider?: true
+    active?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type AllocationSessionCountAggregateInputType = {
+    id?: true
+    name?: true
+    capital?: true
+    virtualCash?: true
+    maxDrawdownPct?: true
+    enabledMarkets?: true
+    provider?: true
+    active?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type AllocationSessionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AllocationSession to aggregate.
+     */
+    where?: AllocationSessionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AllocationSessions to fetch.
+     */
+    orderBy?: AllocationSessionOrderByWithRelationInput | AllocationSessionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: AllocationSessionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AllocationSessions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AllocationSessions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned AllocationSessions
+    **/
+    _count?: true | AllocationSessionCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: AllocationSessionAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: AllocationSessionSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: AllocationSessionMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: AllocationSessionMaxAggregateInputType
+  }
+
+  export type GetAllocationSessionAggregateType<T extends AllocationSessionAggregateArgs> = {
+        [P in keyof T & keyof AggregateAllocationSession]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAllocationSession[P]>
+      : GetScalarType<T[P], AggregateAllocationSession[P]>
+  }
+
+
+
+
+  export type AllocationSessionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AllocationSessionWhereInput
+    orderBy?: AllocationSessionOrderByWithAggregationInput | AllocationSessionOrderByWithAggregationInput[]
+    by: AllocationSessionScalarFieldEnum[] | AllocationSessionScalarFieldEnum
+    having?: AllocationSessionScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AllocationSessionCountAggregateInputType | true
+    _avg?: AllocationSessionAvgAggregateInputType
+    _sum?: AllocationSessionSumAggregateInputType
+    _min?: AllocationSessionMinAggregateInputType
+    _max?: AllocationSessionMaxAggregateInputType
+  }
+
+  export type AllocationSessionGroupByOutputType = {
+    id: string
+    name: string
+    capital: number
+    virtualCash: number
+    maxDrawdownPct: number
+    enabledMarkets: JsonValue
+    provider: string
+    active: boolean
+    createdAt: Date
+    updatedAt: Date
+    _count: AllocationSessionCountAggregateOutputType | null
+    _avg: AllocationSessionAvgAggregateOutputType | null
+    _sum: AllocationSessionSumAggregateOutputType | null
+    _min: AllocationSessionMinAggregateOutputType | null
+    _max: AllocationSessionMaxAggregateOutputType | null
+  }
+
+  type GetAllocationSessionGroupByPayload<T extends AllocationSessionGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AllocationSessionGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AllocationSessionGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AllocationSessionGroupByOutputType[P]>
+            : GetScalarType<T[P], AllocationSessionGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AllocationSessionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    capital?: boolean
+    virtualCash?: boolean
+    maxDrawdownPct?: boolean
+    enabledMarkets?: boolean
+    provider?: boolean
+    active?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    bots?: boolean | AllocationSession$botsArgs<ExtArgs>
+    _count?: boolean | AllocationSessionCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["allocationSession"]>
+
+  export type AllocationSessionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    capital?: boolean
+    virtualCash?: boolean
+    maxDrawdownPct?: boolean
+    enabledMarkets?: boolean
+    provider?: boolean
+    active?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["allocationSession"]>
+
+  export type AllocationSessionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    capital?: boolean
+    virtualCash?: boolean
+    maxDrawdownPct?: boolean
+    enabledMarkets?: boolean
+    provider?: boolean
+    active?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["allocationSession"]>
+
+  export type AllocationSessionSelectScalar = {
+    id?: boolean
+    name?: boolean
+    capital?: boolean
+    virtualCash?: boolean
+    maxDrawdownPct?: boolean
+    enabledMarkets?: boolean
+    provider?: boolean
+    active?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type AllocationSessionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "capital" | "virtualCash" | "maxDrawdownPct" | "enabledMarkets" | "provider" | "active" | "createdAt" | "updatedAt", ExtArgs["result"]["allocationSession"]>
+  export type AllocationSessionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    bots?: boolean | AllocationSession$botsArgs<ExtArgs>
+    _count?: boolean | AllocationSessionCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type AllocationSessionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type AllocationSessionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+
+  export type $AllocationSessionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AllocationSession"
+    objects: {
+      bots: Prisma.$TradingBotPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      name: string
+      capital: number
+      virtualCash: number
+      maxDrawdownPct: number
+      enabledMarkets: Prisma.JsonValue
+      provider: string
+      active: boolean
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["allocationSession"]>
+    composites: {}
+  }
+
+  type AllocationSessionGetPayload<S extends boolean | null | undefined | AllocationSessionDefaultArgs> = $Result.GetResult<Prisma.$AllocationSessionPayload, S>
+
+  type AllocationSessionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<AllocationSessionFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: AllocationSessionCountAggregateInputType | true
+    }
+
+  export interface AllocationSessionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AllocationSession'], meta: { name: 'AllocationSession' } }
+    /**
+     * Find zero or one AllocationSession that matches the filter.
+     * @param {AllocationSessionFindUniqueArgs} args - Arguments to find a AllocationSession
+     * @example
+     * // Get one AllocationSession
+     * const allocationSession = await prisma.allocationSession.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AllocationSessionFindUniqueArgs>(args: SelectSubset<T, AllocationSessionFindUniqueArgs<ExtArgs>>): Prisma__AllocationSessionClient<$Result.GetResult<Prisma.$AllocationSessionPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one AllocationSession that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {AllocationSessionFindUniqueOrThrowArgs} args - Arguments to find a AllocationSession
+     * @example
+     * // Get one AllocationSession
+     * const allocationSession = await prisma.allocationSession.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AllocationSessionFindUniqueOrThrowArgs>(args: SelectSubset<T, AllocationSessionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AllocationSessionClient<$Result.GetResult<Prisma.$AllocationSessionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AllocationSession that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AllocationSessionFindFirstArgs} args - Arguments to find a AllocationSession
+     * @example
+     * // Get one AllocationSession
+     * const allocationSession = await prisma.allocationSession.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AllocationSessionFindFirstArgs>(args?: SelectSubset<T, AllocationSessionFindFirstArgs<ExtArgs>>): Prisma__AllocationSessionClient<$Result.GetResult<Prisma.$AllocationSessionPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AllocationSession that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AllocationSessionFindFirstOrThrowArgs} args - Arguments to find a AllocationSession
+     * @example
+     * // Get one AllocationSession
+     * const allocationSession = await prisma.allocationSession.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AllocationSessionFindFirstOrThrowArgs>(args?: SelectSubset<T, AllocationSessionFindFirstOrThrowArgs<ExtArgs>>): Prisma__AllocationSessionClient<$Result.GetResult<Prisma.$AllocationSessionPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more AllocationSessions that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AllocationSessionFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all AllocationSessions
+     * const allocationSessions = await prisma.allocationSession.findMany()
+     * 
+     * // Get first 10 AllocationSessions
+     * const allocationSessions = await prisma.allocationSession.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const allocationSessionWithIdOnly = await prisma.allocationSession.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends AllocationSessionFindManyArgs>(args?: SelectSubset<T, AllocationSessionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AllocationSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a AllocationSession.
+     * @param {AllocationSessionCreateArgs} args - Arguments to create a AllocationSession.
+     * @example
+     * // Create one AllocationSession
+     * const AllocationSession = await prisma.allocationSession.create({
+     *   data: {
+     *     // ... data to create a AllocationSession
+     *   }
+     * })
+     * 
+     */
+    create<T extends AllocationSessionCreateArgs>(args: SelectSubset<T, AllocationSessionCreateArgs<ExtArgs>>): Prisma__AllocationSessionClient<$Result.GetResult<Prisma.$AllocationSessionPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many AllocationSessions.
+     * @param {AllocationSessionCreateManyArgs} args - Arguments to create many AllocationSessions.
+     * @example
+     * // Create many AllocationSessions
+     * const allocationSession = await prisma.allocationSession.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends AllocationSessionCreateManyArgs>(args?: SelectSubset<T, AllocationSessionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many AllocationSessions and returns the data saved in the database.
+     * @param {AllocationSessionCreateManyAndReturnArgs} args - Arguments to create many AllocationSessions.
+     * @example
+     * // Create many AllocationSessions
+     * const allocationSession = await prisma.allocationSession.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many AllocationSessions and only return the `id`
+     * const allocationSessionWithIdOnly = await prisma.allocationSession.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends AllocationSessionCreateManyAndReturnArgs>(args?: SelectSubset<T, AllocationSessionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AllocationSessionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a AllocationSession.
+     * @param {AllocationSessionDeleteArgs} args - Arguments to delete one AllocationSession.
+     * @example
+     * // Delete one AllocationSession
+     * const AllocationSession = await prisma.allocationSession.delete({
+     *   where: {
+     *     // ... filter to delete one AllocationSession
+     *   }
+     * })
+     * 
+     */
+    delete<T extends AllocationSessionDeleteArgs>(args: SelectSubset<T, AllocationSessionDeleteArgs<ExtArgs>>): Prisma__AllocationSessionClient<$Result.GetResult<Prisma.$AllocationSessionPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one AllocationSession.
+     * @param {AllocationSessionUpdateArgs} args - Arguments to update one AllocationSession.
+     * @example
+     * // Update one AllocationSession
+     * const allocationSession = await prisma.allocationSession.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends AllocationSessionUpdateArgs>(args: SelectSubset<T, AllocationSessionUpdateArgs<ExtArgs>>): Prisma__AllocationSessionClient<$Result.GetResult<Prisma.$AllocationSessionPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more AllocationSessions.
+     * @param {AllocationSessionDeleteManyArgs} args - Arguments to filter AllocationSessions to delete.
+     * @example
+     * // Delete a few AllocationSessions
+     * const { count } = await prisma.allocationSession.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends AllocationSessionDeleteManyArgs>(args?: SelectSubset<T, AllocationSessionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AllocationSessions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AllocationSessionUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many AllocationSessions
+     * const allocationSession = await prisma.allocationSession.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends AllocationSessionUpdateManyArgs>(args: SelectSubset<T, AllocationSessionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AllocationSessions and returns the data updated in the database.
+     * @param {AllocationSessionUpdateManyAndReturnArgs} args - Arguments to update many AllocationSessions.
+     * @example
+     * // Update many AllocationSessions
+     * const allocationSession = await prisma.allocationSession.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more AllocationSessions and only return the `id`
+     * const allocationSessionWithIdOnly = await prisma.allocationSession.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends AllocationSessionUpdateManyAndReturnArgs>(args: SelectSubset<T, AllocationSessionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AllocationSessionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one AllocationSession.
+     * @param {AllocationSessionUpsertArgs} args - Arguments to update or create a AllocationSession.
+     * @example
+     * // Update or create a AllocationSession
+     * const allocationSession = await prisma.allocationSession.upsert({
+     *   create: {
+     *     // ... data to create a AllocationSession
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the AllocationSession we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AllocationSessionUpsertArgs>(args: SelectSubset<T, AllocationSessionUpsertArgs<ExtArgs>>): Prisma__AllocationSessionClient<$Result.GetResult<Prisma.$AllocationSessionPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of AllocationSessions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AllocationSessionCountArgs} args - Arguments to filter AllocationSessions to count.
+     * @example
+     * // Count the number of AllocationSessions
+     * const count = await prisma.allocationSession.count({
+     *   where: {
+     *     // ... the filter for the AllocationSessions we want to count
+     *   }
+     * })
+    **/
+    count<T extends AllocationSessionCountArgs>(
+      args?: Subset<T, AllocationSessionCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AllocationSessionCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a AllocationSession.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AllocationSessionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AllocationSessionAggregateArgs>(args: Subset<T, AllocationSessionAggregateArgs>): Prisma.PrismaPromise<GetAllocationSessionAggregateType<T>>
+
+    /**
+     * Group by AllocationSession.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AllocationSessionGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends AllocationSessionGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AllocationSessionGroupByArgs['orderBy'] }
+        : { orderBy?: AllocationSessionGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AllocationSessionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAllocationSessionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the AllocationSession model
+   */
+  readonly fields: AllocationSessionFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for AllocationSession.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AllocationSessionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    bots<T extends AllocationSession$botsArgs<ExtArgs> = {}>(args?: Subset<T, AllocationSession$botsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TradingBotPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the AllocationSession model
+   */
+  interface AllocationSessionFieldRefs {
+    readonly id: FieldRef<"AllocationSession", 'String'>
+    readonly name: FieldRef<"AllocationSession", 'String'>
+    readonly capital: FieldRef<"AllocationSession", 'Float'>
+    readonly virtualCash: FieldRef<"AllocationSession", 'Float'>
+    readonly maxDrawdownPct: FieldRef<"AllocationSession", 'Float'>
+    readonly enabledMarkets: FieldRef<"AllocationSession", 'Json'>
+    readonly provider: FieldRef<"AllocationSession", 'String'>
+    readonly active: FieldRef<"AllocationSession", 'Boolean'>
+    readonly createdAt: FieldRef<"AllocationSession", 'DateTime'>
+    readonly updatedAt: FieldRef<"AllocationSession", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * AllocationSession findUnique
+   */
+  export type AllocationSessionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AllocationSession
+     */
+    select?: AllocationSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AllocationSession
+     */
+    omit?: AllocationSessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AllocationSessionInclude<ExtArgs> | null
+    /**
+     * Filter, which AllocationSession to fetch.
+     */
+    where: AllocationSessionWhereUniqueInput
+  }
+
+  /**
+   * AllocationSession findUniqueOrThrow
+   */
+  export type AllocationSessionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AllocationSession
+     */
+    select?: AllocationSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AllocationSession
+     */
+    omit?: AllocationSessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AllocationSessionInclude<ExtArgs> | null
+    /**
+     * Filter, which AllocationSession to fetch.
+     */
+    where: AllocationSessionWhereUniqueInput
+  }
+
+  /**
+   * AllocationSession findFirst
+   */
+  export type AllocationSessionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AllocationSession
+     */
+    select?: AllocationSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AllocationSession
+     */
+    omit?: AllocationSessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AllocationSessionInclude<ExtArgs> | null
+    /**
+     * Filter, which AllocationSession to fetch.
+     */
+    where?: AllocationSessionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AllocationSessions to fetch.
+     */
+    orderBy?: AllocationSessionOrderByWithRelationInput | AllocationSessionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AllocationSessions.
+     */
+    cursor?: AllocationSessionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AllocationSessions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AllocationSessions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AllocationSessions.
+     */
+    distinct?: AllocationSessionScalarFieldEnum | AllocationSessionScalarFieldEnum[]
+  }
+
+  /**
+   * AllocationSession findFirstOrThrow
+   */
+  export type AllocationSessionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AllocationSession
+     */
+    select?: AllocationSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AllocationSession
+     */
+    omit?: AllocationSessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AllocationSessionInclude<ExtArgs> | null
+    /**
+     * Filter, which AllocationSession to fetch.
+     */
+    where?: AllocationSessionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AllocationSessions to fetch.
+     */
+    orderBy?: AllocationSessionOrderByWithRelationInput | AllocationSessionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AllocationSessions.
+     */
+    cursor?: AllocationSessionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AllocationSessions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AllocationSessions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AllocationSessions.
+     */
+    distinct?: AllocationSessionScalarFieldEnum | AllocationSessionScalarFieldEnum[]
+  }
+
+  /**
+   * AllocationSession findMany
+   */
+  export type AllocationSessionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AllocationSession
+     */
+    select?: AllocationSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AllocationSession
+     */
+    omit?: AllocationSessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AllocationSessionInclude<ExtArgs> | null
+    /**
+     * Filter, which AllocationSessions to fetch.
+     */
+    where?: AllocationSessionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AllocationSessions to fetch.
+     */
+    orderBy?: AllocationSessionOrderByWithRelationInput | AllocationSessionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing AllocationSessions.
+     */
+    cursor?: AllocationSessionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AllocationSessions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AllocationSessions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AllocationSessions.
+     */
+    distinct?: AllocationSessionScalarFieldEnum | AllocationSessionScalarFieldEnum[]
+  }
+
+  /**
+   * AllocationSession create
+   */
+  export type AllocationSessionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AllocationSession
+     */
+    select?: AllocationSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AllocationSession
+     */
+    omit?: AllocationSessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AllocationSessionInclude<ExtArgs> | null
+    /**
+     * The data needed to create a AllocationSession.
+     */
+    data: XOR<AllocationSessionCreateInput, AllocationSessionUncheckedCreateInput>
+  }
+
+  /**
+   * AllocationSession createMany
+   */
+  export type AllocationSessionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many AllocationSessions.
+     */
+    data: AllocationSessionCreateManyInput | AllocationSessionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AllocationSession createManyAndReturn
+   */
+  export type AllocationSessionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AllocationSession
+     */
+    select?: AllocationSessionSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AllocationSession
+     */
+    omit?: AllocationSessionOmit<ExtArgs> | null
+    /**
+     * The data used to create many AllocationSessions.
+     */
+    data: AllocationSessionCreateManyInput | AllocationSessionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AllocationSession update
+   */
+  export type AllocationSessionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AllocationSession
+     */
+    select?: AllocationSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AllocationSession
+     */
+    omit?: AllocationSessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AllocationSessionInclude<ExtArgs> | null
+    /**
+     * The data needed to update a AllocationSession.
+     */
+    data: XOR<AllocationSessionUpdateInput, AllocationSessionUncheckedUpdateInput>
+    /**
+     * Choose, which AllocationSession to update.
+     */
+    where: AllocationSessionWhereUniqueInput
+  }
+
+  /**
+   * AllocationSession updateMany
+   */
+  export type AllocationSessionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update AllocationSessions.
+     */
+    data: XOR<AllocationSessionUpdateManyMutationInput, AllocationSessionUncheckedUpdateManyInput>
+    /**
+     * Filter which AllocationSessions to update
+     */
+    where?: AllocationSessionWhereInput
+    /**
+     * Limit how many AllocationSessions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AllocationSession updateManyAndReturn
+   */
+  export type AllocationSessionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AllocationSession
+     */
+    select?: AllocationSessionSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AllocationSession
+     */
+    omit?: AllocationSessionOmit<ExtArgs> | null
+    /**
+     * The data used to update AllocationSessions.
+     */
+    data: XOR<AllocationSessionUpdateManyMutationInput, AllocationSessionUncheckedUpdateManyInput>
+    /**
+     * Filter which AllocationSessions to update
+     */
+    where?: AllocationSessionWhereInput
+    /**
+     * Limit how many AllocationSessions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AllocationSession upsert
+   */
+  export type AllocationSessionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AllocationSession
+     */
+    select?: AllocationSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AllocationSession
+     */
+    omit?: AllocationSessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AllocationSessionInclude<ExtArgs> | null
+    /**
+     * The filter to search for the AllocationSession to update in case it exists.
+     */
+    where: AllocationSessionWhereUniqueInput
+    /**
+     * In case the AllocationSession found by the `where` argument doesn't exist, create a new AllocationSession with this data.
+     */
+    create: XOR<AllocationSessionCreateInput, AllocationSessionUncheckedCreateInput>
+    /**
+     * In case the AllocationSession was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AllocationSessionUpdateInput, AllocationSessionUncheckedUpdateInput>
+  }
+
+  /**
+   * AllocationSession delete
+   */
+  export type AllocationSessionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AllocationSession
+     */
+    select?: AllocationSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AllocationSession
+     */
+    omit?: AllocationSessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AllocationSessionInclude<ExtArgs> | null
+    /**
+     * Filter which AllocationSession to delete.
+     */
+    where: AllocationSessionWhereUniqueInput
+  }
+
+  /**
+   * AllocationSession deleteMany
+   */
+  export type AllocationSessionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AllocationSessions to delete
+     */
+    where?: AllocationSessionWhereInput
+    /**
+     * Limit how many AllocationSessions to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * AllocationSession.bots
+   */
+  export type AllocationSession$botsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingBot
+     */
+    select?: TradingBotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingBot
+     */
+    omit?: TradingBotOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingBotInclude<ExtArgs> | null
+    where?: TradingBotWhereInput
+    orderBy?: TradingBotOrderByWithRelationInput | TradingBotOrderByWithRelationInput[]
+    cursor?: TradingBotWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: TradingBotScalarFieldEnum | TradingBotScalarFieldEnum[]
+  }
+
+  /**
+   * AllocationSession without action
+   */
+  export type AllocationSessionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AllocationSession
+     */
+    select?: AllocationSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AllocationSession
+     */
+    omit?: AllocationSessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AllocationSessionInclude<ExtArgs> | null
   }
 
 
@@ -13007,11 +14402,28 @@ export namespace Prisma {
     parameters: 'parameters',
     symbol: 'symbol',
     active: 'active',
+    allocationSessionId: 'allocationSessionId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
 
   export type TradingBotScalarFieldEnum = (typeof TradingBotScalarFieldEnum)[keyof typeof TradingBotScalarFieldEnum]
+
+
+  export const AllocationSessionScalarFieldEnum: {
+    id: 'id',
+    name: 'name',
+    capital: 'capital',
+    virtualCash: 'virtualCash',
+    maxDrawdownPct: 'maxDrawdownPct',
+    enabledMarkets: 'enabledMarkets',
+    provider: 'provider',
+    active: 'active',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type AllocationSessionScalarFieldEnum = (typeof AllocationSessionScalarFieldEnum)[keyof typeof AllocationSessionScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -13761,8 +15173,10 @@ export namespace Prisma {
     parameters?: JsonFilter<"TradingBot">
     symbol?: StringFilter<"TradingBot"> | string
     active?: BoolFilter<"TradingBot"> | boolean
+    allocationSessionId?: StringNullableFilter<"TradingBot"> | string | null
     createdAt?: DateTimeFilter<"TradingBot"> | Date | string
     updatedAt?: DateTimeFilter<"TradingBot"> | Date | string
+    allocationSession?: XOR<AllocationSessionNullableScalarRelationFilter, AllocationSessionWhereInput> | null
   }
 
   export type TradingBotOrderByWithRelationInput = {
@@ -13772,8 +15186,10 @@ export namespace Prisma {
     parameters?: SortOrder
     symbol?: SortOrder
     active?: SortOrder
+    allocationSessionId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    allocationSession?: AllocationSessionOrderByWithRelationInput
   }
 
   export type TradingBotWhereUniqueInput = Prisma.AtLeast<{
@@ -13786,8 +15202,10 @@ export namespace Prisma {
     parameters?: JsonFilter<"TradingBot">
     symbol?: StringFilter<"TradingBot"> | string
     active?: BoolFilter<"TradingBot"> | boolean
+    allocationSessionId?: StringNullableFilter<"TradingBot"> | string | null
     createdAt?: DateTimeFilter<"TradingBot"> | Date | string
     updatedAt?: DateTimeFilter<"TradingBot"> | Date | string
+    allocationSession?: XOR<AllocationSessionNullableScalarRelationFilter, AllocationSessionWhereInput> | null
   }, "id" | "name">
 
   export type TradingBotOrderByWithAggregationInput = {
@@ -13797,6 +15215,7 @@ export namespace Prisma {
     parameters?: SortOrder
     symbol?: SortOrder
     active?: SortOrder
+    allocationSessionId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: TradingBotCountOrderByAggregateInput
@@ -13814,8 +15233,91 @@ export namespace Prisma {
     parameters?: JsonWithAggregatesFilter<"TradingBot">
     symbol?: StringWithAggregatesFilter<"TradingBot"> | string
     active?: BoolWithAggregatesFilter<"TradingBot"> | boolean
+    allocationSessionId?: StringNullableWithAggregatesFilter<"TradingBot"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"TradingBot"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"TradingBot"> | Date | string
+  }
+
+  export type AllocationSessionWhereInput = {
+    AND?: AllocationSessionWhereInput | AllocationSessionWhereInput[]
+    OR?: AllocationSessionWhereInput[]
+    NOT?: AllocationSessionWhereInput | AllocationSessionWhereInput[]
+    id?: StringFilter<"AllocationSession"> | string
+    name?: StringFilter<"AllocationSession"> | string
+    capital?: FloatFilter<"AllocationSession"> | number
+    virtualCash?: FloatFilter<"AllocationSession"> | number
+    maxDrawdownPct?: FloatFilter<"AllocationSession"> | number
+    enabledMarkets?: JsonFilter<"AllocationSession">
+    provider?: StringFilter<"AllocationSession"> | string
+    active?: BoolFilter<"AllocationSession"> | boolean
+    createdAt?: DateTimeFilter<"AllocationSession"> | Date | string
+    updatedAt?: DateTimeFilter<"AllocationSession"> | Date | string
+    bots?: TradingBotListRelationFilter
+  }
+
+  export type AllocationSessionOrderByWithRelationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    capital?: SortOrder
+    virtualCash?: SortOrder
+    maxDrawdownPct?: SortOrder
+    enabledMarkets?: SortOrder
+    provider?: SortOrder
+    active?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    bots?: TradingBotOrderByRelationAggregateInput
+  }
+
+  export type AllocationSessionWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    name?: string
+    AND?: AllocationSessionWhereInput | AllocationSessionWhereInput[]
+    OR?: AllocationSessionWhereInput[]
+    NOT?: AllocationSessionWhereInput | AllocationSessionWhereInput[]
+    capital?: FloatFilter<"AllocationSession"> | number
+    virtualCash?: FloatFilter<"AllocationSession"> | number
+    maxDrawdownPct?: FloatFilter<"AllocationSession"> | number
+    enabledMarkets?: JsonFilter<"AllocationSession">
+    provider?: StringFilter<"AllocationSession"> | string
+    active?: BoolFilter<"AllocationSession"> | boolean
+    createdAt?: DateTimeFilter<"AllocationSession"> | Date | string
+    updatedAt?: DateTimeFilter<"AllocationSession"> | Date | string
+    bots?: TradingBotListRelationFilter
+  }, "id" | "name">
+
+  export type AllocationSessionOrderByWithAggregationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    capital?: SortOrder
+    virtualCash?: SortOrder
+    maxDrawdownPct?: SortOrder
+    enabledMarkets?: SortOrder
+    provider?: SortOrder
+    active?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: AllocationSessionCountOrderByAggregateInput
+    _avg?: AllocationSessionAvgOrderByAggregateInput
+    _max?: AllocationSessionMaxOrderByAggregateInput
+    _min?: AllocationSessionMinOrderByAggregateInput
+    _sum?: AllocationSessionSumOrderByAggregateInput
+  }
+
+  export type AllocationSessionScalarWhereWithAggregatesInput = {
+    AND?: AllocationSessionScalarWhereWithAggregatesInput | AllocationSessionScalarWhereWithAggregatesInput[]
+    OR?: AllocationSessionScalarWhereWithAggregatesInput[]
+    NOT?: AllocationSessionScalarWhereWithAggregatesInput | AllocationSessionScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"AllocationSession"> | string
+    name?: StringWithAggregatesFilter<"AllocationSession"> | string
+    capital?: FloatWithAggregatesFilter<"AllocationSession"> | number
+    virtualCash?: FloatWithAggregatesFilter<"AllocationSession"> | number
+    maxDrawdownPct?: FloatWithAggregatesFilter<"AllocationSession"> | number
+    enabledMarkets?: JsonWithAggregatesFilter<"AllocationSession">
+    provider?: StringWithAggregatesFilter<"AllocationSession"> | string
+    active?: BoolWithAggregatesFilter<"AllocationSession"> | boolean
+    createdAt?: DateTimeWithAggregatesFilter<"AllocationSession"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"AllocationSession"> | Date | string
   }
 
   export type SymbolCreateInput = {
@@ -14486,6 +15988,7 @@ export namespace Prisma {
     active?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    allocationSession?: AllocationSessionCreateNestedOneWithoutBotsInput
   }
 
   export type TradingBotUncheckedCreateInput = {
@@ -14495,6 +15998,7 @@ export namespace Prisma {
     parameters: JsonNullValueInput | InputJsonValue
     symbol: string
     active?: boolean
+    allocationSessionId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -14508,6 +16012,7 @@ export namespace Prisma {
     active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    allocationSession?: AllocationSessionUpdateOneWithoutBotsNestedInput
   }
 
   export type TradingBotUncheckedUpdateInput = {
@@ -14517,6 +16022,7 @@ export namespace Prisma {
     parameters?: JsonNullValueInput | InputJsonValue
     symbol?: StringFieldUpdateOperationsInput | string
     active?: BoolFieldUpdateOperationsInput | boolean
+    allocationSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -14528,6 +16034,7 @@ export namespace Prisma {
     parameters: JsonNullValueInput | InputJsonValue
     symbol: string
     active?: boolean
+    allocationSessionId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -14549,6 +16056,102 @@ export namespace Prisma {
     strategy?: StringFieldUpdateOperationsInput | string
     parameters?: JsonNullValueInput | InputJsonValue
     symbol?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
+    allocationSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AllocationSessionCreateInput = {
+    id?: string
+    name: string
+    capital: number
+    virtualCash: number
+    maxDrawdownPct?: number
+    enabledMarkets: JsonNullValueInput | InputJsonValue
+    provider: string
+    active?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    bots?: TradingBotCreateNestedManyWithoutAllocationSessionInput
+  }
+
+  export type AllocationSessionUncheckedCreateInput = {
+    id?: string
+    name: string
+    capital: number
+    virtualCash: number
+    maxDrawdownPct?: number
+    enabledMarkets: JsonNullValueInput | InputJsonValue
+    provider: string
+    active?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    bots?: TradingBotUncheckedCreateNestedManyWithoutAllocationSessionInput
+  }
+
+  export type AllocationSessionUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    capital?: FloatFieldUpdateOperationsInput | number
+    virtualCash?: FloatFieldUpdateOperationsInput | number
+    maxDrawdownPct?: FloatFieldUpdateOperationsInput | number
+    enabledMarkets?: JsonNullValueInput | InputJsonValue
+    provider?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    bots?: TradingBotUpdateManyWithoutAllocationSessionNestedInput
+  }
+
+  export type AllocationSessionUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    capital?: FloatFieldUpdateOperationsInput | number
+    virtualCash?: FloatFieldUpdateOperationsInput | number
+    maxDrawdownPct?: FloatFieldUpdateOperationsInput | number
+    enabledMarkets?: JsonNullValueInput | InputJsonValue
+    provider?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    bots?: TradingBotUncheckedUpdateManyWithoutAllocationSessionNestedInput
+  }
+
+  export type AllocationSessionCreateManyInput = {
+    id?: string
+    name: string
+    capital: number
+    virtualCash: number
+    maxDrawdownPct?: number
+    enabledMarkets: JsonNullValueInput | InputJsonValue
+    provider: string
+    active?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AllocationSessionUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    capital?: FloatFieldUpdateOperationsInput | number
+    virtualCash?: FloatFieldUpdateOperationsInput | number
+    maxDrawdownPct?: FloatFieldUpdateOperationsInput | number
+    enabledMarkets?: JsonNullValueInput | InputJsonValue
+    provider?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AllocationSessionUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    capital?: FloatFieldUpdateOperationsInput | number
+    virtualCash?: FloatFieldUpdateOperationsInput | number
+    maxDrawdownPct?: FloatFieldUpdateOperationsInput | number
+    enabledMarkets?: JsonNullValueInput | InputJsonValue
+    provider?: StringFieldUpdateOperationsInput | string
     active?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -15160,6 +16763,11 @@ export namespace Prisma {
     not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
+  export type AllocationSessionNullableScalarRelationFilter = {
+    is?: AllocationSessionWhereInput | null
+    isNot?: AllocationSessionWhereInput | null
+  }
+
   export type TradingBotCountOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
@@ -15167,6 +16775,7 @@ export namespace Prisma {
     parameters?: SortOrder
     symbol?: SortOrder
     active?: SortOrder
+    allocationSessionId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -15177,6 +16786,7 @@ export namespace Prisma {
     strategy?: SortOrder
     symbol?: SortOrder
     active?: SortOrder
+    allocationSessionId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -15187,6 +16797,7 @@ export namespace Prisma {
     strategy?: SortOrder
     symbol?: SortOrder
     active?: SortOrder
+    allocationSessionId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -15215,6 +16826,65 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedJsonFilter<$PrismaModel>
     _max?: NestedJsonFilter<$PrismaModel>
+  }
+
+  export type TradingBotListRelationFilter = {
+    every?: TradingBotWhereInput
+    some?: TradingBotWhereInput
+    none?: TradingBotWhereInput
+  }
+
+  export type TradingBotOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type AllocationSessionCountOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    capital?: SortOrder
+    virtualCash?: SortOrder
+    maxDrawdownPct?: SortOrder
+    enabledMarkets?: SortOrder
+    provider?: SortOrder
+    active?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AllocationSessionAvgOrderByAggregateInput = {
+    capital?: SortOrder
+    virtualCash?: SortOrder
+    maxDrawdownPct?: SortOrder
+  }
+
+  export type AllocationSessionMaxOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    capital?: SortOrder
+    virtualCash?: SortOrder
+    maxDrawdownPct?: SortOrder
+    provider?: SortOrder
+    active?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AllocationSessionMinOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    capital?: SortOrder
+    virtualCash?: SortOrder
+    maxDrawdownPct?: SortOrder
+    provider?: SortOrder
+    active?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AllocationSessionSumOrderByAggregateInput = {
+    capital?: SortOrder
+    virtualCash?: SortOrder
+    maxDrawdownPct?: SortOrder
   }
 
   export type HistoricalPriceCreateNestedManyWithoutSymbolInput = {
@@ -15517,6 +17187,64 @@ export namespace Prisma {
     upsert?: TradingAccountUpsertWithoutPositionsInput
     connect?: TradingAccountWhereUniqueInput
     update?: XOR<XOR<TradingAccountUpdateToOneWithWhereWithoutPositionsInput, TradingAccountUpdateWithoutPositionsInput>, TradingAccountUncheckedUpdateWithoutPositionsInput>
+  }
+
+  export type AllocationSessionCreateNestedOneWithoutBotsInput = {
+    create?: XOR<AllocationSessionCreateWithoutBotsInput, AllocationSessionUncheckedCreateWithoutBotsInput>
+    connectOrCreate?: AllocationSessionCreateOrConnectWithoutBotsInput
+    connect?: AllocationSessionWhereUniqueInput
+  }
+
+  export type AllocationSessionUpdateOneWithoutBotsNestedInput = {
+    create?: XOR<AllocationSessionCreateWithoutBotsInput, AllocationSessionUncheckedCreateWithoutBotsInput>
+    connectOrCreate?: AllocationSessionCreateOrConnectWithoutBotsInput
+    upsert?: AllocationSessionUpsertWithoutBotsInput
+    disconnect?: AllocationSessionWhereInput | boolean
+    delete?: AllocationSessionWhereInput | boolean
+    connect?: AllocationSessionWhereUniqueInput
+    update?: XOR<XOR<AllocationSessionUpdateToOneWithWhereWithoutBotsInput, AllocationSessionUpdateWithoutBotsInput>, AllocationSessionUncheckedUpdateWithoutBotsInput>
+  }
+
+  export type TradingBotCreateNestedManyWithoutAllocationSessionInput = {
+    create?: XOR<TradingBotCreateWithoutAllocationSessionInput, TradingBotUncheckedCreateWithoutAllocationSessionInput> | TradingBotCreateWithoutAllocationSessionInput[] | TradingBotUncheckedCreateWithoutAllocationSessionInput[]
+    connectOrCreate?: TradingBotCreateOrConnectWithoutAllocationSessionInput | TradingBotCreateOrConnectWithoutAllocationSessionInput[]
+    createMany?: TradingBotCreateManyAllocationSessionInputEnvelope
+    connect?: TradingBotWhereUniqueInput | TradingBotWhereUniqueInput[]
+  }
+
+  export type TradingBotUncheckedCreateNestedManyWithoutAllocationSessionInput = {
+    create?: XOR<TradingBotCreateWithoutAllocationSessionInput, TradingBotUncheckedCreateWithoutAllocationSessionInput> | TradingBotCreateWithoutAllocationSessionInput[] | TradingBotUncheckedCreateWithoutAllocationSessionInput[]
+    connectOrCreate?: TradingBotCreateOrConnectWithoutAllocationSessionInput | TradingBotCreateOrConnectWithoutAllocationSessionInput[]
+    createMany?: TradingBotCreateManyAllocationSessionInputEnvelope
+    connect?: TradingBotWhereUniqueInput | TradingBotWhereUniqueInput[]
+  }
+
+  export type TradingBotUpdateManyWithoutAllocationSessionNestedInput = {
+    create?: XOR<TradingBotCreateWithoutAllocationSessionInput, TradingBotUncheckedCreateWithoutAllocationSessionInput> | TradingBotCreateWithoutAllocationSessionInput[] | TradingBotUncheckedCreateWithoutAllocationSessionInput[]
+    connectOrCreate?: TradingBotCreateOrConnectWithoutAllocationSessionInput | TradingBotCreateOrConnectWithoutAllocationSessionInput[]
+    upsert?: TradingBotUpsertWithWhereUniqueWithoutAllocationSessionInput | TradingBotUpsertWithWhereUniqueWithoutAllocationSessionInput[]
+    createMany?: TradingBotCreateManyAllocationSessionInputEnvelope
+    set?: TradingBotWhereUniqueInput | TradingBotWhereUniqueInput[]
+    disconnect?: TradingBotWhereUniqueInput | TradingBotWhereUniqueInput[]
+    delete?: TradingBotWhereUniqueInput | TradingBotWhereUniqueInput[]
+    connect?: TradingBotWhereUniqueInput | TradingBotWhereUniqueInput[]
+    update?: TradingBotUpdateWithWhereUniqueWithoutAllocationSessionInput | TradingBotUpdateWithWhereUniqueWithoutAllocationSessionInput[]
+    updateMany?: TradingBotUpdateManyWithWhereWithoutAllocationSessionInput | TradingBotUpdateManyWithWhereWithoutAllocationSessionInput[]
+    deleteMany?: TradingBotScalarWhereInput | TradingBotScalarWhereInput[]
+  }
+
+  export type TradingBotUncheckedUpdateManyWithoutAllocationSessionNestedInput = {
+    create?: XOR<TradingBotCreateWithoutAllocationSessionInput, TradingBotUncheckedCreateWithoutAllocationSessionInput> | TradingBotCreateWithoutAllocationSessionInput[] | TradingBotUncheckedCreateWithoutAllocationSessionInput[]
+    connectOrCreate?: TradingBotCreateOrConnectWithoutAllocationSessionInput | TradingBotCreateOrConnectWithoutAllocationSessionInput[]
+    upsert?: TradingBotUpsertWithWhereUniqueWithoutAllocationSessionInput | TradingBotUpsertWithWhereUniqueWithoutAllocationSessionInput[]
+    createMany?: TradingBotCreateManyAllocationSessionInputEnvelope
+    set?: TradingBotWhereUniqueInput | TradingBotWhereUniqueInput[]
+    disconnect?: TradingBotWhereUniqueInput | TradingBotWhereUniqueInput[]
+    delete?: TradingBotWhereUniqueInput | TradingBotWhereUniqueInput[]
+    connect?: TradingBotWhereUniqueInput | TradingBotWhereUniqueInput[]
+    update?: TradingBotUpdateWithWhereUniqueWithoutAllocationSessionInput | TradingBotUpdateWithWhereUniqueWithoutAllocationSessionInput[]
+    updateMany?: TradingBotUpdateManyWithWhereWithoutAllocationSessionInput | TradingBotUpdateManyWithWhereWithoutAllocationSessionInput[]
+    deleteMany?: TradingBotScalarWhereInput | TradingBotScalarWhereInput[]
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -16312,6 +18040,137 @@ export namespace Prisma {
     orders?: TradingOrderUncheckedUpdateManyWithoutAccountNestedInput
   }
 
+  export type AllocationSessionCreateWithoutBotsInput = {
+    id?: string
+    name: string
+    capital: number
+    virtualCash: number
+    maxDrawdownPct?: number
+    enabledMarkets: JsonNullValueInput | InputJsonValue
+    provider: string
+    active?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AllocationSessionUncheckedCreateWithoutBotsInput = {
+    id?: string
+    name: string
+    capital: number
+    virtualCash: number
+    maxDrawdownPct?: number
+    enabledMarkets: JsonNullValueInput | InputJsonValue
+    provider: string
+    active?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AllocationSessionCreateOrConnectWithoutBotsInput = {
+    where: AllocationSessionWhereUniqueInput
+    create: XOR<AllocationSessionCreateWithoutBotsInput, AllocationSessionUncheckedCreateWithoutBotsInput>
+  }
+
+  export type AllocationSessionUpsertWithoutBotsInput = {
+    update: XOR<AllocationSessionUpdateWithoutBotsInput, AllocationSessionUncheckedUpdateWithoutBotsInput>
+    create: XOR<AllocationSessionCreateWithoutBotsInput, AllocationSessionUncheckedCreateWithoutBotsInput>
+    where?: AllocationSessionWhereInput
+  }
+
+  export type AllocationSessionUpdateToOneWithWhereWithoutBotsInput = {
+    where?: AllocationSessionWhereInput
+    data: XOR<AllocationSessionUpdateWithoutBotsInput, AllocationSessionUncheckedUpdateWithoutBotsInput>
+  }
+
+  export type AllocationSessionUpdateWithoutBotsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    capital?: FloatFieldUpdateOperationsInput | number
+    virtualCash?: FloatFieldUpdateOperationsInput | number
+    maxDrawdownPct?: FloatFieldUpdateOperationsInput | number
+    enabledMarkets?: JsonNullValueInput | InputJsonValue
+    provider?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AllocationSessionUncheckedUpdateWithoutBotsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    capital?: FloatFieldUpdateOperationsInput | number
+    virtualCash?: FloatFieldUpdateOperationsInput | number
+    maxDrawdownPct?: FloatFieldUpdateOperationsInput | number
+    enabledMarkets?: JsonNullValueInput | InputJsonValue
+    provider?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TradingBotCreateWithoutAllocationSessionInput = {
+    id?: string
+    name: string
+    strategy: string
+    parameters: JsonNullValueInput | InputJsonValue
+    symbol: string
+    active?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TradingBotUncheckedCreateWithoutAllocationSessionInput = {
+    id?: string
+    name: string
+    strategy: string
+    parameters: JsonNullValueInput | InputJsonValue
+    symbol: string
+    active?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TradingBotCreateOrConnectWithoutAllocationSessionInput = {
+    where: TradingBotWhereUniqueInput
+    create: XOR<TradingBotCreateWithoutAllocationSessionInput, TradingBotUncheckedCreateWithoutAllocationSessionInput>
+  }
+
+  export type TradingBotCreateManyAllocationSessionInputEnvelope = {
+    data: TradingBotCreateManyAllocationSessionInput | TradingBotCreateManyAllocationSessionInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type TradingBotUpsertWithWhereUniqueWithoutAllocationSessionInput = {
+    where: TradingBotWhereUniqueInput
+    update: XOR<TradingBotUpdateWithoutAllocationSessionInput, TradingBotUncheckedUpdateWithoutAllocationSessionInput>
+    create: XOR<TradingBotCreateWithoutAllocationSessionInput, TradingBotUncheckedCreateWithoutAllocationSessionInput>
+  }
+
+  export type TradingBotUpdateWithWhereUniqueWithoutAllocationSessionInput = {
+    where: TradingBotWhereUniqueInput
+    data: XOR<TradingBotUpdateWithoutAllocationSessionInput, TradingBotUncheckedUpdateWithoutAllocationSessionInput>
+  }
+
+  export type TradingBotUpdateManyWithWhereWithoutAllocationSessionInput = {
+    where: TradingBotScalarWhereInput
+    data: XOR<TradingBotUpdateManyMutationInput, TradingBotUncheckedUpdateManyWithoutAllocationSessionInput>
+  }
+
+  export type TradingBotScalarWhereInput = {
+    AND?: TradingBotScalarWhereInput | TradingBotScalarWhereInput[]
+    OR?: TradingBotScalarWhereInput[]
+    NOT?: TradingBotScalarWhereInput | TradingBotScalarWhereInput[]
+    id?: StringFilter<"TradingBot"> | string
+    name?: StringFilter<"TradingBot"> | string
+    strategy?: StringFilter<"TradingBot"> | string
+    parameters?: JsonFilter<"TradingBot">
+    symbol?: StringFilter<"TradingBot"> | string
+    active?: BoolFilter<"TradingBot"> | boolean
+    allocationSessionId?: StringNullableFilter<"TradingBot"> | string | null
+    createdAt?: DateTimeFilter<"TradingBot"> | Date | string
+    updatedAt?: DateTimeFilter<"TradingBot"> | Date | string
+  }
+
   export type HistoricalPriceCreateManySymbolInput = {
     date: Date | string
     open: number
@@ -16477,6 +18336,50 @@ export namespace Prisma {
     qty?: FloatFieldUpdateOperationsInput | number
     entryPrice?: FloatFieldUpdateOperationsInput | number
     marketPrice?: FloatFieldUpdateOperationsInput | number
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TradingBotCreateManyAllocationSessionInput = {
+    id?: string
+    name: string
+    strategy: string
+    parameters: JsonNullValueInput | InputJsonValue
+    symbol: string
+    active?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TradingBotUpdateWithoutAllocationSessionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    strategy?: StringFieldUpdateOperationsInput | string
+    parameters?: JsonNullValueInput | InputJsonValue
+    symbol?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TradingBotUncheckedUpdateWithoutAllocationSessionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    strategy?: StringFieldUpdateOperationsInput | string
+    parameters?: JsonNullValueInput | InputJsonValue
+    symbol?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TradingBotUncheckedUpdateManyWithoutAllocationSessionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    strategy?: StringFieldUpdateOperationsInput | string
+    parameters?: JsonNullValueInput | InputJsonValue
+    symbol?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 

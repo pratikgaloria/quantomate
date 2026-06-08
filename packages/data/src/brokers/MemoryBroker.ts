@@ -81,6 +81,24 @@ export class MemoryBroker implements IBroker {
     console.log(`[MemoryBroker] Placing ${order.side.toUpperCase()} order for ${order.qty} shares of ${order.symbol} (${order.type})`);
 
     if (!fillPrice) {
+      try {
+        const { DataService } = await import('../DataService');
+        const quotes = await DataService.provider.getQuotes([order.symbol]);
+        const quote = quotes.get(order.symbol);
+        if (quote) {
+          fillPrice = isBuy ? (quote.ask || quote.regularMarketPrice) : (quote.bid || quote.regularMarketPrice);
+          if (fillPrice) {
+            this.lastPrices.set(order.symbol, quote.regularMarketPrice || fillPrice);
+            if (quote.bid) this.lastBids.set(order.symbol, quote.bid);
+            if (quote.ask) this.lastAsks.set(order.symbol, quote.ask);
+          }
+        }
+      } catch (err: any) {
+        console.warn(`[MemoryBroker] Fallback quote fetch failed for ${order.symbol}:`, err.message);
+      }
+    }
+
+    if (!fillPrice) {
       const errMessage = `Cannot execute order: no current price available for ${order.symbol}`;
       console.error(`[MemoryBroker] ${errMessage}`);
       throw new Error(errMessage);

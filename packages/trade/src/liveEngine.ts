@@ -1,11 +1,17 @@
 import { ILiveFeed, DataService } from '@quantomate/data';
-import { IBroker, OrderRequest, Trader, Strategy, Dataset, Quote } from '@quantomate/core';
+import { IBroker, OrderRequest, Trader, Strategy, Dataset, Quote, OptionSelector } from '@quantomate/core';
+import { SessionManager } from './sessionManager';
 
 export interface LiveEngineConfig {
   symbols: string[];
   strategies: Strategy<any, any, any>[];
   initialCapital?: number;
-  resolveOptionSymbol?: (underlying: string, optionType: 'CE' | 'PE', underlyingPrice: number) => Promise<string | undefined> | string | undefined;
+  resolveOptionSymbol?: (
+    underlying: string,
+    optionType: 'CE' | 'PE',
+    underlyingPrice: number,
+    selector?: OptionSelector
+  ) => Promise<string | undefined> | string | undefined;
   interval?: string;
   startDate?: string;
 }
@@ -104,6 +110,9 @@ export class LiveTradingEngine {
       this.broker.setLastPrice(symbol, price, bid, ask, timestamp);
     }
 
+    // Feed current price to SessionManager
+    SessionManager.getInstance().updateLastPrice(symbol, price);
+
     for (const strategy of this.config.strategies) {
       const traderKey = `${symbol}:${strategy.name}`;
       const trader = this.activeTraders.get(traderKey);
@@ -129,14 +138,19 @@ export class LiveTradingEngine {
   private async executeEntry(symbol: string, currentPrice: number, strategyName: string, isShort: boolean) {
     let orderSymbol = symbol;
 
-    if (this.config.resolveOptionSymbol) {
+    const strategy = this.config.strategies.find((s) => s.name === strategyName);
+    if (!strategy) return;
+    const shouldTradeOptions = strategy.options.tradeOptions ?? false;
+    const selector = strategy.options.optionSelector;
+
+    if (shouldTradeOptions && this.config.resolveOptionSymbol) {
       const optionType = isShort ? 'PE' : 'CE';
-      const resolved = await this.config.resolveOptionSymbol(symbol, optionType, currentPrice);
+      const resolved = await this.config.resolveOptionSymbol(symbol, optionType, currentPrice, selector);
       if (resolved) {
         orderSymbol = resolved;
-        console.log(`[OptionMapper] Mapped entry signal on ${symbol} to ATM ${optionType} option: ${orderSymbol}`);
+        console.log(`[OptionMapper] Mapped entry signal on ${symbol} to option: ${orderSymbol}`);
       } else {
-        console.warn(`[OptionMapper] Could not find ATM option contract for ${symbol} at price ${currentPrice}`);
+        console.warn(`[OptionMapper] Could not find option contract matching selector for ${symbol} at price ${currentPrice}`);
         return;
       }
     }
@@ -151,20 +165,44 @@ export class LiveTradingEngine {
     console.log(`[Signal] Entry triggered for ${orderSymbol} by strategy ${strategyName} at price ${currentPrice}`);
 
     const account = await this.broker.getAccountInfo();
-    const allocation = this.config.resolveOptionSymbol ? 0.05 : 1.0;
-    const tradeCapital = account.cashBalance * allocation;
-    
-    // Determine option premium price for sizing
-    let optionPrice = currentPrice;
-    if (this.config.resolveOptionSymbol && 'lastPrices' in (this.broker as any)) {
-      optionPrice = (this.broker as any).lastPrices?.get(orderSymbol) || 100; // default to 100 premium if not ticked yet
+    const allocation = shouldTradeOptions ? 0.05 : 1.0;
+
+    // SIZING & CAPITAL CHECKS VIA SESSION MANAGER
+    const sessionId = strategy.options.allocationSessionId;
+    let targetCapital = account.cashBalance;
+
+    if (sessionId) {
+      targetCapital = SessionManager.getInstance().getVirtualCash(sessionId);
     }
-    
-    const qty = Math.floor(tradeCapital / optionPrice);
+
+    const tradeCapital = targetCapital * allocation;
+
+    // Determine target premium/stock price for sizing
+    let tradePrice = currentPrice;
+    if (shouldTradeOptions && 'lastPrices' in (this.broker as any)) {
+      tradePrice = (this.broker as any).lastPrices?.get(orderSymbol) || 100; // default to 100 premium if not ticked yet
+    }
+
+    const qty = Math.floor(tradeCapital / tradePrice);
 
     if (qty <= 0) {
       console.warn(`Position sizing computed quantity 0 for ${orderSymbol} (allocation capital: INR ${tradeCapital})`);
       return;
+    }
+
+    const requiredCapital = qty * tradePrice;
+
+    // Run constraint checks in SessionManager
+    if (sessionId) {
+      const preTradeCheck = SessionManager.getInstance().canPlaceOrder(
+        sessionId,
+        requiredCapital,
+        account.cashBalance
+      );
+      if (!preTradeCheck.allowed) {
+        console.warn(`[SessionManager] Blocked order for ${orderSymbol}: ${preTradeCheck.reason}`);
+        return;
+      }
     }
 
     const orderReq: OrderRequest = {
@@ -177,6 +215,21 @@ export class LiveTradingEngine {
     try {
       const res = await this.broker.placeOrder(orderReq);
       console.log(`[Order] Successfully entered ${orderSymbol} (Qty: ${qty}) - Order ID: ${res.id}`);
+
+      // Record fill in SessionManager
+      if (sessionId) {
+        const fillPrice = res.avgFillPrice || tradePrice;
+        const fillQty = res.filledQty || qty;
+        const commission = res.commissionPaid || 0;
+        await SessionManager.getInstance().recordFill(
+          sessionId,
+          orderSymbol,
+          'buy',
+          fillQty,
+          fillPrice,
+          commission
+        );
+      }
     } catch (err) {
       console.error(`[Order] Failed to enter position for ${orderSymbol}:`, err);
     }
@@ -185,7 +238,11 @@ export class LiveTradingEngine {
   private async executeExit(symbol: string, currentPrice: number, strategyName: string, isShort: boolean) {
     let orderSymbol = symbol;
 
-    if (this.config.resolveOptionSymbol) {
+    const strategy = this.config.strategies.find((s) => s.name === strategyName);
+    if (!strategy) return;
+    const shouldTradeOptions = strategy.options.tradeOptions ?? false;
+
+    if (shouldTradeOptions && this.config.resolveOptionSymbol) {
       const prefix = (symbol.toUpperCase().includes('NIFTY 50') || symbol.toUpperCase() === 'NIFTY') ? 'NIFTY' :
                      (symbol.toUpperCase().includes('BANK') || symbol.toUpperCase() === 'BANKNIFTY') ? 'BANKNIFTY' :
                      symbol.toUpperCase();
@@ -230,6 +287,22 @@ export class LiveTradingEngine {
     try {
       const res = await this.broker.placeOrder(orderReq);
       console.log(`[Order] Successfully exited ${orderSymbol} (Qty: ${openPosition.qty}) - Order ID: ${res.id}`);
+
+      // Record fill in SessionManager
+      const sessionId = strategy.options.allocationSessionId;
+      if (sessionId) {
+        const fillPrice = res.avgFillPrice || currentPrice;
+        const fillQty = res.filledQty || openPosition.qty;
+        const commission = res.commissionPaid || 0;
+        await SessionManager.getInstance().recordFill(
+          sessionId,
+          orderSymbol,
+          'sell',
+          fillQty,
+          fillPrice,
+          commission
+        );
+      }
     } catch (err) {
       console.error(`[Order] Failed to exit position for ${orderSymbol}:`, err);
     }

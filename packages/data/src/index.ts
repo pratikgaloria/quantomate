@@ -12,6 +12,7 @@ export * from './providers/HistoricalMockFeed';
 export * from './providers/TradierLiveFeed';
 export * from './providers/TradierInstrumentMapper';
 export * from './providers/CompositeLiveFeed';
+export * from './providers/RoutingDataProvider';
 
 
 

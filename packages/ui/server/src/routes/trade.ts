@@ -1,8 +1,46 @@
 import { Router, Request, Response } from 'express';
 import { prisma } from '@quantomate/db';
 import { DataService } from '@quantomate/data';
+import dotenv from 'dotenv';
+import path from 'path';
+
+// Load environment configurations
+dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, '../../../../.env') });
 
 const router = Router();
+
+// Helper to determine market from symbol name
+function getMarketForSymbol(symbol: string): string {
+  const sym = symbol.toUpperCase().trim();
+  const cryptoAssets = ['BTC', 'ETH', 'SOL', 'ADA', 'DOT', 'DOGE', 'XRP'];
+  if (cryptoAssets.some(c => sym.startsWith(c) || sym.endsWith(c) || sym.includes('/USD') || sym.includes('-USD'))) {
+    return 'crypto';
+  }
+  if (sym.startsWith('NIFTY') || sym.startsWith('BANKNIFTY') || ['SBIN', 'RELIANCE', 'TCS', 'INFY', 'HDFCBANK', 'ICICIBANK'].includes(sym)) {
+    return 'india';
+  }
+  return 'us';
+}
+
+// Helper to map symbol to Yahoo ticker symbol
+function mapSymbolToYahooTicker(symbol: string): string {
+  const sym = symbol.toUpperCase().trim();
+  if (sym === 'NIFTY 50' || sym === 'NSEI' || sym === 'NIFTY') {
+    return '^NSEI';
+  }
+  if (sym === 'NIFTY BANK' || sym === 'NSEBANK' || sym === 'BANKNIFTY') {
+    return '^NSEBANK';
+  }
+  const market = getMarketForSymbol(sym);
+  if (market === 'crypto') {
+    return sym.replace('/', '-');
+  }
+  if (market === 'india') {
+    return `${sym}.NS`;
+  }
+  return sym;
+}
 const DAEMON_PORT = process.env.DAEMON_PORT ? parseInt(process.env.DAEMON_PORT, 10) : 8082;
 const DAEMON_URL = `http://127.0.0.1:${DAEMON_PORT}`;
 
@@ -33,6 +71,8 @@ async function fetchFromDaemon(path: string, method: 'GET' | 'POST' = 'GET', bod
 
 // GET /api/trade/status
 router.get('/status', async (req: Request, res: Response) => {
+  const isTradierAuthenticated = !!process.env.TRADIER_API_KEY && process.env.TRADIER_API_KEY !== 'DUMMY';
+
   try {
     const daemonStatus = await fetchFromDaemon('/status');
     
@@ -53,6 +93,9 @@ router.get('/status', async (req: Request, res: Response) => {
         authenticated: isAuthenticated,
         authenticatedAt: session?.createdAt || null,
       },
+      tradier: {
+        authenticated: isTradierAuthenticated,
+      },
       engine: {
         running: daemonStatus.running,
         activeBots: daemonStatus.activeBots,
@@ -66,6 +109,9 @@ router.get('/status', async (req: Request, res: Response) => {
       zerodha: {
         authenticated: false,
         authenticatedAt: null,
+      },
+      tradier: {
+        authenticated: isTradierAuthenticated,
       },
       engine: {
         running: false,
@@ -99,37 +145,63 @@ router.get('/orders', async (req: Request, res: Response) => {
 
 // GET /api/trade/prices
 router.get('/prices', async (req: Request, res: Response) => {
-  const prices: Record<string, number | null> = {
-    'NIFTY 50': null,
-    'NIFTY BANK': null,
-  };
+  const prices: Record<string, number | null> = {};
 
-  // 1. Try querying daemon for latest broker price map
   try {
-    const daemonStatus = await fetchFromDaemon('/status');
-    const priceMap = daemonStatus.prices || {};
-    if (priceMap['NIFTY 50'] !== undefined) prices['NIFTY 50'] = priceMap['NIFTY 50'];
-    if (priceMap['NIFTY BANK'] !== undefined) prices['NIFTY BANK'] = priceMap['NIFTY BANK'];
-  } catch (error) {
-    // Daemon offline
-  }
+    // 1. Get unique symbols from bots
+    const bots = await prisma.tradingBot.findMany({
+      select: { symbol: true }
+    });
+    const symbols = Array.from(new Set(bots.map(b => b.symbol)));
 
-  // 2. Fallback to Yahoo Finance quotes
-  if (prices['NIFTY 50'] === null || prices['NIFTY BANK'] === null) {
-    try {
-      const quotes = await DataService.provider.getQuotes(['^NSEI', '^NSEBANK']);
-      const niftyQuote = quotes.get('^NSEI');
-      const bankNiftyQuote = quotes.get('^NSEBANK');
-
-      if (prices['NIFTY 50'] === null && niftyQuote) {
-        prices['NIFTY 50'] = niftyQuote.regularMarketPrice ?? null;
-      }
-      if (prices['NIFTY BANK'] === null && bankNiftyQuote) {
-        prices['NIFTY BANK'] = bankNiftyQuote.regularMarketPrice ?? null;
-      }
-    } catch (err: any) {
-      console.warn(`[TradeRoutes] Failed index quotes fallback: ${err.message}`);
+    if (symbols.length === 0) {
+      return res.json({ success: true, data: {} });
     }
+
+    for (const sym of symbols) {
+      prices[sym] = null;
+    }
+
+    // 2. Try querying daemon for latest broker price map
+    let daemonStatus: any = null;
+    try {
+      daemonStatus = await fetchFromDaemon('/status');
+      const priceMap = daemonStatus.prices || {};
+      for (const sym of symbols) {
+        if (priceMap[sym] !== undefined) {
+          prices[sym] = priceMap[sym];
+        }
+      }
+    } catch (error) {
+      // Daemon offline
+    }
+
+    // 3. Fallback to Yahoo Finance quotes for any null prices
+    const missingSymbols = symbols.filter(sym => prices[sym] === null);
+    if (missingSymbols.length > 0) {
+      const symbolToTicker = new Map<string, string>();
+      const tickers: string[] = [];
+
+      for (const sym of missingSymbols) {
+        const ticker = mapSymbolToYahooTicker(sym);
+        symbolToTicker.set(sym, ticker);
+        tickers.push(ticker);
+      }
+
+      const quotes = await DataService.provider.getQuotes(tickers);
+
+      for (const sym of missingSymbols) {
+        const ticker = symbolToTicker.get(sym);
+        if (ticker) {
+          const quote = quotes.get(ticker);
+          if (quote) {
+            prices[sym] = quote.regularMarketPrice ?? null;
+          }
+        }
+      }
+    }
+  } catch (err: any) {
+    console.warn(`[TradeRoutes] Failed to fetch bot prices: ${err.message}`);
   }
 
   res.json({ success: true, data: prices });
@@ -176,7 +248,7 @@ router.post('/bots/toggle', async (req: Request, res: Response) => {
 // POST /api/trade/bots - Create a bot
 router.post('/bots', async (req: Request, res: Response) => {
   try {
-    const { name, strategy, symbol, parameters, active } = req.body;
+    const { name, strategy, symbol, parameters, active, allocationSessionId } = req.body;
     if (!name || !strategy || !symbol) {
       return res.status(400).json({ success: false, message: 'Missing required fields: name, strategy, symbol' });
     }
@@ -188,6 +260,7 @@ router.post('/bots', async (req: Request, res: Response) => {
         symbol,
         parameters: parameters || {},
         active: active ?? false,
+        allocationSessionId: allocationSessionId || null,
       },
     });
 
@@ -208,7 +281,7 @@ router.post('/bots', async (req: Request, res: Response) => {
 router.put('/bots/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { name, strategy, symbol, parameters, active } = req.body;
+    const { name, strategy, symbol, parameters, active, allocationSessionId } = req.body;
 
     const updated = await prisma.tradingBot.update({
       where: { id },
@@ -218,6 +291,7 @@ router.put('/bots/:id', async (req: Request, res: Response) => {
         symbol,
         parameters,
         active,
+        allocationSessionId: allocationSessionId || null,
       },
     });
 
@@ -329,6 +403,93 @@ router.post('/settings', async (req: Request, res: Response) => {
     }
 
     res.json({ success: true, message: 'Settings saved and daemon notified.' });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// GET /api/trade/sessions
+router.get('/sessions', async (req: Request, res: Response) => {
+  try {
+    const sessions = await prisma.allocationSession.findMany({
+      include: { bots: true },
+      orderBy: { createdAt: 'asc' },
+    });
+    res.json({ success: true, data: sessions });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// POST /api/trade/sessions
+router.post('/sessions', async (req: Request, res: Response) => {
+  try {
+    const { name, capital, maxDrawdownPct, enabledMarkets, provider, active } = req.body;
+    if (!name || capital === undefined || !provider) {
+      return res.status(400).json({ success: false, message: 'Missing required fields: name, capital, provider' });
+    }
+
+    const session = await prisma.allocationSession.create({
+      data: {
+        name,
+        capital: parseFloat(capital),
+        virtualCash: parseFloat(capital),
+        maxDrawdownPct: maxDrawdownPct ? parseFloat(maxDrawdownPct) : 10.0,
+        enabledMarkets: enabledMarkets || [],
+        provider,
+        active: active ?? true,
+      },
+    });
+
+    res.json({ success: true, data: session });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// PUT /api/trade/sessions/:id
+router.put('/sessions/:id', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { name, capital, maxDrawdownPct, enabledMarkets, provider, active } = req.body;
+
+    const existing = await prisma.allocationSession.findUnique({ where: { id } });
+    if (!existing) {
+      return res.status(404).json({ success: false, message: 'Session not found' });
+    }
+
+    const newCapital = capital !== undefined ? parseFloat(capital) : existing.capital;
+    const deltaCapital = newCapital - existing.capital;
+
+    const session = await prisma.allocationSession.update({
+      where: { id },
+      data: {
+        name,
+        capital: newCapital,
+        virtualCash: existing.virtualCash + deltaCapital,
+        maxDrawdownPct: maxDrawdownPct !== undefined ? parseFloat(maxDrawdownPct) : existing.maxDrawdownPct,
+        enabledMarkets: enabledMarkets || existing.enabledMarkets,
+        provider: provider || existing.provider,
+        active: active !== undefined ? active : existing.active,
+      },
+    });
+
+    res.json({ success: true, data: session });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// DELETE /api/trade/sessions/:id
+router.delete('/sessions/:id', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const deleted = await prisma.allocationSession.delete({
+      where: { id },
+    });
+
+    res.json({ success: true, data: deleted });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });
   }

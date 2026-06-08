@@ -136,15 +136,33 @@ model SystemSetting {
 }
 
 model TradingBot {
-  id        String   @id @default(uuid())
-  name      String   @unique
-  strategy  String   // "GoldenCross", "RSIMeanReversion", "IndexOptionMomentum", "IndexOptionRsiReversion"
-  parameters Json     // Stores strategy parameters as JSON object
-  symbol    String   // E.g., "SBIN", "RELIANCE"
-  active    Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                  String             @id @default(uuid())
+  name                String             @unique
+  strategy            String             // "GoldenCross", "RSIMeanReversion", "IndexOptionMomentum", "IndexOptionRsiReversion"
+  parameters          Json               // Stores strategy parameters as JSON object
+  symbol              String             // E.g., "SBIN", "RELIANCE"
+  active              Boolean            @default(false)
+  allocationSessionId String?            @map("allocation_session_id")
+  allocationSession   AllocationSession? @relation(fields: [allocationSessionId], references: [id], onDelete: Cascade)
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
 
   @@map("trading_bots")
+}
+
+model AllocationSession {
+  id             String       @id @default(uuid())
+  name           String       @unique
+  capital        Float        // Total allocated capital
+  virtualCash    Float        // Current virtual cash remaining
+  maxDrawdownPct Float        @default(10.0) // E.g. 10% maximum drawdown
+  enabledMarkets Json         // E.g. ["india", "us"]
+  provider       String       // "zerodha", "tradier", "paper"
+  active         Boolean      @default(true)
+  bots           TradingBot[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@map("allocation_sessions")
 }
 

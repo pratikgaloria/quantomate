@@ -1,9 +1,9 @@
 import { prisma } from "@quantomate/db";
 import { IDataProvider } from "./providers/IDataProvider";
-import { YahooFinanceProvider } from "./providers/YahooFinanceProvider";
+import { RoutingDataProvider } from "./providers/RoutingDataProvider";
 
 export class DataService {
-  public static provider: IDataProvider = new YahooFinanceProvider();
+  public static provider: IDataProvider = new RoutingDataProvider();
 
   /**
    * Get historical price data for a symbol.

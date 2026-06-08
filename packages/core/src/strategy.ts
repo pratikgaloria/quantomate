@@ -23,6 +23,15 @@ type RiskFn<T, O> = (quote: Quote<T>, position: TradePosition<O>, context: Strat
 
 export type StrategyDirection = 'long' | 'short' | 'both';
 
+export interface OptionSelector {
+  strikeMode: 'atm' | 'offset' | 'delta';
+  strikeOffset?: number;
+  targetDelta?: number;
+  expiryMode: 'nearest' | 'dte' | 'monthly';
+  minDte?: number;
+  maxDte?: number;
+}
+
 export type StrategyOptions<P, T> = {
   indicators?: Indicator<any, T>[];
   onTrigger?: (positionType: TradePositionType, quote: Quote<T>) => void;
@@ -33,6 +42,9 @@ export type StrategyOptions<P, T> = {
   exitWhen?: positionFn<T>;
   entryShortWhen?: positionFn<T>;
   exitShortWhen?: positionFn<T>;
+  tradeOptions?: boolean;
+  optionSelector?: OptionSelector;
+  allocationSessionId?: string;
 };
 
 /**

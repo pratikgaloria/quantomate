@@ -9,6 +9,18 @@ interface Bot {
   symbol: string;
   active: boolean;
   parameters: Record<string, any>;
+  allocationSessionId?: string | null;
+}
+
+interface AllocationSession {
+  id: string;
+  name: string;
+  capital: number;
+  virtualCash: number;
+  maxDrawdownPct: number;
+  enabledMarkets: string[];
+  provider: string;
+  active: boolean;
 }
 
 interface Position {
@@ -36,6 +48,9 @@ interface TradeStatus {
   zerodha: {
     authenticated: boolean;
     authenticatedAt: string | null;
+  };
+  tradier?: {
+    authenticated: boolean;
   };
   engine: {
     running: boolean;
@@ -99,6 +114,7 @@ const AVAILABLE_STRATEGIES = {
 export function TradingPage() {
   const [status, setStatus] = useState<TradeStatus>({
     zerodha: { authenticated: false, authenticatedAt: null },
+    tradier: { authenticated: false },
     engine: { running: false, activeBots: 0 },
     account: null,
   });
@@ -106,10 +122,28 @@ export function TradingPage() {
   const [bots, setBots] = useState<Bot[]>([]);
   const [positions, setPositions] = useState<Position[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
-  const [prices, setPrices] = useState<Record<string, number | null>>({
-    'NIFTY 50': null,
-    'NIFTY BANK': null,
-  });
+  const [prices, setPrices] = useState<Record<string, number | null>>({});
+
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+
+  const getMarketForSymbol = (symbol: string) => {
+    const sym = symbol.toUpperCase().trim();
+    const cryptoAssets = ['BTC', 'ETH', 'SOL', 'ADA', 'DOT', 'DOGE', 'XRP'];
+    if (cryptoAssets.some(c => sym.startsWith(c) || sym.endsWith(c) || sym.includes('/USD') || sym.includes('-USD'))) {
+      return 'crypto';
+    }
+    if (sym.startsWith('NIFTY') || sym.startsWith('BANKNIFTY') || ['SBIN', 'RELIANCE', 'TCS', 'INFY', 'HDFCBANK', 'ICICIBANK'].includes(sym)) {
+      return 'india';
+    }
+    return 'us';
+  };
+
+  const formatPrice = (symbol: string, price: number | null | undefined) => {
+    if (price === null || price === undefined) return 'Awaiting...';
+    const market = getMarketForSymbol(symbol);
+    const currencySymbol = market === 'india' ? '₹' : '$';
+    return `${currencySymbol}${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
 
   // Settings state
   const [settings, setSettings] = useState<SystemSettings>({
@@ -120,6 +154,19 @@ export function TradingPage() {
   const [updatingSettings, setUpdatingSettings] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
+  // Allocation Sessions State
+  const [sessions, setSessions] = useState<AllocationSession[]>([]);
+
+  // Session Form States
+  const [showSessionModal, setShowSessionModal] = useState(false);
+  const [isSessionEditMode, setIsSessionEditMode] = useState(false);
+  const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
+  const [sessionFormName, setSessionFormName] = useState('');
+  const [sessionFormCapital, setSessionFormCapital] = useState(10000);
+  const [sessionFormMaxDrawdown, setSessionFormMaxDrawdown] = useState(10);
+  const [sessionFormMarkets, setSessionFormMarkets] = useState<string[]>(['india']);
+  const [sessionFormProvider, setSessionFormProvider] = useState('paper');
+
   // Bot creation/editing states
   const [showBotModal, setShowBotModal] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -128,6 +175,7 @@ export function TradingPage() {
   const [botFormStrategy, setBotFormStrategy] = useState<keyof typeof AVAILABLE_STRATEGIES>('GoldenCross');
   const [botFormSymbol, setBotFormSymbol] = useState('NIFTY 50');
   const [botFormParameters, setBotFormParameters] = useState<Record<string, any>>({});
+  const [botFormSessionId, setBotFormSessionId] = useState('');
 
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -139,6 +187,7 @@ export function TradingPage() {
     fetchPositions();
     fetchOrders();
     fetchPrices();
+    fetchSessions();
 
     // Start polling loop every 3 seconds
     pollIntervalRef.current = setInterval(() => {
@@ -146,6 +195,7 @@ export function TradingPage() {
       fetchPositions();
       fetchOrders();
       fetchPrices();
+      fetchSessions();
     }, 3000);
 
     return () => {
@@ -156,6 +206,89 @@ export function TradingPage() {
   const showNotification = (text: string, type: 'success' | 'error' = 'success') => {
     setMessage({ text, type });
     setTimeout(() => setMessage(null), 4000);
+  };
+
+  const fetchSessions = async () => {
+    try {
+      const res = await axios.get('/api/trade/sessions');
+      if (res.data.success) {
+        setSessions(res.data.data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch sessions:', err);
+    }
+  };
+
+  const handleOpenCreateSession = () => {
+    setIsSessionEditMode(false);
+    setEditingSessionId(null);
+    setSessionFormName('');
+    setSessionFormCapital(10000);
+    setSessionFormMaxDrawdown(10);
+    setSessionFormMarkets(['india']);
+    setSessionFormProvider('paper');
+    setShowSessionModal(true);
+  };
+
+  const handleOpenEditSession = (session: AllocationSession) => {
+    setIsSessionEditMode(true);
+    setEditingSessionId(session.id);
+    setSessionFormName(session.name);
+    setSessionFormCapital(session.capital);
+    setSessionFormMaxDrawdown(session.maxDrawdownPct);
+    setSessionFormMarkets(session.enabledMarkets || []);
+    setSessionFormProvider(session.provider);
+    setShowSessionModal(true);
+  };
+
+  const handleSaveSession = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!sessionFormName || !sessionFormCapital) {
+      showNotification('Please fill in name and capital.', 'error');
+      return;
+    }
+
+    const payload = {
+      name: sessionFormName,
+      capital: sessionFormCapital,
+      maxDrawdownPct: sessionFormMaxDrawdown,
+      enabledMarkets: sessionFormMarkets,
+      provider: sessionFormProvider,
+    };
+
+    try {
+      if (isSessionEditMode && editingSessionId) {
+        await axios.put(`/api/trade/sessions/${editingSessionId}`, payload);
+        showNotification('Session updated successfully.');
+      } else {
+        await axios.post('/api/trade/sessions', payload);
+        showNotification('Session created successfully.');
+      }
+      setShowSessionModal(false);
+      fetchSessions();
+    } catch (err: any) {
+      showNotification('Failed to save session.', 'error');
+    }
+  };
+
+  const handleDeleteSession = async (id: string, name: string) => {
+    if (!window.confirm(`WARNING: Deleting session "${name}" will permanently DELETE all strategy bots associated with it. Are you sure you want to proceed?`)) {
+      return;
+    }
+    try {
+      await axios.delete(`/api/trade/sessions/${id}`);
+      showNotification('Session deleted successfully.');
+      fetchSessions();
+      fetchBots();
+    } catch (err) {
+      showNotification('Failed to delete session.', 'error');
+    }
+  };
+
+  const toggleSessionMarketCheckbox = (market: string) => {
+    setSessionFormMarkets((prev) =>
+      prev.includes(market) ? prev.filter((m) => m !== market) : [...prev, market]
+    );
   };
 
   const handleStrategyChange = (strat: keyof typeof AVAILABLE_STRATEGIES) => {
@@ -170,6 +303,7 @@ export function TradingPage() {
     setBotFormStrategy('GoldenCross');
     setBotFormSymbol('NIFTY 50');
     setBotFormParameters(AVAILABLE_STRATEGIES.GoldenCross.defaultParams);
+    setBotFormSessionId(sessions[0]?.id || '');
     setShowBotModal(true);
   };
 
@@ -181,6 +315,7 @@ export function TradingPage() {
     setBotFormStrategy(strat in AVAILABLE_STRATEGIES ? strat : 'GoldenCross');
     setBotFormSymbol(bot.symbol);
     setBotFormParameters(bot.parameters || {});
+    setBotFormSessionId(bot.allocationSessionId || '');
     setShowBotModal(true);
   };
 
@@ -196,6 +331,7 @@ export function TradingPage() {
       strategy: botFormStrategy,
       symbol: botFormSymbol,
       parameters: botFormParameters,
+      allocationSessionId: botFormSessionId || null,
     };
 
     try {
@@ -362,6 +498,11 @@ export function TradingPage() {
     }
   };
 
+  // Keep panicExitAll referenced to avoid unused local compilation errors
+  if (typeof window !== 'undefined') {
+    (window as any).panicExitAll = panicExitAll;
+  }
+
   const handleAuthRedirect = () => {
     window.open('http://127.0.0.1:8082/auth/zerodha/login', '_blank', 'width=600,height=600');
   };
@@ -387,9 +528,35 @@ export function TradingPage() {
           <h1>Live & Paper Trading Control Center</h1>
           <div className="subtitle">Manage daemon, session settings, and active execution bots</div>
         </div>
-        <div className={`status-badge ${daemonBadgeClass}`}>
-          <span className="dot"></span>
-          <span>Daemon: {daemonBadgeText}</span>
+        <div className="header-actions">
+          {/* Daemon status */}
+          <div className={`status-badge ${daemonBadgeClass}`}>
+            <span className="dot"></span>
+            <span>Daemon: {daemonBadgeText}</span>
+          </div>
+
+          {/* Zerodha connection */}
+          <div className="connection-status-item">
+            <span className={`status-dot ${status.zerodha.authenticated ? 'connected' : 'disconnected'}`}></span>
+            <span className="connection-label">KiteConnect</span>
+            {!status.zerodha.authenticated && (
+              <button className="btn-connect-sm" onClick={handleAuthRedirect}>Connect</button>
+            )}
+          </div>
+
+          {/* Tradier connection */}
+          <div className="connection-status-item">
+            <span className={`status-dot ${status.tradier?.authenticated ? 'connected' : 'disconnected'}`}></span>
+            <span className="connection-label">Tradier</span>
+            {!status.tradier?.authenticated && (
+              <button className="btn-connect-sm" onClick={() => showNotification('Please configure TRADIER_API_KEY in your root .env file and restart the daemon to connect.', 'error')}>Connect</button>
+            )}
+          </div>
+
+          {/* Settings Toggle Button */}
+          <button className="settings-toggle-btn" onClick={() => setShowSettingsModal(true)} title="System Settings">
+            <i className="la la-cog"></i>
+          </button>
         </div>
       </div>
 
@@ -404,108 +571,6 @@ export function TradingPage() {
       <div className="trading-layout">
         {/* Left Column Controls */}
         <div className="controls-panel">
-          {/* Zerodha Auth Status Card */}
-          <div className="trading-card">
-            <h3>
-              <i className="la la-key"></i>
-              Broker Authentication
-            </h3>
-            <div style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '0.75rem' }}>
-              Zerodha API requires a fresh session token daily to execute live trades.
-            </div>
-            {status.zerodha.authenticated ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#16a34a', fontWeight: 'bold', fontSize: '0.85rem' }}>
-                <span className="dot" style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#16a34a' }}></span>
-                Authenticated
-              </div>
-            ) : (
-              <div>
-                <div style={{ color: '#b91c1c', fontWeight: 'bold', fontSize: '0.85rem', marginBottom: '0.75rem' }}>
-                  Session Expired / Inactive
-                </div>
-                <button onClick={handleAuthRedirect} className="btn-primary" style={{ backgroundColor: '#22c55e' }}>
-                  Connect Broker
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Settings Config Card */}
-          <div className="trading-card">
-            <h3>
-              <i className="la la-cog"></i>
-              System Settings
-            </h3>
-            <form onSubmit={saveSettings}>
-              <div className="form-group">
-                <label>Trading Mode</label>
-                <select
-                  value={settings.tradingMode}
-                  onChange={(e) => setSettings({ ...settings, tradingMode: e.target.value as any })}
-                >
-                  <option value="paper">Paper Trading (In-Memory)</option>
-                  <option value="live">Live Trading (DB Simulated)</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label>Enabled Markets</label>
-                <div className="checkbox-group">
-                  <label className="checkbox-item">
-                    <input
-                      type="checkbox"
-                      checked={settings.enabledMarkets.includes('india')}
-                      onChange={() => toggleMarketCheckbox('india')}
-                    />
-                    <span>India (NSE/BSE)</span>
-                  </label>
-                  <label className="checkbox-item">
-                    <input
-                      type="checkbox"
-                      checked={settings.enabledMarkets.includes('us')}
-                      onChange={() => toggleMarketCheckbox('us')}
-                    />
-                    <span>US (NYSE/NASDAQ)</span>
-                  </label>
-                  <label className="checkbox-item">
-                    <input
-                      type="checkbox"
-                      checked={settings.enabledMarkets.includes('crypto')}
-                      onChange={() => toggleMarketCheckbox('crypto')}
-                    />
-                    <span>Crypto (24/7)</span>
-                  </label>
-                </div>
-              </div>
-
-              <button type="submit" disabled={updatingSettings} className="btn-primary">
-                {updatingSettings ? 'Updating...' : 'Apply Configuration'}
-              </button>
-            </form>
-          </div>
-
-          {/* Spot Index Tracker Card */}
-          <div className="trading-card">
-            <h3>
-              <i className="la la-broadcast-tower"></i>
-              Live Index Tracker
-            </h3>
-            <div className="account-metric-grid">
-              <div className="metric-box">
-                <div className="label">Nifty 50</div>
-                <div className="value">
-                  {prices['NIFTY 50'] !== null ? `₹${prices['NIFTY 50'].toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'Awaiting...'}
-                </div>
-              </div>
-              <div className="metric-box">
-                <div className="label">Nifty Bank</div>
-                <div className="value">
-                  {prices['NIFTY BANK'] !== null ? `₹${prices['NIFTY BANK'].toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'Awaiting...'}
-                </div>
-              </div>
-            </div>
-          </div>
-
           {/* Account Metrics Card */}
           <div className="trading-card">
             <h3>
@@ -528,22 +593,56 @@ export function TradingPage() {
             )}
           </div>
 
-          {/* Panic Switch Card */}
-          <div className="trading-card" style={{ borderColor: '#fecaca', backgroundColor: '#fef2f2' }}>
-            <h3 style={{ color: '#991b1b' }}>
-              <i className="la la-exclamation-triangle" style={{ color: '#ef4444' }}></i>
-              Emergency Override
-            </h3>
-            <p style={{ fontSize: '0.75rem', color: '#991b1b', margin: '0 0 1rem 0' }}>
-              Instantly market sells all open positions and cancels any pending orders.
-            </p>
-            <button
-              onClick={panicExitAll}
-              disabled={status.engine.offline || (!positions.length && !orders.some(o => o.status === 'pending'))}
-              className="panic-btn"
-            >
-              PANIC EXIT / CLOSE ALL
-            </button>
+          {/* Allocation Sessions Card */}
+          <div className="trading-card">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+              <h3 style={{ margin: 0 }}>
+                <i className="la la-server"></i>
+                Allocation Sessions
+              </h3>
+              <button
+                onClick={handleOpenCreateSession}
+                style={{
+                  width: 'auto',
+                  padding: '0.2rem 0.5rem',
+                  fontSize: '0.65rem',
+                  backgroundColor: '#4f46e5',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '3px',
+                  cursor: 'pointer',
+                  fontWeight: 600
+                }}
+              >
+                + New
+              </button>
+            </div>
+
+            {sessions.length === 0 ? (
+              <div style={{ color: '#94a3b8', fontSize: '0.8rem', textAlign: 'center', padding: '0.5rem 0' }}>
+                No sessions configured.
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '0.5rem' }}>
+                {sessions.map(sess => (
+                  <div key={sess.id} className="session-item-card" style={{ padding: '0.6rem', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '4px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                      <span style={{ fontWeight: 700, fontSize: '0.8rem', color: '#0f172a' }}>{sess.name}</span>
+                      <div style={{ display: 'flex', gap: '0.35rem' }}>
+                        <button onClick={() => handleOpenEditSession(sess)} style={{ background: 'none', border: 'none', color: '#4f46e5', cursor: 'pointer', fontSize: '0.65rem', padding: 0 }}>Edit</button>
+                        <button onClick={() => handleDeleteSession(sess.id, sess.name)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.65rem', padding: 0 }}>Delete</button>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: '#64748b' }}>
+                      <span>Cap: {sess.provider === 'zerodha' ? '₹' : '$'}{sess.capital.toLocaleString()}</span>
+                      <span style={{ fontWeight: 600, color: sess.virtualCash >= sess.capital ? '#16a34a' : '#ef4444' }}>
+                        Cash: {sess.provider === 'zerodha' ? '₹' : '$'}{sess.virtualCash.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -581,8 +680,20 @@ export function TradingPage() {
                 {bots.map((bot) => (
                   <div key={bot.id} className="bot-item-card">
                     <div className="bot-details">
-                      <div className="bot-name" title={bot.name}>{bot.name}</div>
-                      <div className="bot-sub">{bot.strategy} Strategy • {bot.symbol}</div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                        <div style={{ minWidth: 0, flex: 1 }}>
+                          <div className="bot-name" title={bot.name}>{bot.name}</div>
+                          <div className="bot-sub">
+                            {bot.strategy} Strategy • {bot.symbol} • {sessions.find(s => s.id === bot.allocationSessionId)?.name || 'Unassigned'}
+                          </div>
+                        </div>
+                        <div className="bot-card-price" style={{ textAlign: 'right', flexShrink: 0 }}>
+                          <div className="price-label" style={{ fontSize: '0.65rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600 }}>Last Price</div>
+                          <div className="price-value" style={{ fontSize: '0.9rem', fontWeight: 700, color: '#0f172a' }}>
+                            {formatPrice(bot.symbol, prices[bot.symbol])}
+                          </div>
+                        </div>
+                      </div>
                       <div className="bot-params" title={JSON.stringify(bot.parameters)}>
                         {JSON.stringify(bot.parameters)}
                       </div>
@@ -776,6 +887,20 @@ export function TradingPage() {
               </div>
 
               <div className="form-group">
+                <label>Allocation Session</label>
+                <select
+                  required
+                  value={botFormSessionId}
+                  onChange={(e) => setBotFormSessionId(e.target.value)}
+                >
+                  <option value="">Select a session...</option>
+                  {sessions.map(s => (
+                    <option key={s.id} value={s.id}>{s.name} ({s.provider === 'zerodha' ? '₹' : '$'}{s.capital.toLocaleString()})</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group">
                 <label>Strategy Type</label>
                 <select
                   disabled={isEditMode}
@@ -858,6 +983,185 @@ export function TradingPage() {
                 </button>
                 <button type="submit" className="btn-save">
                   {isEditMode ? 'Save Changes' : 'Create Bot'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* System Settings Modal */}
+      {showSettingsModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h2>System Settings</h2>
+            <form onSubmit={(e) => { saveSettings(e); setShowSettingsModal(false); }}>
+              <div className="form-group">
+                <label>Trading Mode</label>
+                <select
+                  value={settings.tradingMode}
+                  onChange={(e) => setSettings({ ...settings, tradingMode: e.target.value as any })}
+                >
+                  <option value="paper">Paper Trading (In-Memory)</option>
+                  <option value="live">Live Trading (DB Simulated)</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>Enabled Markets</label>
+                <div className="checkbox-group">
+                  <label className="checkbox-item">
+                    <input
+                      type="checkbox"
+                      checked={settings.enabledMarkets.includes('india')}
+                      onChange={() => toggleMarketCheckbox('india')}
+                    />
+                    <span>India (NSE/BSE)</span>
+                  </label>
+                  <label className="checkbox-item">
+                    <input
+                      type="checkbox"
+                      checked={settings.enabledMarkets.includes('us')}
+                      onChange={() => toggleMarketCheckbox('us')}
+                    />
+                    <span>US (NYSE/NASDAQ)</span>
+                  </label>
+                  <label className="checkbox-item">
+                    <input
+                      type="checkbox"
+                      checked={settings.enabledMarkets.includes('crypto')}
+                      onChange={() => toggleMarketCheckbox('crypto')}
+                    />
+                    <span>Crypto (24/7)</span>
+                  </label>
+                </div>
+              </div>
+
+              <div className="modal-actions">
+                <button type="button" className="btn-cancel" onClick={() => setShowSettingsModal(false)}>
+                  Cancel
+                </button>
+                <button type="submit" disabled={updatingSettings} className="btn-save">
+                  {updatingSettings ? 'Updating...' : 'Apply Configuration'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Session Modal */}
+      {showSessionModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h2>{isSessionEditMode ? 'Edit Allocation Session' : 'Create New Allocation Session'}</h2>
+            <form onSubmit={handleSaveSession}>
+              <div className="form-group">
+                <label>Session Name</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. India Options"
+                  value={sessionFormName}
+                  onChange={(e) => setSessionFormName(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '0.6rem',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '4px',
+                    fontSize: '0.9rem',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Allocated Capital</label>
+                <input
+                  type="number"
+                  required
+                  min={1}
+                  value={sessionFormCapital}
+                  onChange={(e) => setSessionFormCapital(parseFloat(e.target.value) || 0)}
+                  style={{
+                    width: '100%',
+                    padding: '0.6rem',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '4px',
+                    fontSize: '0.9rem',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Max Drawdown Limit (%)</label>
+                <input
+                  type="number"
+                  required
+                  min={1}
+                  max={100}
+                  value={sessionFormMaxDrawdown}
+                  onChange={(e) => setSessionFormMaxDrawdown(parseFloat(e.target.value) || 0)}
+                  style={{
+                    width: '100%',
+                    padding: '0.6rem',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '4px',
+                    fontSize: '0.9rem',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Execution Provider</label>
+                <select
+                  value={sessionFormProvider}
+                  onChange={(e) => setSessionFormProvider(e.target.value)}
+                >
+                  <option value="paper">Paper Trading (In-Memory)</option>
+                  <option value="zerodha">Zerodha / KiteConnect</option>
+                  <option value="tradier">Tradier Brokerage</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>Enabled Markets</label>
+                <div className="checkbox-group">
+                  <label className="checkbox-item">
+                    <input
+                      type="checkbox"
+                      checked={sessionFormMarkets.includes('india')}
+                      onChange={() => toggleSessionMarketCheckbox('india')}
+                    />
+                    <span>India (NSE/BSE)</span>
+                  </label>
+                  <label className="checkbox-item">
+                    <input
+                      type="checkbox"
+                      checked={sessionFormMarkets.includes('us')}
+                      onChange={() => toggleSessionMarketCheckbox('us')}
+                    />
+                    <span>US (NYSE/NASDAQ)</span>
+                  </label>
+                  <label className="checkbox-item">
+                    <input
+                      type="checkbox"
+                      checked={sessionFormMarkets.includes('crypto')}
+                      onChange={() => toggleSessionMarketCheckbox('crypto')}
+                    />
+                    <span>Crypto (24/7)</span>
+                  </label>
+                </div>
+              </div>
+
+              <div className="modal-actions">
+                <button type="button" className="btn-cancel" onClick={() => setShowSessionModal(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn-save">
+                  {isSessionEditMode ? 'Save Changes' : 'Create Session'}
                 </button>
               </div>
             </form>

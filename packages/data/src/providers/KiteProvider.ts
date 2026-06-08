@@ -2,6 +2,7 @@ import axios from 'axios';
 import papa from 'papaparse';
 import fs from 'fs';
 import path from 'path';
+import { OptionSelector } from '@quantomate/core';
 
 export interface KiteInstrument {
   instrument_token: number;
@@ -102,7 +103,12 @@ export class KiteInstrumentMapper {
     return [];
   }
 
-  static findATMOption(underlying: string, optionType: 'CE' | 'PE', underlyingPrice: number): any | undefined {
+  static findATMOption(
+    underlying: string,
+    optionType: 'CE' | 'PE',
+    underlyingPrice: number,
+    selector?: OptionSelector
+  ): any | undefined {
     let name = underlying.toUpperCase();
     if (name.includes('NIFTY 50') || name === 'NIFTY') {
       name = 'NIFTY';
@@ -110,22 +116,86 @@ export class KiteInstrumentMapper {
       name = 'BANKNIFTY';
     }
 
-    const interval = name === 'NIFTY' ? 50 : 100;
-    const strike = Math.round(underlyingPrice / interval) * interval;
-
     const list = this.getCachedList();
-    const matching = list.filter(item => 
+    if (list.length === 0) return undefined;
+
+    // Filter list for matching underlying name, NFO exchange, and option type
+    const matchingInstruments = list.filter(item => 
       item.name === name &&
       item.exchange === 'NFO' &&
-      item.instrument_type === optionType &&
-      item.strike === strike
+      item.instrument_type === optionType
     );
 
-    if (matching.length === 0) return undefined;
+    if (matchingInstruments.length === 0) return undefined;
 
-    // Sort by expiry date ascending
-    matching.sort((a, b) => new Date(a.expiry).getTime() - new Date(b.expiry).getTime());
+    // 1. Filter by Expiration / DTE
+    const uniqueExpirations = Array.from(new Set(matchingInstruments.map(item => item.expiry))).sort();
+    let targetExpiry = uniqueExpirations[0]; // default to nearest
 
-    return matching[0];
+    if (selector) {
+      if (selector.expiryMode === 'dte') {
+        const minDte = selector.minDte ?? 0;
+        const maxDte = selector.maxDte ?? 365;
+        const nowMs = Date.now();
+        const matchedExpirations = uniqueExpirations.filter(exp => {
+          const expMs = new Date(exp).getTime();
+          const dte = (expMs - nowMs) / (1000 * 60 * 60 * 24);
+          return dte >= minDte && dte <= maxDte;
+        });
+        if (matchedExpirations.length > 0) {
+          targetExpiry = matchedExpirations[0];
+        }
+      } else if (selector.expiryMode === 'monthly') {
+        const expsByMonth: Record<string, string[]> = {};
+        for (const exp of uniqueExpirations) {
+          const monthKey = exp.substring(0, 7); // YYYY-MM
+          if (!expsByMonth[monthKey]) expsByMonth[monthKey] = [];
+          expsByMonth[monthKey].push(exp);
+        }
+        const monthlyExpirations = Object.values(expsByMonth).map(exps => exps[exps.length - 1]);
+        if (monthlyExpirations.length > 0) {
+          targetExpiry = monthlyExpirations[0];
+        }
+      }
+    }
+
+    // Filter instruments by target expiry
+    const chain = matchingInstruments.filter(item => item.expiry === targetExpiry);
+    if (chain.length === 0) return undefined;
+
+    // 2. Select Strike
+    const uniqueStrikes = Array.from(new Set(chain.map(item => Number(item.strike)))).sort((a, b) => a - b);
+    const interval = name === 'NIFTY' ? 50 : 100;
+    const atmStrike = Math.round(underlyingPrice / interval) * interval;
+    
+    let selectedStrike = atmStrike;
+
+    if (selector && selector.strikeMode === 'offset' && selector.strikeOffset) {
+      let atmIndex = uniqueStrikes.indexOf(atmStrike);
+      if (atmIndex === -1) {
+        let minDiff = Math.abs(uniqueStrikes[0] - atmStrike);
+        atmIndex = 0;
+        for (let i = 1; i < uniqueStrikes.length; i++) {
+          const diff = Math.abs(uniqueStrikes[i] - atmStrike);
+          if (diff < minDiff) {
+            minDiff = diff;
+            atmIndex = i;
+          }
+        }
+      }
+
+      if (atmIndex !== -1) {
+        let offsetIndex = atmIndex;
+        if (optionType === 'CE') {
+          offsetIndex += selector.strikeOffset;
+        } else {
+          offsetIndex -= selector.strikeOffset;
+        }
+        const targetIndex = Math.max(0, Math.min(uniqueStrikes.length - 1, offsetIndex));
+        selectedStrike = uniqueStrikes[targetIndex];
+      }
+    }
+
+    return chain.find(item => Number(item.strike) === selectedStrike);
   }
 }
