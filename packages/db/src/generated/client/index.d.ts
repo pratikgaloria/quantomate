@@ -33,6 +33,36 @@ export type StrategySignal = $Result.DefaultSelection<Prisma.$StrategySignalPayl
  * 
  */
 export type FundamentalMetric = $Result.DefaultSelection<Prisma.$FundamentalMetricPayload>
+/**
+ * Model TradingSession
+ * 
+ */
+export type TradingSession = $Result.DefaultSelection<Prisma.$TradingSessionPayload>
+/**
+ * Model TradingAccount
+ * 
+ */
+export type TradingAccount = $Result.DefaultSelection<Prisma.$TradingAccountPayload>
+/**
+ * Model TradingOrder
+ * 
+ */
+export type TradingOrder = $Result.DefaultSelection<Prisma.$TradingOrderPayload>
+/**
+ * Model TradingPosition
+ * 
+ */
+export type TradingPosition = $Result.DefaultSelection<Prisma.$TradingPositionPayload>
+/**
+ * Model SystemSetting
+ * 
+ */
+export type SystemSetting = $Result.DefaultSelection<Prisma.$SystemSettingPayload>
+/**
+ * Model TradingBot
+ * 
+ */
+export type TradingBot = $Result.DefaultSelection<Prisma.$TradingBotPayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -194,6 +224,66 @@ export class PrismaClient<
     * ```
     */
   get fundamentalMetric(): Prisma.FundamentalMetricDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.tradingSession`: Exposes CRUD operations for the **TradingSession** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more TradingSessions
+    * const tradingSessions = await prisma.tradingSession.findMany()
+    * ```
+    */
+  get tradingSession(): Prisma.TradingSessionDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.tradingAccount`: Exposes CRUD operations for the **TradingAccount** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more TradingAccounts
+    * const tradingAccounts = await prisma.tradingAccount.findMany()
+    * ```
+    */
+  get tradingAccount(): Prisma.TradingAccountDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.tradingOrder`: Exposes CRUD operations for the **TradingOrder** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more TradingOrders
+    * const tradingOrders = await prisma.tradingOrder.findMany()
+    * ```
+    */
+  get tradingOrder(): Prisma.TradingOrderDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.tradingPosition`: Exposes CRUD operations for the **TradingPosition** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more TradingPositions
+    * const tradingPositions = await prisma.tradingPosition.findMany()
+    * ```
+    */
+  get tradingPosition(): Prisma.TradingPositionDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.systemSetting`: Exposes CRUD operations for the **SystemSetting** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more SystemSettings
+    * const systemSettings = await prisma.systemSetting.findMany()
+    * ```
+    */
+  get systemSetting(): Prisma.SystemSettingDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.tradingBot`: Exposes CRUD operations for the **TradingBot** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more TradingBots
+    * const tradingBots = await prisma.tradingBot.findMany()
+    * ```
+    */
+  get tradingBot(): Prisma.TradingBotDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -631,7 +721,13 @@ export namespace Prisma {
     Symbol: 'Symbol',
     HistoricalPrice: 'HistoricalPrice',
     StrategySignal: 'StrategySignal',
-    FundamentalMetric: 'FundamentalMetric'
+    FundamentalMetric: 'FundamentalMetric',
+    TradingSession: 'TradingSession',
+    TradingAccount: 'TradingAccount',
+    TradingOrder: 'TradingOrder',
+    TradingPosition: 'TradingPosition',
+    SystemSetting: 'SystemSetting',
+    TradingBot: 'TradingBot'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -647,7 +743,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "symbol" | "historicalPrice" | "strategySignal" | "fundamentalMetric"
+      modelProps: "symbol" | "historicalPrice" | "strategySignal" | "fundamentalMetric" | "tradingSession" | "tradingAccount" | "tradingOrder" | "tradingPosition" | "systemSetting" | "tradingBot"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -947,6 +1043,450 @@ export namespace Prisma {
           }
         }
       }
+      TradingSession: {
+        payload: Prisma.$TradingSessionPayload<ExtArgs>
+        fields: Prisma.TradingSessionFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.TradingSessionFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingSessionPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.TradingSessionFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingSessionPayload>
+          }
+          findFirst: {
+            args: Prisma.TradingSessionFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingSessionPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.TradingSessionFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingSessionPayload>
+          }
+          findMany: {
+            args: Prisma.TradingSessionFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingSessionPayload>[]
+          }
+          create: {
+            args: Prisma.TradingSessionCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingSessionPayload>
+          }
+          createMany: {
+            args: Prisma.TradingSessionCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.TradingSessionCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingSessionPayload>[]
+          }
+          delete: {
+            args: Prisma.TradingSessionDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingSessionPayload>
+          }
+          update: {
+            args: Prisma.TradingSessionUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingSessionPayload>
+          }
+          deleteMany: {
+            args: Prisma.TradingSessionDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.TradingSessionUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.TradingSessionUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingSessionPayload>[]
+          }
+          upsert: {
+            args: Prisma.TradingSessionUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingSessionPayload>
+          }
+          aggregate: {
+            args: Prisma.TradingSessionAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateTradingSession>
+          }
+          groupBy: {
+            args: Prisma.TradingSessionGroupByArgs<ExtArgs>
+            result: $Utils.Optional<TradingSessionGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.TradingSessionCountArgs<ExtArgs>
+            result: $Utils.Optional<TradingSessionCountAggregateOutputType> | number
+          }
+        }
+      }
+      TradingAccount: {
+        payload: Prisma.$TradingAccountPayload<ExtArgs>
+        fields: Prisma.TradingAccountFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.TradingAccountFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingAccountPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.TradingAccountFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingAccountPayload>
+          }
+          findFirst: {
+            args: Prisma.TradingAccountFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingAccountPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.TradingAccountFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingAccountPayload>
+          }
+          findMany: {
+            args: Prisma.TradingAccountFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingAccountPayload>[]
+          }
+          create: {
+            args: Prisma.TradingAccountCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingAccountPayload>
+          }
+          createMany: {
+            args: Prisma.TradingAccountCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.TradingAccountCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingAccountPayload>[]
+          }
+          delete: {
+            args: Prisma.TradingAccountDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingAccountPayload>
+          }
+          update: {
+            args: Prisma.TradingAccountUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingAccountPayload>
+          }
+          deleteMany: {
+            args: Prisma.TradingAccountDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.TradingAccountUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.TradingAccountUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingAccountPayload>[]
+          }
+          upsert: {
+            args: Prisma.TradingAccountUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingAccountPayload>
+          }
+          aggregate: {
+            args: Prisma.TradingAccountAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateTradingAccount>
+          }
+          groupBy: {
+            args: Prisma.TradingAccountGroupByArgs<ExtArgs>
+            result: $Utils.Optional<TradingAccountGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.TradingAccountCountArgs<ExtArgs>
+            result: $Utils.Optional<TradingAccountCountAggregateOutputType> | number
+          }
+        }
+      }
+      TradingOrder: {
+        payload: Prisma.$TradingOrderPayload<ExtArgs>
+        fields: Prisma.TradingOrderFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.TradingOrderFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingOrderPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.TradingOrderFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingOrderPayload>
+          }
+          findFirst: {
+            args: Prisma.TradingOrderFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingOrderPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.TradingOrderFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingOrderPayload>
+          }
+          findMany: {
+            args: Prisma.TradingOrderFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingOrderPayload>[]
+          }
+          create: {
+            args: Prisma.TradingOrderCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingOrderPayload>
+          }
+          createMany: {
+            args: Prisma.TradingOrderCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.TradingOrderCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingOrderPayload>[]
+          }
+          delete: {
+            args: Prisma.TradingOrderDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingOrderPayload>
+          }
+          update: {
+            args: Prisma.TradingOrderUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingOrderPayload>
+          }
+          deleteMany: {
+            args: Prisma.TradingOrderDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.TradingOrderUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.TradingOrderUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingOrderPayload>[]
+          }
+          upsert: {
+            args: Prisma.TradingOrderUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingOrderPayload>
+          }
+          aggregate: {
+            args: Prisma.TradingOrderAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateTradingOrder>
+          }
+          groupBy: {
+            args: Prisma.TradingOrderGroupByArgs<ExtArgs>
+            result: $Utils.Optional<TradingOrderGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.TradingOrderCountArgs<ExtArgs>
+            result: $Utils.Optional<TradingOrderCountAggregateOutputType> | number
+          }
+        }
+      }
+      TradingPosition: {
+        payload: Prisma.$TradingPositionPayload<ExtArgs>
+        fields: Prisma.TradingPositionFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.TradingPositionFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingPositionPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.TradingPositionFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingPositionPayload>
+          }
+          findFirst: {
+            args: Prisma.TradingPositionFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingPositionPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.TradingPositionFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingPositionPayload>
+          }
+          findMany: {
+            args: Prisma.TradingPositionFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingPositionPayload>[]
+          }
+          create: {
+            args: Prisma.TradingPositionCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingPositionPayload>
+          }
+          createMany: {
+            args: Prisma.TradingPositionCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.TradingPositionCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingPositionPayload>[]
+          }
+          delete: {
+            args: Prisma.TradingPositionDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingPositionPayload>
+          }
+          update: {
+            args: Prisma.TradingPositionUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingPositionPayload>
+          }
+          deleteMany: {
+            args: Prisma.TradingPositionDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.TradingPositionUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.TradingPositionUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingPositionPayload>[]
+          }
+          upsert: {
+            args: Prisma.TradingPositionUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingPositionPayload>
+          }
+          aggregate: {
+            args: Prisma.TradingPositionAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateTradingPosition>
+          }
+          groupBy: {
+            args: Prisma.TradingPositionGroupByArgs<ExtArgs>
+            result: $Utils.Optional<TradingPositionGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.TradingPositionCountArgs<ExtArgs>
+            result: $Utils.Optional<TradingPositionCountAggregateOutputType> | number
+          }
+        }
+      }
+      SystemSetting: {
+        payload: Prisma.$SystemSettingPayload<ExtArgs>
+        fields: Prisma.SystemSettingFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.SystemSettingFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SystemSettingPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.SystemSettingFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SystemSettingPayload>
+          }
+          findFirst: {
+            args: Prisma.SystemSettingFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SystemSettingPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.SystemSettingFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SystemSettingPayload>
+          }
+          findMany: {
+            args: Prisma.SystemSettingFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SystemSettingPayload>[]
+          }
+          create: {
+            args: Prisma.SystemSettingCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SystemSettingPayload>
+          }
+          createMany: {
+            args: Prisma.SystemSettingCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.SystemSettingCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SystemSettingPayload>[]
+          }
+          delete: {
+            args: Prisma.SystemSettingDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SystemSettingPayload>
+          }
+          update: {
+            args: Prisma.SystemSettingUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SystemSettingPayload>
+          }
+          deleteMany: {
+            args: Prisma.SystemSettingDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.SystemSettingUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.SystemSettingUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SystemSettingPayload>[]
+          }
+          upsert: {
+            args: Prisma.SystemSettingUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SystemSettingPayload>
+          }
+          aggregate: {
+            args: Prisma.SystemSettingAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateSystemSetting>
+          }
+          groupBy: {
+            args: Prisma.SystemSettingGroupByArgs<ExtArgs>
+            result: $Utils.Optional<SystemSettingGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.SystemSettingCountArgs<ExtArgs>
+            result: $Utils.Optional<SystemSettingCountAggregateOutputType> | number
+          }
+        }
+      }
+      TradingBot: {
+        payload: Prisma.$TradingBotPayload<ExtArgs>
+        fields: Prisma.TradingBotFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.TradingBotFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingBotPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.TradingBotFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingBotPayload>
+          }
+          findFirst: {
+            args: Prisma.TradingBotFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingBotPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.TradingBotFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingBotPayload>
+          }
+          findMany: {
+            args: Prisma.TradingBotFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingBotPayload>[]
+          }
+          create: {
+            args: Prisma.TradingBotCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingBotPayload>
+          }
+          createMany: {
+            args: Prisma.TradingBotCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.TradingBotCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingBotPayload>[]
+          }
+          delete: {
+            args: Prisma.TradingBotDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingBotPayload>
+          }
+          update: {
+            args: Prisma.TradingBotUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingBotPayload>
+          }
+          deleteMany: {
+            args: Prisma.TradingBotDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.TradingBotUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.TradingBotUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingBotPayload>[]
+          }
+          upsert: {
+            args: Prisma.TradingBotUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TradingBotPayload>
+          }
+          aggregate: {
+            args: Prisma.TradingBotAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateTradingBot>
+          }
+          groupBy: {
+            args: Prisma.TradingBotGroupByArgs<ExtArgs>
+            result: $Utils.Optional<TradingBotGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.TradingBotCountArgs<ExtArgs>
+            result: $Utils.Optional<TradingBotCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1059,6 +1599,12 @@ export namespace Prisma {
     historicalPrice?: HistoricalPriceOmit
     strategySignal?: StrategySignalOmit
     fundamentalMetric?: FundamentalMetricOmit
+    tradingSession?: TradingSessionOmit
+    tradingAccount?: TradingAccountOmit
+    tradingOrder?: TradingOrderOmit
+    tradingPosition?: TradingPositionOmit
+    systemSetting?: SystemSettingOmit
+    tradingBot?: TradingBotOmit
   }
 
   /* Types for Logging */
@@ -1171,6 +1717,46 @@ export namespace Prisma {
    */
   export type SymbolCountOutputTypeCountSignalsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: StrategySignalWhereInput
+  }
+
+
+  /**
+   * Count Type TradingAccountCountOutputType
+   */
+
+  export type TradingAccountCountOutputType = {
+    orders: number
+    positions: number
+  }
+
+  export type TradingAccountCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    orders?: boolean | TradingAccountCountOutputTypeCountOrdersArgs
+    positions?: boolean | TradingAccountCountOutputTypeCountPositionsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * TradingAccountCountOutputType without action
+   */
+  export type TradingAccountCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingAccountCountOutputType
+     */
+    select?: TradingAccountCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * TradingAccountCountOutputType without action
+   */
+  export type TradingAccountCountOutputTypeCountOrdersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TradingOrderWhereInput
+  }
+
+  /**
+   * TradingAccountCountOutputType without action
+   */
+  export type TradingAccountCountOutputTypeCountPositionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TradingPositionWhereInput
   }
 
 
@@ -5753,6 +6339,6535 @@ export namespace Prisma {
 
 
   /**
+   * Model TradingSession
+   */
+
+  export type AggregateTradingSession = {
+    _count: TradingSessionCountAggregateOutputType | null
+    _min: TradingSessionMinAggregateOutputType | null
+    _max: TradingSessionMaxAggregateOutputType | null
+  }
+
+  export type TradingSessionMinAggregateOutputType = {
+    id: string | null
+    provider: string | null
+    accessToken: string | null
+    publicToken: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type TradingSessionMaxAggregateOutputType = {
+    id: string | null
+    provider: string | null
+    accessToken: string | null
+    publicToken: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type TradingSessionCountAggregateOutputType = {
+    id: number
+    provider: number
+    accessToken: number
+    publicToken: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type TradingSessionMinAggregateInputType = {
+    id?: true
+    provider?: true
+    accessToken?: true
+    publicToken?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type TradingSessionMaxAggregateInputType = {
+    id?: true
+    provider?: true
+    accessToken?: true
+    publicToken?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type TradingSessionCountAggregateInputType = {
+    id?: true
+    provider?: true
+    accessToken?: true
+    publicToken?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type TradingSessionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TradingSession to aggregate.
+     */
+    where?: TradingSessionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TradingSessions to fetch.
+     */
+    orderBy?: TradingSessionOrderByWithRelationInput | TradingSessionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: TradingSessionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TradingSessions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TradingSessions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned TradingSessions
+    **/
+    _count?: true | TradingSessionCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: TradingSessionMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: TradingSessionMaxAggregateInputType
+  }
+
+  export type GetTradingSessionAggregateType<T extends TradingSessionAggregateArgs> = {
+        [P in keyof T & keyof AggregateTradingSession]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateTradingSession[P]>
+      : GetScalarType<T[P], AggregateTradingSession[P]>
+  }
+
+
+
+
+  export type TradingSessionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TradingSessionWhereInput
+    orderBy?: TradingSessionOrderByWithAggregationInput | TradingSessionOrderByWithAggregationInput[]
+    by: TradingSessionScalarFieldEnum[] | TradingSessionScalarFieldEnum
+    having?: TradingSessionScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: TradingSessionCountAggregateInputType | true
+    _min?: TradingSessionMinAggregateInputType
+    _max?: TradingSessionMaxAggregateInputType
+  }
+
+  export type TradingSessionGroupByOutputType = {
+    id: string
+    provider: string
+    accessToken: string
+    publicToken: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: TradingSessionCountAggregateOutputType | null
+    _min: TradingSessionMinAggregateOutputType | null
+    _max: TradingSessionMaxAggregateOutputType | null
+  }
+
+  type GetTradingSessionGroupByPayload<T extends TradingSessionGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<TradingSessionGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof TradingSessionGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], TradingSessionGroupByOutputType[P]>
+            : GetScalarType<T[P], TradingSessionGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type TradingSessionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    provider?: boolean
+    accessToken?: boolean
+    publicToken?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["tradingSession"]>
+
+  export type TradingSessionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    provider?: boolean
+    accessToken?: boolean
+    publicToken?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["tradingSession"]>
+
+  export type TradingSessionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    provider?: boolean
+    accessToken?: boolean
+    publicToken?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["tradingSession"]>
+
+  export type TradingSessionSelectScalar = {
+    id?: boolean
+    provider?: boolean
+    accessToken?: boolean
+    publicToken?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type TradingSessionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "provider" | "accessToken" | "publicToken" | "createdAt" | "updatedAt", ExtArgs["result"]["tradingSession"]>
+
+  export type $TradingSessionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "TradingSession"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      provider: string
+      accessToken: string
+      publicToken: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["tradingSession"]>
+    composites: {}
+  }
+
+  type TradingSessionGetPayload<S extends boolean | null | undefined | TradingSessionDefaultArgs> = $Result.GetResult<Prisma.$TradingSessionPayload, S>
+
+  type TradingSessionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<TradingSessionFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: TradingSessionCountAggregateInputType | true
+    }
+
+  export interface TradingSessionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['TradingSession'], meta: { name: 'TradingSession' } }
+    /**
+     * Find zero or one TradingSession that matches the filter.
+     * @param {TradingSessionFindUniqueArgs} args - Arguments to find a TradingSession
+     * @example
+     * // Get one TradingSession
+     * const tradingSession = await prisma.tradingSession.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends TradingSessionFindUniqueArgs>(args: SelectSubset<T, TradingSessionFindUniqueArgs<ExtArgs>>): Prisma__TradingSessionClient<$Result.GetResult<Prisma.$TradingSessionPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one TradingSession that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {TradingSessionFindUniqueOrThrowArgs} args - Arguments to find a TradingSession
+     * @example
+     * // Get one TradingSession
+     * const tradingSession = await prisma.tradingSession.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends TradingSessionFindUniqueOrThrowArgs>(args: SelectSubset<T, TradingSessionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__TradingSessionClient<$Result.GetResult<Prisma.$TradingSessionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first TradingSession that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TradingSessionFindFirstArgs} args - Arguments to find a TradingSession
+     * @example
+     * // Get one TradingSession
+     * const tradingSession = await prisma.tradingSession.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends TradingSessionFindFirstArgs>(args?: SelectSubset<T, TradingSessionFindFirstArgs<ExtArgs>>): Prisma__TradingSessionClient<$Result.GetResult<Prisma.$TradingSessionPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first TradingSession that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TradingSessionFindFirstOrThrowArgs} args - Arguments to find a TradingSession
+     * @example
+     * // Get one TradingSession
+     * const tradingSession = await prisma.tradingSession.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends TradingSessionFindFirstOrThrowArgs>(args?: SelectSubset<T, TradingSessionFindFirstOrThrowArgs<ExtArgs>>): Prisma__TradingSessionClient<$Result.GetResult<Prisma.$TradingSessionPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more TradingSessions that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TradingSessionFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all TradingSessions
+     * const tradingSessions = await prisma.tradingSession.findMany()
+     * 
+     * // Get first 10 TradingSessions
+     * const tradingSessions = await prisma.tradingSession.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const tradingSessionWithIdOnly = await prisma.tradingSession.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends TradingSessionFindManyArgs>(args?: SelectSubset<T, TradingSessionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TradingSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a TradingSession.
+     * @param {TradingSessionCreateArgs} args - Arguments to create a TradingSession.
+     * @example
+     * // Create one TradingSession
+     * const TradingSession = await prisma.tradingSession.create({
+     *   data: {
+     *     // ... data to create a TradingSession
+     *   }
+     * })
+     * 
+     */
+    create<T extends TradingSessionCreateArgs>(args: SelectSubset<T, TradingSessionCreateArgs<ExtArgs>>): Prisma__TradingSessionClient<$Result.GetResult<Prisma.$TradingSessionPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many TradingSessions.
+     * @param {TradingSessionCreateManyArgs} args - Arguments to create many TradingSessions.
+     * @example
+     * // Create many TradingSessions
+     * const tradingSession = await prisma.tradingSession.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends TradingSessionCreateManyArgs>(args?: SelectSubset<T, TradingSessionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many TradingSessions and returns the data saved in the database.
+     * @param {TradingSessionCreateManyAndReturnArgs} args - Arguments to create many TradingSessions.
+     * @example
+     * // Create many TradingSessions
+     * const tradingSession = await prisma.tradingSession.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many TradingSessions and only return the `id`
+     * const tradingSessionWithIdOnly = await prisma.tradingSession.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends TradingSessionCreateManyAndReturnArgs>(args?: SelectSubset<T, TradingSessionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TradingSessionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a TradingSession.
+     * @param {TradingSessionDeleteArgs} args - Arguments to delete one TradingSession.
+     * @example
+     * // Delete one TradingSession
+     * const TradingSession = await prisma.tradingSession.delete({
+     *   where: {
+     *     // ... filter to delete one TradingSession
+     *   }
+     * })
+     * 
+     */
+    delete<T extends TradingSessionDeleteArgs>(args: SelectSubset<T, TradingSessionDeleteArgs<ExtArgs>>): Prisma__TradingSessionClient<$Result.GetResult<Prisma.$TradingSessionPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one TradingSession.
+     * @param {TradingSessionUpdateArgs} args - Arguments to update one TradingSession.
+     * @example
+     * // Update one TradingSession
+     * const tradingSession = await prisma.tradingSession.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends TradingSessionUpdateArgs>(args: SelectSubset<T, TradingSessionUpdateArgs<ExtArgs>>): Prisma__TradingSessionClient<$Result.GetResult<Prisma.$TradingSessionPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more TradingSessions.
+     * @param {TradingSessionDeleteManyArgs} args - Arguments to filter TradingSessions to delete.
+     * @example
+     * // Delete a few TradingSessions
+     * const { count } = await prisma.tradingSession.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends TradingSessionDeleteManyArgs>(args?: SelectSubset<T, TradingSessionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more TradingSessions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TradingSessionUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many TradingSessions
+     * const tradingSession = await prisma.tradingSession.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends TradingSessionUpdateManyArgs>(args: SelectSubset<T, TradingSessionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more TradingSessions and returns the data updated in the database.
+     * @param {TradingSessionUpdateManyAndReturnArgs} args - Arguments to update many TradingSessions.
+     * @example
+     * // Update many TradingSessions
+     * const tradingSession = await prisma.tradingSession.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more TradingSessions and only return the `id`
+     * const tradingSessionWithIdOnly = await prisma.tradingSession.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends TradingSessionUpdateManyAndReturnArgs>(args: SelectSubset<T, TradingSessionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TradingSessionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one TradingSession.
+     * @param {TradingSessionUpsertArgs} args - Arguments to update or create a TradingSession.
+     * @example
+     * // Update or create a TradingSession
+     * const tradingSession = await prisma.tradingSession.upsert({
+     *   create: {
+     *     // ... data to create a TradingSession
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the TradingSession we want to update
+     *   }
+     * })
+     */
+    upsert<T extends TradingSessionUpsertArgs>(args: SelectSubset<T, TradingSessionUpsertArgs<ExtArgs>>): Prisma__TradingSessionClient<$Result.GetResult<Prisma.$TradingSessionPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of TradingSessions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TradingSessionCountArgs} args - Arguments to filter TradingSessions to count.
+     * @example
+     * // Count the number of TradingSessions
+     * const count = await prisma.tradingSession.count({
+     *   where: {
+     *     // ... the filter for the TradingSessions we want to count
+     *   }
+     * })
+    **/
+    count<T extends TradingSessionCountArgs>(
+      args?: Subset<T, TradingSessionCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], TradingSessionCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a TradingSession.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TradingSessionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends TradingSessionAggregateArgs>(args: Subset<T, TradingSessionAggregateArgs>): Prisma.PrismaPromise<GetTradingSessionAggregateType<T>>
+
+    /**
+     * Group by TradingSession.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TradingSessionGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends TradingSessionGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: TradingSessionGroupByArgs['orderBy'] }
+        : { orderBy?: TradingSessionGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, TradingSessionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetTradingSessionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the TradingSession model
+   */
+  readonly fields: TradingSessionFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for TradingSession.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__TradingSessionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the TradingSession model
+   */
+  interface TradingSessionFieldRefs {
+    readonly id: FieldRef<"TradingSession", 'String'>
+    readonly provider: FieldRef<"TradingSession", 'String'>
+    readonly accessToken: FieldRef<"TradingSession", 'String'>
+    readonly publicToken: FieldRef<"TradingSession", 'String'>
+    readonly createdAt: FieldRef<"TradingSession", 'DateTime'>
+    readonly updatedAt: FieldRef<"TradingSession", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * TradingSession findUnique
+   */
+  export type TradingSessionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingSession
+     */
+    select?: TradingSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingSession
+     */
+    omit?: TradingSessionOmit<ExtArgs> | null
+    /**
+     * Filter, which TradingSession to fetch.
+     */
+    where: TradingSessionWhereUniqueInput
+  }
+
+  /**
+   * TradingSession findUniqueOrThrow
+   */
+  export type TradingSessionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingSession
+     */
+    select?: TradingSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingSession
+     */
+    omit?: TradingSessionOmit<ExtArgs> | null
+    /**
+     * Filter, which TradingSession to fetch.
+     */
+    where: TradingSessionWhereUniqueInput
+  }
+
+  /**
+   * TradingSession findFirst
+   */
+  export type TradingSessionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingSession
+     */
+    select?: TradingSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingSession
+     */
+    omit?: TradingSessionOmit<ExtArgs> | null
+    /**
+     * Filter, which TradingSession to fetch.
+     */
+    where?: TradingSessionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TradingSessions to fetch.
+     */
+    orderBy?: TradingSessionOrderByWithRelationInput | TradingSessionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TradingSessions.
+     */
+    cursor?: TradingSessionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TradingSessions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TradingSessions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TradingSessions.
+     */
+    distinct?: TradingSessionScalarFieldEnum | TradingSessionScalarFieldEnum[]
+  }
+
+  /**
+   * TradingSession findFirstOrThrow
+   */
+  export type TradingSessionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingSession
+     */
+    select?: TradingSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingSession
+     */
+    omit?: TradingSessionOmit<ExtArgs> | null
+    /**
+     * Filter, which TradingSession to fetch.
+     */
+    where?: TradingSessionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TradingSessions to fetch.
+     */
+    orderBy?: TradingSessionOrderByWithRelationInput | TradingSessionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TradingSessions.
+     */
+    cursor?: TradingSessionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TradingSessions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TradingSessions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TradingSessions.
+     */
+    distinct?: TradingSessionScalarFieldEnum | TradingSessionScalarFieldEnum[]
+  }
+
+  /**
+   * TradingSession findMany
+   */
+  export type TradingSessionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingSession
+     */
+    select?: TradingSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingSession
+     */
+    omit?: TradingSessionOmit<ExtArgs> | null
+    /**
+     * Filter, which TradingSessions to fetch.
+     */
+    where?: TradingSessionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TradingSessions to fetch.
+     */
+    orderBy?: TradingSessionOrderByWithRelationInput | TradingSessionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing TradingSessions.
+     */
+    cursor?: TradingSessionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TradingSessions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TradingSessions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TradingSessions.
+     */
+    distinct?: TradingSessionScalarFieldEnum | TradingSessionScalarFieldEnum[]
+  }
+
+  /**
+   * TradingSession create
+   */
+  export type TradingSessionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingSession
+     */
+    select?: TradingSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingSession
+     */
+    omit?: TradingSessionOmit<ExtArgs> | null
+    /**
+     * The data needed to create a TradingSession.
+     */
+    data: XOR<TradingSessionCreateInput, TradingSessionUncheckedCreateInput>
+  }
+
+  /**
+   * TradingSession createMany
+   */
+  export type TradingSessionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many TradingSessions.
+     */
+    data: TradingSessionCreateManyInput | TradingSessionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * TradingSession createManyAndReturn
+   */
+  export type TradingSessionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingSession
+     */
+    select?: TradingSessionSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingSession
+     */
+    omit?: TradingSessionOmit<ExtArgs> | null
+    /**
+     * The data used to create many TradingSessions.
+     */
+    data: TradingSessionCreateManyInput | TradingSessionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * TradingSession update
+   */
+  export type TradingSessionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingSession
+     */
+    select?: TradingSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingSession
+     */
+    omit?: TradingSessionOmit<ExtArgs> | null
+    /**
+     * The data needed to update a TradingSession.
+     */
+    data: XOR<TradingSessionUpdateInput, TradingSessionUncheckedUpdateInput>
+    /**
+     * Choose, which TradingSession to update.
+     */
+    where: TradingSessionWhereUniqueInput
+  }
+
+  /**
+   * TradingSession updateMany
+   */
+  export type TradingSessionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update TradingSessions.
+     */
+    data: XOR<TradingSessionUpdateManyMutationInput, TradingSessionUncheckedUpdateManyInput>
+    /**
+     * Filter which TradingSessions to update
+     */
+    where?: TradingSessionWhereInput
+    /**
+     * Limit how many TradingSessions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * TradingSession updateManyAndReturn
+   */
+  export type TradingSessionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingSession
+     */
+    select?: TradingSessionSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingSession
+     */
+    omit?: TradingSessionOmit<ExtArgs> | null
+    /**
+     * The data used to update TradingSessions.
+     */
+    data: XOR<TradingSessionUpdateManyMutationInput, TradingSessionUncheckedUpdateManyInput>
+    /**
+     * Filter which TradingSessions to update
+     */
+    where?: TradingSessionWhereInput
+    /**
+     * Limit how many TradingSessions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * TradingSession upsert
+   */
+  export type TradingSessionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingSession
+     */
+    select?: TradingSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingSession
+     */
+    omit?: TradingSessionOmit<ExtArgs> | null
+    /**
+     * The filter to search for the TradingSession to update in case it exists.
+     */
+    where: TradingSessionWhereUniqueInput
+    /**
+     * In case the TradingSession found by the `where` argument doesn't exist, create a new TradingSession with this data.
+     */
+    create: XOR<TradingSessionCreateInput, TradingSessionUncheckedCreateInput>
+    /**
+     * In case the TradingSession was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<TradingSessionUpdateInput, TradingSessionUncheckedUpdateInput>
+  }
+
+  /**
+   * TradingSession delete
+   */
+  export type TradingSessionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingSession
+     */
+    select?: TradingSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingSession
+     */
+    omit?: TradingSessionOmit<ExtArgs> | null
+    /**
+     * Filter which TradingSession to delete.
+     */
+    where: TradingSessionWhereUniqueInput
+  }
+
+  /**
+   * TradingSession deleteMany
+   */
+  export type TradingSessionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TradingSessions to delete
+     */
+    where?: TradingSessionWhereInput
+    /**
+     * Limit how many TradingSessions to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * TradingSession without action
+   */
+  export type TradingSessionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingSession
+     */
+    select?: TradingSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingSession
+     */
+    omit?: TradingSessionOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model TradingAccount
+   */
+
+  export type AggregateTradingAccount = {
+    _count: TradingAccountCountAggregateOutputType | null
+    _avg: TradingAccountAvgAggregateOutputType | null
+    _sum: TradingAccountSumAggregateOutputType | null
+    _min: TradingAccountMinAggregateOutputType | null
+    _max: TradingAccountMaxAggregateOutputType | null
+  }
+
+  export type TradingAccountAvgAggregateOutputType = {
+    balance: number | null
+  }
+
+  export type TradingAccountSumAggregateOutputType = {
+    balance: number | null
+  }
+
+  export type TradingAccountMinAggregateOutputType = {
+    id: string | null
+    provider: string | null
+    name: string | null
+    isLive: boolean | null
+    balance: number | null
+    currency: string | null
+    createdAt: Date | null
+  }
+
+  export type TradingAccountMaxAggregateOutputType = {
+    id: string | null
+    provider: string | null
+    name: string | null
+    isLive: boolean | null
+    balance: number | null
+    currency: string | null
+    createdAt: Date | null
+  }
+
+  export type TradingAccountCountAggregateOutputType = {
+    id: number
+    provider: number
+    name: number
+    isLive: number
+    balance: number
+    currency: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type TradingAccountAvgAggregateInputType = {
+    balance?: true
+  }
+
+  export type TradingAccountSumAggregateInputType = {
+    balance?: true
+  }
+
+  export type TradingAccountMinAggregateInputType = {
+    id?: true
+    provider?: true
+    name?: true
+    isLive?: true
+    balance?: true
+    currency?: true
+    createdAt?: true
+  }
+
+  export type TradingAccountMaxAggregateInputType = {
+    id?: true
+    provider?: true
+    name?: true
+    isLive?: true
+    balance?: true
+    currency?: true
+    createdAt?: true
+  }
+
+  export type TradingAccountCountAggregateInputType = {
+    id?: true
+    provider?: true
+    name?: true
+    isLive?: true
+    balance?: true
+    currency?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type TradingAccountAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TradingAccount to aggregate.
+     */
+    where?: TradingAccountWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TradingAccounts to fetch.
+     */
+    orderBy?: TradingAccountOrderByWithRelationInput | TradingAccountOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: TradingAccountWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TradingAccounts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TradingAccounts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned TradingAccounts
+    **/
+    _count?: true | TradingAccountCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: TradingAccountAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: TradingAccountSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: TradingAccountMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: TradingAccountMaxAggregateInputType
+  }
+
+  export type GetTradingAccountAggregateType<T extends TradingAccountAggregateArgs> = {
+        [P in keyof T & keyof AggregateTradingAccount]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateTradingAccount[P]>
+      : GetScalarType<T[P], AggregateTradingAccount[P]>
+  }
+
+
+
+
+  export type TradingAccountGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TradingAccountWhereInput
+    orderBy?: TradingAccountOrderByWithAggregationInput | TradingAccountOrderByWithAggregationInput[]
+    by: TradingAccountScalarFieldEnum[] | TradingAccountScalarFieldEnum
+    having?: TradingAccountScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: TradingAccountCountAggregateInputType | true
+    _avg?: TradingAccountAvgAggregateInputType
+    _sum?: TradingAccountSumAggregateInputType
+    _min?: TradingAccountMinAggregateInputType
+    _max?: TradingAccountMaxAggregateInputType
+  }
+
+  export type TradingAccountGroupByOutputType = {
+    id: string
+    provider: string
+    name: string
+    isLive: boolean
+    balance: number
+    currency: string
+    createdAt: Date
+    _count: TradingAccountCountAggregateOutputType | null
+    _avg: TradingAccountAvgAggregateOutputType | null
+    _sum: TradingAccountSumAggregateOutputType | null
+    _min: TradingAccountMinAggregateOutputType | null
+    _max: TradingAccountMaxAggregateOutputType | null
+  }
+
+  type GetTradingAccountGroupByPayload<T extends TradingAccountGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<TradingAccountGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof TradingAccountGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], TradingAccountGroupByOutputType[P]>
+            : GetScalarType<T[P], TradingAccountGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type TradingAccountSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    provider?: boolean
+    name?: boolean
+    isLive?: boolean
+    balance?: boolean
+    currency?: boolean
+    createdAt?: boolean
+    orders?: boolean | TradingAccount$ordersArgs<ExtArgs>
+    positions?: boolean | TradingAccount$positionsArgs<ExtArgs>
+    _count?: boolean | TradingAccountCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["tradingAccount"]>
+
+  export type TradingAccountSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    provider?: boolean
+    name?: boolean
+    isLive?: boolean
+    balance?: boolean
+    currency?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["tradingAccount"]>
+
+  export type TradingAccountSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    provider?: boolean
+    name?: boolean
+    isLive?: boolean
+    balance?: boolean
+    currency?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["tradingAccount"]>
+
+  export type TradingAccountSelectScalar = {
+    id?: boolean
+    provider?: boolean
+    name?: boolean
+    isLive?: boolean
+    balance?: boolean
+    currency?: boolean
+    createdAt?: boolean
+  }
+
+  export type TradingAccountOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "provider" | "name" | "isLive" | "balance" | "currency" | "createdAt", ExtArgs["result"]["tradingAccount"]>
+  export type TradingAccountInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    orders?: boolean | TradingAccount$ordersArgs<ExtArgs>
+    positions?: boolean | TradingAccount$positionsArgs<ExtArgs>
+    _count?: boolean | TradingAccountCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type TradingAccountIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type TradingAccountIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+
+  export type $TradingAccountPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "TradingAccount"
+    objects: {
+      orders: Prisma.$TradingOrderPayload<ExtArgs>[]
+      positions: Prisma.$TradingPositionPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      provider: string
+      name: string
+      isLive: boolean
+      balance: number
+      currency: string
+      createdAt: Date
+    }, ExtArgs["result"]["tradingAccount"]>
+    composites: {}
+  }
+
+  type TradingAccountGetPayload<S extends boolean | null | undefined | TradingAccountDefaultArgs> = $Result.GetResult<Prisma.$TradingAccountPayload, S>
+
+  type TradingAccountCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<TradingAccountFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: TradingAccountCountAggregateInputType | true
+    }
+
+  export interface TradingAccountDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['TradingAccount'], meta: { name: 'TradingAccount' } }
+    /**
+     * Find zero or one TradingAccount that matches the filter.
+     * @param {TradingAccountFindUniqueArgs} args - Arguments to find a TradingAccount
+     * @example
+     * // Get one TradingAccount
+     * const tradingAccount = await prisma.tradingAccount.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends TradingAccountFindUniqueArgs>(args: SelectSubset<T, TradingAccountFindUniqueArgs<ExtArgs>>): Prisma__TradingAccountClient<$Result.GetResult<Prisma.$TradingAccountPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one TradingAccount that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {TradingAccountFindUniqueOrThrowArgs} args - Arguments to find a TradingAccount
+     * @example
+     * // Get one TradingAccount
+     * const tradingAccount = await prisma.tradingAccount.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends TradingAccountFindUniqueOrThrowArgs>(args: SelectSubset<T, TradingAccountFindUniqueOrThrowArgs<ExtArgs>>): Prisma__TradingAccountClient<$Result.GetResult<Prisma.$TradingAccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first TradingAccount that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TradingAccountFindFirstArgs} args - Arguments to find a TradingAccount
+     * @example
+     * // Get one TradingAccount
+     * const tradingAccount = await prisma.tradingAccount.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends TradingAccountFindFirstArgs>(args?: SelectSubset<T, TradingAccountFindFirstArgs<ExtArgs>>): Prisma__TradingAccountClient<$Result.GetResult<Prisma.$TradingAccountPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first TradingAccount that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TradingAccountFindFirstOrThrowArgs} args - Arguments to find a TradingAccount
+     * @example
+     * // Get one TradingAccount
+     * const tradingAccount = await prisma.tradingAccount.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends TradingAccountFindFirstOrThrowArgs>(args?: SelectSubset<T, TradingAccountFindFirstOrThrowArgs<ExtArgs>>): Prisma__TradingAccountClient<$Result.GetResult<Prisma.$TradingAccountPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more TradingAccounts that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TradingAccountFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all TradingAccounts
+     * const tradingAccounts = await prisma.tradingAccount.findMany()
+     * 
+     * // Get first 10 TradingAccounts
+     * const tradingAccounts = await prisma.tradingAccount.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const tradingAccountWithIdOnly = await prisma.tradingAccount.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends TradingAccountFindManyArgs>(args?: SelectSubset<T, TradingAccountFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TradingAccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a TradingAccount.
+     * @param {TradingAccountCreateArgs} args - Arguments to create a TradingAccount.
+     * @example
+     * // Create one TradingAccount
+     * const TradingAccount = await prisma.tradingAccount.create({
+     *   data: {
+     *     // ... data to create a TradingAccount
+     *   }
+     * })
+     * 
+     */
+    create<T extends TradingAccountCreateArgs>(args: SelectSubset<T, TradingAccountCreateArgs<ExtArgs>>): Prisma__TradingAccountClient<$Result.GetResult<Prisma.$TradingAccountPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many TradingAccounts.
+     * @param {TradingAccountCreateManyArgs} args - Arguments to create many TradingAccounts.
+     * @example
+     * // Create many TradingAccounts
+     * const tradingAccount = await prisma.tradingAccount.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends TradingAccountCreateManyArgs>(args?: SelectSubset<T, TradingAccountCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many TradingAccounts and returns the data saved in the database.
+     * @param {TradingAccountCreateManyAndReturnArgs} args - Arguments to create many TradingAccounts.
+     * @example
+     * // Create many TradingAccounts
+     * const tradingAccount = await prisma.tradingAccount.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many TradingAccounts and only return the `id`
+     * const tradingAccountWithIdOnly = await prisma.tradingAccount.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends TradingAccountCreateManyAndReturnArgs>(args?: SelectSubset<T, TradingAccountCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TradingAccountPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a TradingAccount.
+     * @param {TradingAccountDeleteArgs} args - Arguments to delete one TradingAccount.
+     * @example
+     * // Delete one TradingAccount
+     * const TradingAccount = await prisma.tradingAccount.delete({
+     *   where: {
+     *     // ... filter to delete one TradingAccount
+     *   }
+     * })
+     * 
+     */
+    delete<T extends TradingAccountDeleteArgs>(args: SelectSubset<T, TradingAccountDeleteArgs<ExtArgs>>): Prisma__TradingAccountClient<$Result.GetResult<Prisma.$TradingAccountPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one TradingAccount.
+     * @param {TradingAccountUpdateArgs} args - Arguments to update one TradingAccount.
+     * @example
+     * // Update one TradingAccount
+     * const tradingAccount = await prisma.tradingAccount.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends TradingAccountUpdateArgs>(args: SelectSubset<T, TradingAccountUpdateArgs<ExtArgs>>): Prisma__TradingAccountClient<$Result.GetResult<Prisma.$TradingAccountPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more TradingAccounts.
+     * @param {TradingAccountDeleteManyArgs} args - Arguments to filter TradingAccounts to delete.
+     * @example
+     * // Delete a few TradingAccounts
+     * const { count } = await prisma.tradingAccount.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends TradingAccountDeleteManyArgs>(args?: SelectSubset<T, TradingAccountDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more TradingAccounts.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TradingAccountUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many TradingAccounts
+     * const tradingAccount = await prisma.tradingAccount.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends TradingAccountUpdateManyArgs>(args: SelectSubset<T, TradingAccountUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more TradingAccounts and returns the data updated in the database.
+     * @param {TradingAccountUpdateManyAndReturnArgs} args - Arguments to update many TradingAccounts.
+     * @example
+     * // Update many TradingAccounts
+     * const tradingAccount = await prisma.tradingAccount.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more TradingAccounts and only return the `id`
+     * const tradingAccountWithIdOnly = await prisma.tradingAccount.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends TradingAccountUpdateManyAndReturnArgs>(args: SelectSubset<T, TradingAccountUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TradingAccountPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one TradingAccount.
+     * @param {TradingAccountUpsertArgs} args - Arguments to update or create a TradingAccount.
+     * @example
+     * // Update or create a TradingAccount
+     * const tradingAccount = await prisma.tradingAccount.upsert({
+     *   create: {
+     *     // ... data to create a TradingAccount
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the TradingAccount we want to update
+     *   }
+     * })
+     */
+    upsert<T extends TradingAccountUpsertArgs>(args: SelectSubset<T, TradingAccountUpsertArgs<ExtArgs>>): Prisma__TradingAccountClient<$Result.GetResult<Prisma.$TradingAccountPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of TradingAccounts.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TradingAccountCountArgs} args - Arguments to filter TradingAccounts to count.
+     * @example
+     * // Count the number of TradingAccounts
+     * const count = await prisma.tradingAccount.count({
+     *   where: {
+     *     // ... the filter for the TradingAccounts we want to count
+     *   }
+     * })
+    **/
+    count<T extends TradingAccountCountArgs>(
+      args?: Subset<T, TradingAccountCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], TradingAccountCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a TradingAccount.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TradingAccountAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends TradingAccountAggregateArgs>(args: Subset<T, TradingAccountAggregateArgs>): Prisma.PrismaPromise<GetTradingAccountAggregateType<T>>
+
+    /**
+     * Group by TradingAccount.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TradingAccountGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends TradingAccountGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: TradingAccountGroupByArgs['orderBy'] }
+        : { orderBy?: TradingAccountGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, TradingAccountGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetTradingAccountGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the TradingAccount model
+   */
+  readonly fields: TradingAccountFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for TradingAccount.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__TradingAccountClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    orders<T extends TradingAccount$ordersArgs<ExtArgs> = {}>(args?: Subset<T, TradingAccount$ordersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TradingOrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    positions<T extends TradingAccount$positionsArgs<ExtArgs> = {}>(args?: Subset<T, TradingAccount$positionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TradingPositionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the TradingAccount model
+   */
+  interface TradingAccountFieldRefs {
+    readonly id: FieldRef<"TradingAccount", 'String'>
+    readonly provider: FieldRef<"TradingAccount", 'String'>
+    readonly name: FieldRef<"TradingAccount", 'String'>
+    readonly isLive: FieldRef<"TradingAccount", 'Boolean'>
+    readonly balance: FieldRef<"TradingAccount", 'Float'>
+    readonly currency: FieldRef<"TradingAccount", 'String'>
+    readonly createdAt: FieldRef<"TradingAccount", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * TradingAccount findUnique
+   */
+  export type TradingAccountFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingAccount
+     */
+    select?: TradingAccountSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingAccount
+     */
+    omit?: TradingAccountOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingAccountInclude<ExtArgs> | null
+    /**
+     * Filter, which TradingAccount to fetch.
+     */
+    where: TradingAccountWhereUniqueInput
+  }
+
+  /**
+   * TradingAccount findUniqueOrThrow
+   */
+  export type TradingAccountFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingAccount
+     */
+    select?: TradingAccountSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingAccount
+     */
+    omit?: TradingAccountOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingAccountInclude<ExtArgs> | null
+    /**
+     * Filter, which TradingAccount to fetch.
+     */
+    where: TradingAccountWhereUniqueInput
+  }
+
+  /**
+   * TradingAccount findFirst
+   */
+  export type TradingAccountFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingAccount
+     */
+    select?: TradingAccountSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingAccount
+     */
+    omit?: TradingAccountOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingAccountInclude<ExtArgs> | null
+    /**
+     * Filter, which TradingAccount to fetch.
+     */
+    where?: TradingAccountWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TradingAccounts to fetch.
+     */
+    orderBy?: TradingAccountOrderByWithRelationInput | TradingAccountOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TradingAccounts.
+     */
+    cursor?: TradingAccountWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TradingAccounts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TradingAccounts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TradingAccounts.
+     */
+    distinct?: TradingAccountScalarFieldEnum | TradingAccountScalarFieldEnum[]
+  }
+
+  /**
+   * TradingAccount findFirstOrThrow
+   */
+  export type TradingAccountFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingAccount
+     */
+    select?: TradingAccountSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingAccount
+     */
+    omit?: TradingAccountOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingAccountInclude<ExtArgs> | null
+    /**
+     * Filter, which TradingAccount to fetch.
+     */
+    where?: TradingAccountWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TradingAccounts to fetch.
+     */
+    orderBy?: TradingAccountOrderByWithRelationInput | TradingAccountOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TradingAccounts.
+     */
+    cursor?: TradingAccountWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TradingAccounts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TradingAccounts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TradingAccounts.
+     */
+    distinct?: TradingAccountScalarFieldEnum | TradingAccountScalarFieldEnum[]
+  }
+
+  /**
+   * TradingAccount findMany
+   */
+  export type TradingAccountFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingAccount
+     */
+    select?: TradingAccountSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingAccount
+     */
+    omit?: TradingAccountOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingAccountInclude<ExtArgs> | null
+    /**
+     * Filter, which TradingAccounts to fetch.
+     */
+    where?: TradingAccountWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TradingAccounts to fetch.
+     */
+    orderBy?: TradingAccountOrderByWithRelationInput | TradingAccountOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing TradingAccounts.
+     */
+    cursor?: TradingAccountWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TradingAccounts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TradingAccounts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TradingAccounts.
+     */
+    distinct?: TradingAccountScalarFieldEnum | TradingAccountScalarFieldEnum[]
+  }
+
+  /**
+   * TradingAccount create
+   */
+  export type TradingAccountCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingAccount
+     */
+    select?: TradingAccountSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingAccount
+     */
+    omit?: TradingAccountOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingAccountInclude<ExtArgs> | null
+    /**
+     * The data needed to create a TradingAccount.
+     */
+    data: XOR<TradingAccountCreateInput, TradingAccountUncheckedCreateInput>
+  }
+
+  /**
+   * TradingAccount createMany
+   */
+  export type TradingAccountCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many TradingAccounts.
+     */
+    data: TradingAccountCreateManyInput | TradingAccountCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * TradingAccount createManyAndReturn
+   */
+  export type TradingAccountCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingAccount
+     */
+    select?: TradingAccountSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingAccount
+     */
+    omit?: TradingAccountOmit<ExtArgs> | null
+    /**
+     * The data used to create many TradingAccounts.
+     */
+    data: TradingAccountCreateManyInput | TradingAccountCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * TradingAccount update
+   */
+  export type TradingAccountUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingAccount
+     */
+    select?: TradingAccountSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingAccount
+     */
+    omit?: TradingAccountOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingAccountInclude<ExtArgs> | null
+    /**
+     * The data needed to update a TradingAccount.
+     */
+    data: XOR<TradingAccountUpdateInput, TradingAccountUncheckedUpdateInput>
+    /**
+     * Choose, which TradingAccount to update.
+     */
+    where: TradingAccountWhereUniqueInput
+  }
+
+  /**
+   * TradingAccount updateMany
+   */
+  export type TradingAccountUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update TradingAccounts.
+     */
+    data: XOR<TradingAccountUpdateManyMutationInput, TradingAccountUncheckedUpdateManyInput>
+    /**
+     * Filter which TradingAccounts to update
+     */
+    where?: TradingAccountWhereInput
+    /**
+     * Limit how many TradingAccounts to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * TradingAccount updateManyAndReturn
+   */
+  export type TradingAccountUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingAccount
+     */
+    select?: TradingAccountSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingAccount
+     */
+    omit?: TradingAccountOmit<ExtArgs> | null
+    /**
+     * The data used to update TradingAccounts.
+     */
+    data: XOR<TradingAccountUpdateManyMutationInput, TradingAccountUncheckedUpdateManyInput>
+    /**
+     * Filter which TradingAccounts to update
+     */
+    where?: TradingAccountWhereInput
+    /**
+     * Limit how many TradingAccounts to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * TradingAccount upsert
+   */
+  export type TradingAccountUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingAccount
+     */
+    select?: TradingAccountSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingAccount
+     */
+    omit?: TradingAccountOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingAccountInclude<ExtArgs> | null
+    /**
+     * The filter to search for the TradingAccount to update in case it exists.
+     */
+    where: TradingAccountWhereUniqueInput
+    /**
+     * In case the TradingAccount found by the `where` argument doesn't exist, create a new TradingAccount with this data.
+     */
+    create: XOR<TradingAccountCreateInput, TradingAccountUncheckedCreateInput>
+    /**
+     * In case the TradingAccount was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<TradingAccountUpdateInput, TradingAccountUncheckedUpdateInput>
+  }
+
+  /**
+   * TradingAccount delete
+   */
+  export type TradingAccountDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingAccount
+     */
+    select?: TradingAccountSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingAccount
+     */
+    omit?: TradingAccountOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingAccountInclude<ExtArgs> | null
+    /**
+     * Filter which TradingAccount to delete.
+     */
+    where: TradingAccountWhereUniqueInput
+  }
+
+  /**
+   * TradingAccount deleteMany
+   */
+  export type TradingAccountDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TradingAccounts to delete
+     */
+    where?: TradingAccountWhereInput
+    /**
+     * Limit how many TradingAccounts to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * TradingAccount.orders
+   */
+  export type TradingAccount$ordersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingOrder
+     */
+    select?: TradingOrderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingOrder
+     */
+    omit?: TradingOrderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingOrderInclude<ExtArgs> | null
+    where?: TradingOrderWhereInput
+    orderBy?: TradingOrderOrderByWithRelationInput | TradingOrderOrderByWithRelationInput[]
+    cursor?: TradingOrderWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: TradingOrderScalarFieldEnum | TradingOrderScalarFieldEnum[]
+  }
+
+  /**
+   * TradingAccount.positions
+   */
+  export type TradingAccount$positionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingPosition
+     */
+    select?: TradingPositionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingPosition
+     */
+    omit?: TradingPositionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingPositionInclude<ExtArgs> | null
+    where?: TradingPositionWhereInput
+    orderBy?: TradingPositionOrderByWithRelationInput | TradingPositionOrderByWithRelationInput[]
+    cursor?: TradingPositionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: TradingPositionScalarFieldEnum | TradingPositionScalarFieldEnum[]
+  }
+
+  /**
+   * TradingAccount without action
+   */
+  export type TradingAccountDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingAccount
+     */
+    select?: TradingAccountSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingAccount
+     */
+    omit?: TradingAccountOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingAccountInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model TradingOrder
+   */
+
+  export type AggregateTradingOrder = {
+    _count: TradingOrderCountAggregateOutputType | null
+    _avg: TradingOrderAvgAggregateOutputType | null
+    _sum: TradingOrderSumAggregateOutputType | null
+    _min: TradingOrderMinAggregateOutputType | null
+    _max: TradingOrderMaxAggregateOutputType | null
+  }
+
+  export type TradingOrderAvgAggregateOutputType = {
+    qty: number | null
+    price: number | null
+    filledPrice: number | null
+    commission: number | null
+  }
+
+  export type TradingOrderSumAggregateOutputType = {
+    qty: number | null
+    price: number | null
+    filledPrice: number | null
+    commission: number | null
+  }
+
+  export type TradingOrderMinAggregateOutputType = {
+    id: string | null
+    accountId: string | null
+    symbol: string | null
+    qty: number | null
+    side: string | null
+    type: string | null
+    price: number | null
+    status: string | null
+    filledPrice: number | null
+    commission: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type TradingOrderMaxAggregateOutputType = {
+    id: string | null
+    accountId: string | null
+    symbol: string | null
+    qty: number | null
+    side: string | null
+    type: string | null
+    price: number | null
+    status: string | null
+    filledPrice: number | null
+    commission: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type TradingOrderCountAggregateOutputType = {
+    id: number
+    accountId: number
+    symbol: number
+    qty: number
+    side: number
+    type: number
+    price: number
+    status: number
+    filledPrice: number
+    commission: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type TradingOrderAvgAggregateInputType = {
+    qty?: true
+    price?: true
+    filledPrice?: true
+    commission?: true
+  }
+
+  export type TradingOrderSumAggregateInputType = {
+    qty?: true
+    price?: true
+    filledPrice?: true
+    commission?: true
+  }
+
+  export type TradingOrderMinAggregateInputType = {
+    id?: true
+    accountId?: true
+    symbol?: true
+    qty?: true
+    side?: true
+    type?: true
+    price?: true
+    status?: true
+    filledPrice?: true
+    commission?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type TradingOrderMaxAggregateInputType = {
+    id?: true
+    accountId?: true
+    symbol?: true
+    qty?: true
+    side?: true
+    type?: true
+    price?: true
+    status?: true
+    filledPrice?: true
+    commission?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type TradingOrderCountAggregateInputType = {
+    id?: true
+    accountId?: true
+    symbol?: true
+    qty?: true
+    side?: true
+    type?: true
+    price?: true
+    status?: true
+    filledPrice?: true
+    commission?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type TradingOrderAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TradingOrder to aggregate.
+     */
+    where?: TradingOrderWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TradingOrders to fetch.
+     */
+    orderBy?: TradingOrderOrderByWithRelationInput | TradingOrderOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: TradingOrderWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TradingOrders from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TradingOrders.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned TradingOrders
+    **/
+    _count?: true | TradingOrderCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: TradingOrderAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: TradingOrderSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: TradingOrderMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: TradingOrderMaxAggregateInputType
+  }
+
+  export type GetTradingOrderAggregateType<T extends TradingOrderAggregateArgs> = {
+        [P in keyof T & keyof AggregateTradingOrder]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateTradingOrder[P]>
+      : GetScalarType<T[P], AggregateTradingOrder[P]>
+  }
+
+
+
+
+  export type TradingOrderGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TradingOrderWhereInput
+    orderBy?: TradingOrderOrderByWithAggregationInput | TradingOrderOrderByWithAggregationInput[]
+    by: TradingOrderScalarFieldEnum[] | TradingOrderScalarFieldEnum
+    having?: TradingOrderScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: TradingOrderCountAggregateInputType | true
+    _avg?: TradingOrderAvgAggregateInputType
+    _sum?: TradingOrderSumAggregateInputType
+    _min?: TradingOrderMinAggregateInputType
+    _max?: TradingOrderMaxAggregateInputType
+  }
+
+  export type TradingOrderGroupByOutputType = {
+    id: string
+    accountId: string
+    symbol: string
+    qty: number
+    side: string
+    type: string
+    price: number | null
+    status: string
+    filledPrice: number | null
+    commission: number
+    createdAt: Date
+    updatedAt: Date
+    _count: TradingOrderCountAggregateOutputType | null
+    _avg: TradingOrderAvgAggregateOutputType | null
+    _sum: TradingOrderSumAggregateOutputType | null
+    _min: TradingOrderMinAggregateOutputType | null
+    _max: TradingOrderMaxAggregateOutputType | null
+  }
+
+  type GetTradingOrderGroupByPayload<T extends TradingOrderGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<TradingOrderGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof TradingOrderGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], TradingOrderGroupByOutputType[P]>
+            : GetScalarType<T[P], TradingOrderGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type TradingOrderSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    accountId?: boolean
+    symbol?: boolean
+    qty?: boolean
+    side?: boolean
+    type?: boolean
+    price?: boolean
+    status?: boolean
+    filledPrice?: boolean
+    commission?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    account?: boolean | TradingAccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["tradingOrder"]>
+
+  export type TradingOrderSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    accountId?: boolean
+    symbol?: boolean
+    qty?: boolean
+    side?: boolean
+    type?: boolean
+    price?: boolean
+    status?: boolean
+    filledPrice?: boolean
+    commission?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    account?: boolean | TradingAccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["tradingOrder"]>
+
+  export type TradingOrderSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    accountId?: boolean
+    symbol?: boolean
+    qty?: boolean
+    side?: boolean
+    type?: boolean
+    price?: boolean
+    status?: boolean
+    filledPrice?: boolean
+    commission?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    account?: boolean | TradingAccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["tradingOrder"]>
+
+  export type TradingOrderSelectScalar = {
+    id?: boolean
+    accountId?: boolean
+    symbol?: boolean
+    qty?: boolean
+    side?: boolean
+    type?: boolean
+    price?: boolean
+    status?: boolean
+    filledPrice?: boolean
+    commission?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type TradingOrderOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "accountId" | "symbol" | "qty" | "side" | "type" | "price" | "status" | "filledPrice" | "commission" | "createdAt" | "updatedAt", ExtArgs["result"]["tradingOrder"]>
+  export type TradingOrderInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | TradingAccountDefaultArgs<ExtArgs>
+  }
+  export type TradingOrderIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | TradingAccountDefaultArgs<ExtArgs>
+  }
+  export type TradingOrderIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | TradingAccountDefaultArgs<ExtArgs>
+  }
+
+  export type $TradingOrderPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "TradingOrder"
+    objects: {
+      account: Prisma.$TradingAccountPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      accountId: string
+      symbol: string
+      qty: number
+      side: string
+      type: string
+      price: number | null
+      status: string
+      filledPrice: number | null
+      commission: number
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["tradingOrder"]>
+    composites: {}
+  }
+
+  type TradingOrderGetPayload<S extends boolean | null | undefined | TradingOrderDefaultArgs> = $Result.GetResult<Prisma.$TradingOrderPayload, S>
+
+  type TradingOrderCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<TradingOrderFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: TradingOrderCountAggregateInputType | true
+    }
+
+  export interface TradingOrderDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['TradingOrder'], meta: { name: 'TradingOrder' } }
+    /**
+     * Find zero or one TradingOrder that matches the filter.
+     * @param {TradingOrderFindUniqueArgs} args - Arguments to find a TradingOrder
+     * @example
+     * // Get one TradingOrder
+     * const tradingOrder = await prisma.tradingOrder.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends TradingOrderFindUniqueArgs>(args: SelectSubset<T, TradingOrderFindUniqueArgs<ExtArgs>>): Prisma__TradingOrderClient<$Result.GetResult<Prisma.$TradingOrderPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one TradingOrder that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {TradingOrderFindUniqueOrThrowArgs} args - Arguments to find a TradingOrder
+     * @example
+     * // Get one TradingOrder
+     * const tradingOrder = await prisma.tradingOrder.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends TradingOrderFindUniqueOrThrowArgs>(args: SelectSubset<T, TradingOrderFindUniqueOrThrowArgs<ExtArgs>>): Prisma__TradingOrderClient<$Result.GetResult<Prisma.$TradingOrderPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first TradingOrder that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TradingOrderFindFirstArgs} args - Arguments to find a TradingOrder
+     * @example
+     * // Get one TradingOrder
+     * const tradingOrder = await prisma.tradingOrder.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends TradingOrderFindFirstArgs>(args?: SelectSubset<T, TradingOrderFindFirstArgs<ExtArgs>>): Prisma__TradingOrderClient<$Result.GetResult<Prisma.$TradingOrderPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first TradingOrder that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TradingOrderFindFirstOrThrowArgs} args - Arguments to find a TradingOrder
+     * @example
+     * // Get one TradingOrder
+     * const tradingOrder = await prisma.tradingOrder.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends TradingOrderFindFirstOrThrowArgs>(args?: SelectSubset<T, TradingOrderFindFirstOrThrowArgs<ExtArgs>>): Prisma__TradingOrderClient<$Result.GetResult<Prisma.$TradingOrderPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more TradingOrders that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TradingOrderFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all TradingOrders
+     * const tradingOrders = await prisma.tradingOrder.findMany()
+     * 
+     * // Get first 10 TradingOrders
+     * const tradingOrders = await prisma.tradingOrder.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const tradingOrderWithIdOnly = await prisma.tradingOrder.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends TradingOrderFindManyArgs>(args?: SelectSubset<T, TradingOrderFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TradingOrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a TradingOrder.
+     * @param {TradingOrderCreateArgs} args - Arguments to create a TradingOrder.
+     * @example
+     * // Create one TradingOrder
+     * const TradingOrder = await prisma.tradingOrder.create({
+     *   data: {
+     *     // ... data to create a TradingOrder
+     *   }
+     * })
+     * 
+     */
+    create<T extends TradingOrderCreateArgs>(args: SelectSubset<T, TradingOrderCreateArgs<ExtArgs>>): Prisma__TradingOrderClient<$Result.GetResult<Prisma.$TradingOrderPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many TradingOrders.
+     * @param {TradingOrderCreateManyArgs} args - Arguments to create many TradingOrders.
+     * @example
+     * // Create many TradingOrders
+     * const tradingOrder = await prisma.tradingOrder.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends TradingOrderCreateManyArgs>(args?: SelectSubset<T, TradingOrderCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many TradingOrders and returns the data saved in the database.
+     * @param {TradingOrderCreateManyAndReturnArgs} args - Arguments to create many TradingOrders.
+     * @example
+     * // Create many TradingOrders
+     * const tradingOrder = await prisma.tradingOrder.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many TradingOrders and only return the `id`
+     * const tradingOrderWithIdOnly = await prisma.tradingOrder.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends TradingOrderCreateManyAndReturnArgs>(args?: SelectSubset<T, TradingOrderCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TradingOrderPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a TradingOrder.
+     * @param {TradingOrderDeleteArgs} args - Arguments to delete one TradingOrder.
+     * @example
+     * // Delete one TradingOrder
+     * const TradingOrder = await prisma.tradingOrder.delete({
+     *   where: {
+     *     // ... filter to delete one TradingOrder
+     *   }
+     * })
+     * 
+     */
+    delete<T extends TradingOrderDeleteArgs>(args: SelectSubset<T, TradingOrderDeleteArgs<ExtArgs>>): Prisma__TradingOrderClient<$Result.GetResult<Prisma.$TradingOrderPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one TradingOrder.
+     * @param {TradingOrderUpdateArgs} args - Arguments to update one TradingOrder.
+     * @example
+     * // Update one TradingOrder
+     * const tradingOrder = await prisma.tradingOrder.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends TradingOrderUpdateArgs>(args: SelectSubset<T, TradingOrderUpdateArgs<ExtArgs>>): Prisma__TradingOrderClient<$Result.GetResult<Prisma.$TradingOrderPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more TradingOrders.
+     * @param {TradingOrderDeleteManyArgs} args - Arguments to filter TradingOrders to delete.
+     * @example
+     * // Delete a few TradingOrders
+     * const { count } = await prisma.tradingOrder.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends TradingOrderDeleteManyArgs>(args?: SelectSubset<T, TradingOrderDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more TradingOrders.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TradingOrderUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many TradingOrders
+     * const tradingOrder = await prisma.tradingOrder.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends TradingOrderUpdateManyArgs>(args: SelectSubset<T, TradingOrderUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more TradingOrders and returns the data updated in the database.
+     * @param {TradingOrderUpdateManyAndReturnArgs} args - Arguments to update many TradingOrders.
+     * @example
+     * // Update many TradingOrders
+     * const tradingOrder = await prisma.tradingOrder.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more TradingOrders and only return the `id`
+     * const tradingOrderWithIdOnly = await prisma.tradingOrder.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends TradingOrderUpdateManyAndReturnArgs>(args: SelectSubset<T, TradingOrderUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TradingOrderPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one TradingOrder.
+     * @param {TradingOrderUpsertArgs} args - Arguments to update or create a TradingOrder.
+     * @example
+     * // Update or create a TradingOrder
+     * const tradingOrder = await prisma.tradingOrder.upsert({
+     *   create: {
+     *     // ... data to create a TradingOrder
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the TradingOrder we want to update
+     *   }
+     * })
+     */
+    upsert<T extends TradingOrderUpsertArgs>(args: SelectSubset<T, TradingOrderUpsertArgs<ExtArgs>>): Prisma__TradingOrderClient<$Result.GetResult<Prisma.$TradingOrderPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of TradingOrders.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TradingOrderCountArgs} args - Arguments to filter TradingOrders to count.
+     * @example
+     * // Count the number of TradingOrders
+     * const count = await prisma.tradingOrder.count({
+     *   where: {
+     *     // ... the filter for the TradingOrders we want to count
+     *   }
+     * })
+    **/
+    count<T extends TradingOrderCountArgs>(
+      args?: Subset<T, TradingOrderCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], TradingOrderCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a TradingOrder.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TradingOrderAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends TradingOrderAggregateArgs>(args: Subset<T, TradingOrderAggregateArgs>): Prisma.PrismaPromise<GetTradingOrderAggregateType<T>>
+
+    /**
+     * Group by TradingOrder.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TradingOrderGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends TradingOrderGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: TradingOrderGroupByArgs['orderBy'] }
+        : { orderBy?: TradingOrderGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, TradingOrderGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetTradingOrderGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the TradingOrder model
+   */
+  readonly fields: TradingOrderFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for TradingOrder.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__TradingOrderClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    account<T extends TradingAccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TradingAccountDefaultArgs<ExtArgs>>): Prisma__TradingAccountClient<$Result.GetResult<Prisma.$TradingAccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the TradingOrder model
+   */
+  interface TradingOrderFieldRefs {
+    readonly id: FieldRef<"TradingOrder", 'String'>
+    readonly accountId: FieldRef<"TradingOrder", 'String'>
+    readonly symbol: FieldRef<"TradingOrder", 'String'>
+    readonly qty: FieldRef<"TradingOrder", 'Float'>
+    readonly side: FieldRef<"TradingOrder", 'String'>
+    readonly type: FieldRef<"TradingOrder", 'String'>
+    readonly price: FieldRef<"TradingOrder", 'Float'>
+    readonly status: FieldRef<"TradingOrder", 'String'>
+    readonly filledPrice: FieldRef<"TradingOrder", 'Float'>
+    readonly commission: FieldRef<"TradingOrder", 'Float'>
+    readonly createdAt: FieldRef<"TradingOrder", 'DateTime'>
+    readonly updatedAt: FieldRef<"TradingOrder", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * TradingOrder findUnique
+   */
+  export type TradingOrderFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingOrder
+     */
+    select?: TradingOrderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingOrder
+     */
+    omit?: TradingOrderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingOrderInclude<ExtArgs> | null
+    /**
+     * Filter, which TradingOrder to fetch.
+     */
+    where: TradingOrderWhereUniqueInput
+  }
+
+  /**
+   * TradingOrder findUniqueOrThrow
+   */
+  export type TradingOrderFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingOrder
+     */
+    select?: TradingOrderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingOrder
+     */
+    omit?: TradingOrderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingOrderInclude<ExtArgs> | null
+    /**
+     * Filter, which TradingOrder to fetch.
+     */
+    where: TradingOrderWhereUniqueInput
+  }
+
+  /**
+   * TradingOrder findFirst
+   */
+  export type TradingOrderFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingOrder
+     */
+    select?: TradingOrderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingOrder
+     */
+    omit?: TradingOrderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingOrderInclude<ExtArgs> | null
+    /**
+     * Filter, which TradingOrder to fetch.
+     */
+    where?: TradingOrderWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TradingOrders to fetch.
+     */
+    orderBy?: TradingOrderOrderByWithRelationInput | TradingOrderOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TradingOrders.
+     */
+    cursor?: TradingOrderWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TradingOrders from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TradingOrders.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TradingOrders.
+     */
+    distinct?: TradingOrderScalarFieldEnum | TradingOrderScalarFieldEnum[]
+  }
+
+  /**
+   * TradingOrder findFirstOrThrow
+   */
+  export type TradingOrderFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingOrder
+     */
+    select?: TradingOrderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingOrder
+     */
+    omit?: TradingOrderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingOrderInclude<ExtArgs> | null
+    /**
+     * Filter, which TradingOrder to fetch.
+     */
+    where?: TradingOrderWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TradingOrders to fetch.
+     */
+    orderBy?: TradingOrderOrderByWithRelationInput | TradingOrderOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TradingOrders.
+     */
+    cursor?: TradingOrderWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TradingOrders from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TradingOrders.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TradingOrders.
+     */
+    distinct?: TradingOrderScalarFieldEnum | TradingOrderScalarFieldEnum[]
+  }
+
+  /**
+   * TradingOrder findMany
+   */
+  export type TradingOrderFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingOrder
+     */
+    select?: TradingOrderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingOrder
+     */
+    omit?: TradingOrderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingOrderInclude<ExtArgs> | null
+    /**
+     * Filter, which TradingOrders to fetch.
+     */
+    where?: TradingOrderWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TradingOrders to fetch.
+     */
+    orderBy?: TradingOrderOrderByWithRelationInput | TradingOrderOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing TradingOrders.
+     */
+    cursor?: TradingOrderWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TradingOrders from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TradingOrders.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TradingOrders.
+     */
+    distinct?: TradingOrderScalarFieldEnum | TradingOrderScalarFieldEnum[]
+  }
+
+  /**
+   * TradingOrder create
+   */
+  export type TradingOrderCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingOrder
+     */
+    select?: TradingOrderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingOrder
+     */
+    omit?: TradingOrderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingOrderInclude<ExtArgs> | null
+    /**
+     * The data needed to create a TradingOrder.
+     */
+    data: XOR<TradingOrderCreateInput, TradingOrderUncheckedCreateInput>
+  }
+
+  /**
+   * TradingOrder createMany
+   */
+  export type TradingOrderCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many TradingOrders.
+     */
+    data: TradingOrderCreateManyInput | TradingOrderCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * TradingOrder createManyAndReturn
+   */
+  export type TradingOrderCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingOrder
+     */
+    select?: TradingOrderSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingOrder
+     */
+    omit?: TradingOrderOmit<ExtArgs> | null
+    /**
+     * The data used to create many TradingOrders.
+     */
+    data: TradingOrderCreateManyInput | TradingOrderCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingOrderIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * TradingOrder update
+   */
+  export type TradingOrderUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingOrder
+     */
+    select?: TradingOrderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingOrder
+     */
+    omit?: TradingOrderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingOrderInclude<ExtArgs> | null
+    /**
+     * The data needed to update a TradingOrder.
+     */
+    data: XOR<TradingOrderUpdateInput, TradingOrderUncheckedUpdateInput>
+    /**
+     * Choose, which TradingOrder to update.
+     */
+    where: TradingOrderWhereUniqueInput
+  }
+
+  /**
+   * TradingOrder updateMany
+   */
+  export type TradingOrderUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update TradingOrders.
+     */
+    data: XOR<TradingOrderUpdateManyMutationInput, TradingOrderUncheckedUpdateManyInput>
+    /**
+     * Filter which TradingOrders to update
+     */
+    where?: TradingOrderWhereInput
+    /**
+     * Limit how many TradingOrders to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * TradingOrder updateManyAndReturn
+   */
+  export type TradingOrderUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingOrder
+     */
+    select?: TradingOrderSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingOrder
+     */
+    omit?: TradingOrderOmit<ExtArgs> | null
+    /**
+     * The data used to update TradingOrders.
+     */
+    data: XOR<TradingOrderUpdateManyMutationInput, TradingOrderUncheckedUpdateManyInput>
+    /**
+     * Filter which TradingOrders to update
+     */
+    where?: TradingOrderWhereInput
+    /**
+     * Limit how many TradingOrders to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingOrderIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * TradingOrder upsert
+   */
+  export type TradingOrderUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingOrder
+     */
+    select?: TradingOrderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingOrder
+     */
+    omit?: TradingOrderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingOrderInclude<ExtArgs> | null
+    /**
+     * The filter to search for the TradingOrder to update in case it exists.
+     */
+    where: TradingOrderWhereUniqueInput
+    /**
+     * In case the TradingOrder found by the `where` argument doesn't exist, create a new TradingOrder with this data.
+     */
+    create: XOR<TradingOrderCreateInput, TradingOrderUncheckedCreateInput>
+    /**
+     * In case the TradingOrder was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<TradingOrderUpdateInput, TradingOrderUncheckedUpdateInput>
+  }
+
+  /**
+   * TradingOrder delete
+   */
+  export type TradingOrderDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingOrder
+     */
+    select?: TradingOrderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingOrder
+     */
+    omit?: TradingOrderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingOrderInclude<ExtArgs> | null
+    /**
+     * Filter which TradingOrder to delete.
+     */
+    where: TradingOrderWhereUniqueInput
+  }
+
+  /**
+   * TradingOrder deleteMany
+   */
+  export type TradingOrderDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TradingOrders to delete
+     */
+    where?: TradingOrderWhereInput
+    /**
+     * Limit how many TradingOrders to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * TradingOrder without action
+   */
+  export type TradingOrderDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingOrder
+     */
+    select?: TradingOrderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingOrder
+     */
+    omit?: TradingOrderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingOrderInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model TradingPosition
+   */
+
+  export type AggregateTradingPosition = {
+    _count: TradingPositionCountAggregateOutputType | null
+    _avg: TradingPositionAvgAggregateOutputType | null
+    _sum: TradingPositionSumAggregateOutputType | null
+    _min: TradingPositionMinAggregateOutputType | null
+    _max: TradingPositionMaxAggregateOutputType | null
+  }
+
+  export type TradingPositionAvgAggregateOutputType = {
+    qty: number | null
+    entryPrice: number | null
+    marketPrice: number | null
+  }
+
+  export type TradingPositionSumAggregateOutputType = {
+    qty: number | null
+    entryPrice: number | null
+    marketPrice: number | null
+  }
+
+  export type TradingPositionMinAggregateOutputType = {
+    id: string | null
+    accountId: string | null
+    symbol: string | null
+    qty: number | null
+    entryPrice: number | null
+    marketPrice: number | null
+    updatedAt: Date | null
+  }
+
+  export type TradingPositionMaxAggregateOutputType = {
+    id: string | null
+    accountId: string | null
+    symbol: string | null
+    qty: number | null
+    entryPrice: number | null
+    marketPrice: number | null
+    updatedAt: Date | null
+  }
+
+  export type TradingPositionCountAggregateOutputType = {
+    id: number
+    accountId: number
+    symbol: number
+    qty: number
+    entryPrice: number
+    marketPrice: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type TradingPositionAvgAggregateInputType = {
+    qty?: true
+    entryPrice?: true
+    marketPrice?: true
+  }
+
+  export type TradingPositionSumAggregateInputType = {
+    qty?: true
+    entryPrice?: true
+    marketPrice?: true
+  }
+
+  export type TradingPositionMinAggregateInputType = {
+    id?: true
+    accountId?: true
+    symbol?: true
+    qty?: true
+    entryPrice?: true
+    marketPrice?: true
+    updatedAt?: true
+  }
+
+  export type TradingPositionMaxAggregateInputType = {
+    id?: true
+    accountId?: true
+    symbol?: true
+    qty?: true
+    entryPrice?: true
+    marketPrice?: true
+    updatedAt?: true
+  }
+
+  export type TradingPositionCountAggregateInputType = {
+    id?: true
+    accountId?: true
+    symbol?: true
+    qty?: true
+    entryPrice?: true
+    marketPrice?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type TradingPositionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TradingPosition to aggregate.
+     */
+    where?: TradingPositionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TradingPositions to fetch.
+     */
+    orderBy?: TradingPositionOrderByWithRelationInput | TradingPositionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: TradingPositionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TradingPositions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TradingPositions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned TradingPositions
+    **/
+    _count?: true | TradingPositionCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: TradingPositionAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: TradingPositionSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: TradingPositionMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: TradingPositionMaxAggregateInputType
+  }
+
+  export type GetTradingPositionAggregateType<T extends TradingPositionAggregateArgs> = {
+        [P in keyof T & keyof AggregateTradingPosition]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateTradingPosition[P]>
+      : GetScalarType<T[P], AggregateTradingPosition[P]>
+  }
+
+
+
+
+  export type TradingPositionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TradingPositionWhereInput
+    orderBy?: TradingPositionOrderByWithAggregationInput | TradingPositionOrderByWithAggregationInput[]
+    by: TradingPositionScalarFieldEnum[] | TradingPositionScalarFieldEnum
+    having?: TradingPositionScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: TradingPositionCountAggregateInputType | true
+    _avg?: TradingPositionAvgAggregateInputType
+    _sum?: TradingPositionSumAggregateInputType
+    _min?: TradingPositionMinAggregateInputType
+    _max?: TradingPositionMaxAggregateInputType
+  }
+
+  export type TradingPositionGroupByOutputType = {
+    id: string
+    accountId: string
+    symbol: string
+    qty: number
+    entryPrice: number
+    marketPrice: number
+    updatedAt: Date
+    _count: TradingPositionCountAggregateOutputType | null
+    _avg: TradingPositionAvgAggregateOutputType | null
+    _sum: TradingPositionSumAggregateOutputType | null
+    _min: TradingPositionMinAggregateOutputType | null
+    _max: TradingPositionMaxAggregateOutputType | null
+  }
+
+  type GetTradingPositionGroupByPayload<T extends TradingPositionGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<TradingPositionGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof TradingPositionGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], TradingPositionGroupByOutputType[P]>
+            : GetScalarType<T[P], TradingPositionGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type TradingPositionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    accountId?: boolean
+    symbol?: boolean
+    qty?: boolean
+    entryPrice?: boolean
+    marketPrice?: boolean
+    updatedAt?: boolean
+    account?: boolean | TradingAccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["tradingPosition"]>
+
+  export type TradingPositionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    accountId?: boolean
+    symbol?: boolean
+    qty?: boolean
+    entryPrice?: boolean
+    marketPrice?: boolean
+    updatedAt?: boolean
+    account?: boolean | TradingAccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["tradingPosition"]>
+
+  export type TradingPositionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    accountId?: boolean
+    symbol?: boolean
+    qty?: boolean
+    entryPrice?: boolean
+    marketPrice?: boolean
+    updatedAt?: boolean
+    account?: boolean | TradingAccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["tradingPosition"]>
+
+  export type TradingPositionSelectScalar = {
+    id?: boolean
+    accountId?: boolean
+    symbol?: boolean
+    qty?: boolean
+    entryPrice?: boolean
+    marketPrice?: boolean
+    updatedAt?: boolean
+  }
+
+  export type TradingPositionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "accountId" | "symbol" | "qty" | "entryPrice" | "marketPrice" | "updatedAt", ExtArgs["result"]["tradingPosition"]>
+  export type TradingPositionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | TradingAccountDefaultArgs<ExtArgs>
+  }
+  export type TradingPositionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | TradingAccountDefaultArgs<ExtArgs>
+  }
+  export type TradingPositionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | TradingAccountDefaultArgs<ExtArgs>
+  }
+
+  export type $TradingPositionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "TradingPosition"
+    objects: {
+      account: Prisma.$TradingAccountPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      accountId: string
+      symbol: string
+      qty: number
+      entryPrice: number
+      marketPrice: number
+      updatedAt: Date
+    }, ExtArgs["result"]["tradingPosition"]>
+    composites: {}
+  }
+
+  type TradingPositionGetPayload<S extends boolean | null | undefined | TradingPositionDefaultArgs> = $Result.GetResult<Prisma.$TradingPositionPayload, S>
+
+  type TradingPositionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<TradingPositionFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: TradingPositionCountAggregateInputType | true
+    }
+
+  export interface TradingPositionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['TradingPosition'], meta: { name: 'TradingPosition' } }
+    /**
+     * Find zero or one TradingPosition that matches the filter.
+     * @param {TradingPositionFindUniqueArgs} args - Arguments to find a TradingPosition
+     * @example
+     * // Get one TradingPosition
+     * const tradingPosition = await prisma.tradingPosition.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends TradingPositionFindUniqueArgs>(args: SelectSubset<T, TradingPositionFindUniqueArgs<ExtArgs>>): Prisma__TradingPositionClient<$Result.GetResult<Prisma.$TradingPositionPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one TradingPosition that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {TradingPositionFindUniqueOrThrowArgs} args - Arguments to find a TradingPosition
+     * @example
+     * // Get one TradingPosition
+     * const tradingPosition = await prisma.tradingPosition.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends TradingPositionFindUniqueOrThrowArgs>(args: SelectSubset<T, TradingPositionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__TradingPositionClient<$Result.GetResult<Prisma.$TradingPositionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first TradingPosition that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TradingPositionFindFirstArgs} args - Arguments to find a TradingPosition
+     * @example
+     * // Get one TradingPosition
+     * const tradingPosition = await prisma.tradingPosition.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends TradingPositionFindFirstArgs>(args?: SelectSubset<T, TradingPositionFindFirstArgs<ExtArgs>>): Prisma__TradingPositionClient<$Result.GetResult<Prisma.$TradingPositionPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first TradingPosition that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TradingPositionFindFirstOrThrowArgs} args - Arguments to find a TradingPosition
+     * @example
+     * // Get one TradingPosition
+     * const tradingPosition = await prisma.tradingPosition.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends TradingPositionFindFirstOrThrowArgs>(args?: SelectSubset<T, TradingPositionFindFirstOrThrowArgs<ExtArgs>>): Prisma__TradingPositionClient<$Result.GetResult<Prisma.$TradingPositionPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more TradingPositions that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TradingPositionFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all TradingPositions
+     * const tradingPositions = await prisma.tradingPosition.findMany()
+     * 
+     * // Get first 10 TradingPositions
+     * const tradingPositions = await prisma.tradingPosition.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const tradingPositionWithIdOnly = await prisma.tradingPosition.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends TradingPositionFindManyArgs>(args?: SelectSubset<T, TradingPositionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TradingPositionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a TradingPosition.
+     * @param {TradingPositionCreateArgs} args - Arguments to create a TradingPosition.
+     * @example
+     * // Create one TradingPosition
+     * const TradingPosition = await prisma.tradingPosition.create({
+     *   data: {
+     *     // ... data to create a TradingPosition
+     *   }
+     * })
+     * 
+     */
+    create<T extends TradingPositionCreateArgs>(args: SelectSubset<T, TradingPositionCreateArgs<ExtArgs>>): Prisma__TradingPositionClient<$Result.GetResult<Prisma.$TradingPositionPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many TradingPositions.
+     * @param {TradingPositionCreateManyArgs} args - Arguments to create many TradingPositions.
+     * @example
+     * // Create many TradingPositions
+     * const tradingPosition = await prisma.tradingPosition.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends TradingPositionCreateManyArgs>(args?: SelectSubset<T, TradingPositionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many TradingPositions and returns the data saved in the database.
+     * @param {TradingPositionCreateManyAndReturnArgs} args - Arguments to create many TradingPositions.
+     * @example
+     * // Create many TradingPositions
+     * const tradingPosition = await prisma.tradingPosition.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many TradingPositions and only return the `id`
+     * const tradingPositionWithIdOnly = await prisma.tradingPosition.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends TradingPositionCreateManyAndReturnArgs>(args?: SelectSubset<T, TradingPositionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TradingPositionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a TradingPosition.
+     * @param {TradingPositionDeleteArgs} args - Arguments to delete one TradingPosition.
+     * @example
+     * // Delete one TradingPosition
+     * const TradingPosition = await prisma.tradingPosition.delete({
+     *   where: {
+     *     // ... filter to delete one TradingPosition
+     *   }
+     * })
+     * 
+     */
+    delete<T extends TradingPositionDeleteArgs>(args: SelectSubset<T, TradingPositionDeleteArgs<ExtArgs>>): Prisma__TradingPositionClient<$Result.GetResult<Prisma.$TradingPositionPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one TradingPosition.
+     * @param {TradingPositionUpdateArgs} args - Arguments to update one TradingPosition.
+     * @example
+     * // Update one TradingPosition
+     * const tradingPosition = await prisma.tradingPosition.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends TradingPositionUpdateArgs>(args: SelectSubset<T, TradingPositionUpdateArgs<ExtArgs>>): Prisma__TradingPositionClient<$Result.GetResult<Prisma.$TradingPositionPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more TradingPositions.
+     * @param {TradingPositionDeleteManyArgs} args - Arguments to filter TradingPositions to delete.
+     * @example
+     * // Delete a few TradingPositions
+     * const { count } = await prisma.tradingPosition.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends TradingPositionDeleteManyArgs>(args?: SelectSubset<T, TradingPositionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more TradingPositions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TradingPositionUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many TradingPositions
+     * const tradingPosition = await prisma.tradingPosition.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends TradingPositionUpdateManyArgs>(args: SelectSubset<T, TradingPositionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more TradingPositions and returns the data updated in the database.
+     * @param {TradingPositionUpdateManyAndReturnArgs} args - Arguments to update many TradingPositions.
+     * @example
+     * // Update many TradingPositions
+     * const tradingPosition = await prisma.tradingPosition.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more TradingPositions and only return the `id`
+     * const tradingPositionWithIdOnly = await prisma.tradingPosition.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends TradingPositionUpdateManyAndReturnArgs>(args: SelectSubset<T, TradingPositionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TradingPositionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one TradingPosition.
+     * @param {TradingPositionUpsertArgs} args - Arguments to update or create a TradingPosition.
+     * @example
+     * // Update or create a TradingPosition
+     * const tradingPosition = await prisma.tradingPosition.upsert({
+     *   create: {
+     *     // ... data to create a TradingPosition
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the TradingPosition we want to update
+     *   }
+     * })
+     */
+    upsert<T extends TradingPositionUpsertArgs>(args: SelectSubset<T, TradingPositionUpsertArgs<ExtArgs>>): Prisma__TradingPositionClient<$Result.GetResult<Prisma.$TradingPositionPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of TradingPositions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TradingPositionCountArgs} args - Arguments to filter TradingPositions to count.
+     * @example
+     * // Count the number of TradingPositions
+     * const count = await prisma.tradingPosition.count({
+     *   where: {
+     *     // ... the filter for the TradingPositions we want to count
+     *   }
+     * })
+    **/
+    count<T extends TradingPositionCountArgs>(
+      args?: Subset<T, TradingPositionCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], TradingPositionCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a TradingPosition.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TradingPositionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends TradingPositionAggregateArgs>(args: Subset<T, TradingPositionAggregateArgs>): Prisma.PrismaPromise<GetTradingPositionAggregateType<T>>
+
+    /**
+     * Group by TradingPosition.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TradingPositionGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends TradingPositionGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: TradingPositionGroupByArgs['orderBy'] }
+        : { orderBy?: TradingPositionGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, TradingPositionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetTradingPositionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the TradingPosition model
+   */
+  readonly fields: TradingPositionFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for TradingPosition.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__TradingPositionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    account<T extends TradingAccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TradingAccountDefaultArgs<ExtArgs>>): Prisma__TradingAccountClient<$Result.GetResult<Prisma.$TradingAccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the TradingPosition model
+   */
+  interface TradingPositionFieldRefs {
+    readonly id: FieldRef<"TradingPosition", 'String'>
+    readonly accountId: FieldRef<"TradingPosition", 'String'>
+    readonly symbol: FieldRef<"TradingPosition", 'String'>
+    readonly qty: FieldRef<"TradingPosition", 'Float'>
+    readonly entryPrice: FieldRef<"TradingPosition", 'Float'>
+    readonly marketPrice: FieldRef<"TradingPosition", 'Float'>
+    readonly updatedAt: FieldRef<"TradingPosition", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * TradingPosition findUnique
+   */
+  export type TradingPositionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingPosition
+     */
+    select?: TradingPositionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingPosition
+     */
+    omit?: TradingPositionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingPositionInclude<ExtArgs> | null
+    /**
+     * Filter, which TradingPosition to fetch.
+     */
+    where: TradingPositionWhereUniqueInput
+  }
+
+  /**
+   * TradingPosition findUniqueOrThrow
+   */
+  export type TradingPositionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingPosition
+     */
+    select?: TradingPositionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingPosition
+     */
+    omit?: TradingPositionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingPositionInclude<ExtArgs> | null
+    /**
+     * Filter, which TradingPosition to fetch.
+     */
+    where: TradingPositionWhereUniqueInput
+  }
+
+  /**
+   * TradingPosition findFirst
+   */
+  export type TradingPositionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingPosition
+     */
+    select?: TradingPositionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingPosition
+     */
+    omit?: TradingPositionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingPositionInclude<ExtArgs> | null
+    /**
+     * Filter, which TradingPosition to fetch.
+     */
+    where?: TradingPositionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TradingPositions to fetch.
+     */
+    orderBy?: TradingPositionOrderByWithRelationInput | TradingPositionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TradingPositions.
+     */
+    cursor?: TradingPositionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TradingPositions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TradingPositions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TradingPositions.
+     */
+    distinct?: TradingPositionScalarFieldEnum | TradingPositionScalarFieldEnum[]
+  }
+
+  /**
+   * TradingPosition findFirstOrThrow
+   */
+  export type TradingPositionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingPosition
+     */
+    select?: TradingPositionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingPosition
+     */
+    omit?: TradingPositionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingPositionInclude<ExtArgs> | null
+    /**
+     * Filter, which TradingPosition to fetch.
+     */
+    where?: TradingPositionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TradingPositions to fetch.
+     */
+    orderBy?: TradingPositionOrderByWithRelationInput | TradingPositionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TradingPositions.
+     */
+    cursor?: TradingPositionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TradingPositions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TradingPositions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TradingPositions.
+     */
+    distinct?: TradingPositionScalarFieldEnum | TradingPositionScalarFieldEnum[]
+  }
+
+  /**
+   * TradingPosition findMany
+   */
+  export type TradingPositionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingPosition
+     */
+    select?: TradingPositionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingPosition
+     */
+    omit?: TradingPositionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingPositionInclude<ExtArgs> | null
+    /**
+     * Filter, which TradingPositions to fetch.
+     */
+    where?: TradingPositionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TradingPositions to fetch.
+     */
+    orderBy?: TradingPositionOrderByWithRelationInput | TradingPositionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing TradingPositions.
+     */
+    cursor?: TradingPositionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TradingPositions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TradingPositions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TradingPositions.
+     */
+    distinct?: TradingPositionScalarFieldEnum | TradingPositionScalarFieldEnum[]
+  }
+
+  /**
+   * TradingPosition create
+   */
+  export type TradingPositionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingPosition
+     */
+    select?: TradingPositionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingPosition
+     */
+    omit?: TradingPositionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingPositionInclude<ExtArgs> | null
+    /**
+     * The data needed to create a TradingPosition.
+     */
+    data: XOR<TradingPositionCreateInput, TradingPositionUncheckedCreateInput>
+  }
+
+  /**
+   * TradingPosition createMany
+   */
+  export type TradingPositionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many TradingPositions.
+     */
+    data: TradingPositionCreateManyInput | TradingPositionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * TradingPosition createManyAndReturn
+   */
+  export type TradingPositionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingPosition
+     */
+    select?: TradingPositionSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingPosition
+     */
+    omit?: TradingPositionOmit<ExtArgs> | null
+    /**
+     * The data used to create many TradingPositions.
+     */
+    data: TradingPositionCreateManyInput | TradingPositionCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingPositionIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * TradingPosition update
+   */
+  export type TradingPositionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingPosition
+     */
+    select?: TradingPositionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingPosition
+     */
+    omit?: TradingPositionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingPositionInclude<ExtArgs> | null
+    /**
+     * The data needed to update a TradingPosition.
+     */
+    data: XOR<TradingPositionUpdateInput, TradingPositionUncheckedUpdateInput>
+    /**
+     * Choose, which TradingPosition to update.
+     */
+    where: TradingPositionWhereUniqueInput
+  }
+
+  /**
+   * TradingPosition updateMany
+   */
+  export type TradingPositionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update TradingPositions.
+     */
+    data: XOR<TradingPositionUpdateManyMutationInput, TradingPositionUncheckedUpdateManyInput>
+    /**
+     * Filter which TradingPositions to update
+     */
+    where?: TradingPositionWhereInput
+    /**
+     * Limit how many TradingPositions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * TradingPosition updateManyAndReturn
+   */
+  export type TradingPositionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingPosition
+     */
+    select?: TradingPositionSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingPosition
+     */
+    omit?: TradingPositionOmit<ExtArgs> | null
+    /**
+     * The data used to update TradingPositions.
+     */
+    data: XOR<TradingPositionUpdateManyMutationInput, TradingPositionUncheckedUpdateManyInput>
+    /**
+     * Filter which TradingPositions to update
+     */
+    where?: TradingPositionWhereInput
+    /**
+     * Limit how many TradingPositions to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingPositionIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * TradingPosition upsert
+   */
+  export type TradingPositionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingPosition
+     */
+    select?: TradingPositionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingPosition
+     */
+    omit?: TradingPositionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingPositionInclude<ExtArgs> | null
+    /**
+     * The filter to search for the TradingPosition to update in case it exists.
+     */
+    where: TradingPositionWhereUniqueInput
+    /**
+     * In case the TradingPosition found by the `where` argument doesn't exist, create a new TradingPosition with this data.
+     */
+    create: XOR<TradingPositionCreateInput, TradingPositionUncheckedCreateInput>
+    /**
+     * In case the TradingPosition was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<TradingPositionUpdateInput, TradingPositionUncheckedUpdateInput>
+  }
+
+  /**
+   * TradingPosition delete
+   */
+  export type TradingPositionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingPosition
+     */
+    select?: TradingPositionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingPosition
+     */
+    omit?: TradingPositionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingPositionInclude<ExtArgs> | null
+    /**
+     * Filter which TradingPosition to delete.
+     */
+    where: TradingPositionWhereUniqueInput
+  }
+
+  /**
+   * TradingPosition deleteMany
+   */
+  export type TradingPositionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TradingPositions to delete
+     */
+    where?: TradingPositionWhereInput
+    /**
+     * Limit how many TradingPositions to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * TradingPosition without action
+   */
+  export type TradingPositionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingPosition
+     */
+    select?: TradingPositionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingPosition
+     */
+    omit?: TradingPositionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TradingPositionInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model SystemSetting
+   */
+
+  export type AggregateSystemSetting = {
+    _count: SystemSettingCountAggregateOutputType | null
+    _min: SystemSettingMinAggregateOutputType | null
+    _max: SystemSettingMaxAggregateOutputType | null
+  }
+
+  export type SystemSettingMinAggregateOutputType = {
+    id: string | null
+    key: string | null
+    value: string | null
+    updatedAt: Date | null
+  }
+
+  export type SystemSettingMaxAggregateOutputType = {
+    id: string | null
+    key: string | null
+    value: string | null
+    updatedAt: Date | null
+  }
+
+  export type SystemSettingCountAggregateOutputType = {
+    id: number
+    key: number
+    value: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type SystemSettingMinAggregateInputType = {
+    id?: true
+    key?: true
+    value?: true
+    updatedAt?: true
+  }
+
+  export type SystemSettingMaxAggregateInputType = {
+    id?: true
+    key?: true
+    value?: true
+    updatedAt?: true
+  }
+
+  export type SystemSettingCountAggregateInputType = {
+    id?: true
+    key?: true
+    value?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type SystemSettingAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which SystemSetting to aggregate.
+     */
+    where?: SystemSettingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SystemSettings to fetch.
+     */
+    orderBy?: SystemSettingOrderByWithRelationInput | SystemSettingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: SystemSettingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SystemSettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SystemSettings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned SystemSettings
+    **/
+    _count?: true | SystemSettingCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: SystemSettingMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: SystemSettingMaxAggregateInputType
+  }
+
+  export type GetSystemSettingAggregateType<T extends SystemSettingAggregateArgs> = {
+        [P in keyof T & keyof AggregateSystemSetting]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateSystemSetting[P]>
+      : GetScalarType<T[P], AggregateSystemSetting[P]>
+  }
+
+
+
+
+  export type SystemSettingGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SystemSettingWhereInput
+    orderBy?: SystemSettingOrderByWithAggregationInput | SystemSettingOrderByWithAggregationInput[]
+    by: SystemSettingScalarFieldEnum[] | SystemSettingScalarFieldEnum
+    having?: SystemSettingScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: SystemSettingCountAggregateInputType | true
+    _min?: SystemSettingMinAggregateInputType
+    _max?: SystemSettingMaxAggregateInputType
+  }
+
+  export type SystemSettingGroupByOutputType = {
+    id: string
+    key: string
+    value: string
+    updatedAt: Date
+    _count: SystemSettingCountAggregateOutputType | null
+    _min: SystemSettingMinAggregateOutputType | null
+    _max: SystemSettingMaxAggregateOutputType | null
+  }
+
+  type GetSystemSettingGroupByPayload<T extends SystemSettingGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<SystemSettingGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof SystemSettingGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], SystemSettingGroupByOutputType[P]>
+            : GetScalarType<T[P], SystemSettingGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type SystemSettingSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    key?: boolean
+    value?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["systemSetting"]>
+
+  export type SystemSettingSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    key?: boolean
+    value?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["systemSetting"]>
+
+  export type SystemSettingSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    key?: boolean
+    value?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["systemSetting"]>
+
+  export type SystemSettingSelectScalar = {
+    id?: boolean
+    key?: boolean
+    value?: boolean
+    updatedAt?: boolean
+  }
+
+  export type SystemSettingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "key" | "value" | "updatedAt", ExtArgs["result"]["systemSetting"]>
+
+  export type $SystemSettingPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "SystemSetting"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      key: string
+      value: string
+      updatedAt: Date
+    }, ExtArgs["result"]["systemSetting"]>
+    composites: {}
+  }
+
+  type SystemSettingGetPayload<S extends boolean | null | undefined | SystemSettingDefaultArgs> = $Result.GetResult<Prisma.$SystemSettingPayload, S>
+
+  type SystemSettingCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<SystemSettingFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: SystemSettingCountAggregateInputType | true
+    }
+
+  export interface SystemSettingDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['SystemSetting'], meta: { name: 'SystemSetting' } }
+    /**
+     * Find zero or one SystemSetting that matches the filter.
+     * @param {SystemSettingFindUniqueArgs} args - Arguments to find a SystemSetting
+     * @example
+     * // Get one SystemSetting
+     * const systemSetting = await prisma.systemSetting.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends SystemSettingFindUniqueArgs>(args: SelectSubset<T, SystemSettingFindUniqueArgs<ExtArgs>>): Prisma__SystemSettingClient<$Result.GetResult<Prisma.$SystemSettingPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one SystemSetting that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {SystemSettingFindUniqueOrThrowArgs} args - Arguments to find a SystemSetting
+     * @example
+     * // Get one SystemSetting
+     * const systemSetting = await prisma.systemSetting.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends SystemSettingFindUniqueOrThrowArgs>(args: SelectSubset<T, SystemSettingFindUniqueOrThrowArgs<ExtArgs>>): Prisma__SystemSettingClient<$Result.GetResult<Prisma.$SystemSettingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first SystemSetting that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SystemSettingFindFirstArgs} args - Arguments to find a SystemSetting
+     * @example
+     * // Get one SystemSetting
+     * const systemSetting = await prisma.systemSetting.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends SystemSettingFindFirstArgs>(args?: SelectSubset<T, SystemSettingFindFirstArgs<ExtArgs>>): Prisma__SystemSettingClient<$Result.GetResult<Prisma.$SystemSettingPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first SystemSetting that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SystemSettingFindFirstOrThrowArgs} args - Arguments to find a SystemSetting
+     * @example
+     * // Get one SystemSetting
+     * const systemSetting = await prisma.systemSetting.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends SystemSettingFindFirstOrThrowArgs>(args?: SelectSubset<T, SystemSettingFindFirstOrThrowArgs<ExtArgs>>): Prisma__SystemSettingClient<$Result.GetResult<Prisma.$SystemSettingPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more SystemSettings that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SystemSettingFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all SystemSettings
+     * const systemSettings = await prisma.systemSetting.findMany()
+     * 
+     * // Get first 10 SystemSettings
+     * const systemSettings = await prisma.systemSetting.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const systemSettingWithIdOnly = await prisma.systemSetting.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends SystemSettingFindManyArgs>(args?: SelectSubset<T, SystemSettingFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SystemSettingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a SystemSetting.
+     * @param {SystemSettingCreateArgs} args - Arguments to create a SystemSetting.
+     * @example
+     * // Create one SystemSetting
+     * const SystemSetting = await prisma.systemSetting.create({
+     *   data: {
+     *     // ... data to create a SystemSetting
+     *   }
+     * })
+     * 
+     */
+    create<T extends SystemSettingCreateArgs>(args: SelectSubset<T, SystemSettingCreateArgs<ExtArgs>>): Prisma__SystemSettingClient<$Result.GetResult<Prisma.$SystemSettingPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many SystemSettings.
+     * @param {SystemSettingCreateManyArgs} args - Arguments to create many SystemSettings.
+     * @example
+     * // Create many SystemSettings
+     * const systemSetting = await prisma.systemSetting.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends SystemSettingCreateManyArgs>(args?: SelectSubset<T, SystemSettingCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many SystemSettings and returns the data saved in the database.
+     * @param {SystemSettingCreateManyAndReturnArgs} args - Arguments to create many SystemSettings.
+     * @example
+     * // Create many SystemSettings
+     * const systemSetting = await prisma.systemSetting.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many SystemSettings and only return the `id`
+     * const systemSettingWithIdOnly = await prisma.systemSetting.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends SystemSettingCreateManyAndReturnArgs>(args?: SelectSubset<T, SystemSettingCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SystemSettingPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a SystemSetting.
+     * @param {SystemSettingDeleteArgs} args - Arguments to delete one SystemSetting.
+     * @example
+     * // Delete one SystemSetting
+     * const SystemSetting = await prisma.systemSetting.delete({
+     *   where: {
+     *     // ... filter to delete one SystemSetting
+     *   }
+     * })
+     * 
+     */
+    delete<T extends SystemSettingDeleteArgs>(args: SelectSubset<T, SystemSettingDeleteArgs<ExtArgs>>): Prisma__SystemSettingClient<$Result.GetResult<Prisma.$SystemSettingPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one SystemSetting.
+     * @param {SystemSettingUpdateArgs} args - Arguments to update one SystemSetting.
+     * @example
+     * // Update one SystemSetting
+     * const systemSetting = await prisma.systemSetting.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends SystemSettingUpdateArgs>(args: SelectSubset<T, SystemSettingUpdateArgs<ExtArgs>>): Prisma__SystemSettingClient<$Result.GetResult<Prisma.$SystemSettingPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more SystemSettings.
+     * @param {SystemSettingDeleteManyArgs} args - Arguments to filter SystemSettings to delete.
+     * @example
+     * // Delete a few SystemSettings
+     * const { count } = await prisma.systemSetting.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends SystemSettingDeleteManyArgs>(args?: SelectSubset<T, SystemSettingDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more SystemSettings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SystemSettingUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many SystemSettings
+     * const systemSetting = await prisma.systemSetting.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends SystemSettingUpdateManyArgs>(args: SelectSubset<T, SystemSettingUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more SystemSettings and returns the data updated in the database.
+     * @param {SystemSettingUpdateManyAndReturnArgs} args - Arguments to update many SystemSettings.
+     * @example
+     * // Update many SystemSettings
+     * const systemSetting = await prisma.systemSetting.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more SystemSettings and only return the `id`
+     * const systemSettingWithIdOnly = await prisma.systemSetting.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends SystemSettingUpdateManyAndReturnArgs>(args: SelectSubset<T, SystemSettingUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SystemSettingPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one SystemSetting.
+     * @param {SystemSettingUpsertArgs} args - Arguments to update or create a SystemSetting.
+     * @example
+     * // Update or create a SystemSetting
+     * const systemSetting = await prisma.systemSetting.upsert({
+     *   create: {
+     *     // ... data to create a SystemSetting
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the SystemSetting we want to update
+     *   }
+     * })
+     */
+    upsert<T extends SystemSettingUpsertArgs>(args: SelectSubset<T, SystemSettingUpsertArgs<ExtArgs>>): Prisma__SystemSettingClient<$Result.GetResult<Prisma.$SystemSettingPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of SystemSettings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SystemSettingCountArgs} args - Arguments to filter SystemSettings to count.
+     * @example
+     * // Count the number of SystemSettings
+     * const count = await prisma.systemSetting.count({
+     *   where: {
+     *     // ... the filter for the SystemSettings we want to count
+     *   }
+     * })
+    **/
+    count<T extends SystemSettingCountArgs>(
+      args?: Subset<T, SystemSettingCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], SystemSettingCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a SystemSetting.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SystemSettingAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends SystemSettingAggregateArgs>(args: Subset<T, SystemSettingAggregateArgs>): Prisma.PrismaPromise<GetSystemSettingAggregateType<T>>
+
+    /**
+     * Group by SystemSetting.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SystemSettingGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends SystemSettingGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: SystemSettingGroupByArgs['orderBy'] }
+        : { orderBy?: SystemSettingGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, SystemSettingGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetSystemSettingGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the SystemSetting model
+   */
+  readonly fields: SystemSettingFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for SystemSetting.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__SystemSettingClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the SystemSetting model
+   */
+  interface SystemSettingFieldRefs {
+    readonly id: FieldRef<"SystemSetting", 'String'>
+    readonly key: FieldRef<"SystemSetting", 'String'>
+    readonly value: FieldRef<"SystemSetting", 'String'>
+    readonly updatedAt: FieldRef<"SystemSetting", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * SystemSetting findUnique
+   */
+  export type SystemSettingFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SystemSetting
+     */
+    select?: SystemSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SystemSetting
+     */
+    omit?: SystemSettingOmit<ExtArgs> | null
+    /**
+     * Filter, which SystemSetting to fetch.
+     */
+    where: SystemSettingWhereUniqueInput
+  }
+
+  /**
+   * SystemSetting findUniqueOrThrow
+   */
+  export type SystemSettingFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SystemSetting
+     */
+    select?: SystemSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SystemSetting
+     */
+    omit?: SystemSettingOmit<ExtArgs> | null
+    /**
+     * Filter, which SystemSetting to fetch.
+     */
+    where: SystemSettingWhereUniqueInput
+  }
+
+  /**
+   * SystemSetting findFirst
+   */
+  export type SystemSettingFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SystemSetting
+     */
+    select?: SystemSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SystemSetting
+     */
+    omit?: SystemSettingOmit<ExtArgs> | null
+    /**
+     * Filter, which SystemSetting to fetch.
+     */
+    where?: SystemSettingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SystemSettings to fetch.
+     */
+    orderBy?: SystemSettingOrderByWithRelationInput | SystemSettingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for SystemSettings.
+     */
+    cursor?: SystemSettingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SystemSettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SystemSettings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SystemSettings.
+     */
+    distinct?: SystemSettingScalarFieldEnum | SystemSettingScalarFieldEnum[]
+  }
+
+  /**
+   * SystemSetting findFirstOrThrow
+   */
+  export type SystemSettingFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SystemSetting
+     */
+    select?: SystemSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SystemSetting
+     */
+    omit?: SystemSettingOmit<ExtArgs> | null
+    /**
+     * Filter, which SystemSetting to fetch.
+     */
+    where?: SystemSettingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SystemSettings to fetch.
+     */
+    orderBy?: SystemSettingOrderByWithRelationInput | SystemSettingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for SystemSettings.
+     */
+    cursor?: SystemSettingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SystemSettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SystemSettings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SystemSettings.
+     */
+    distinct?: SystemSettingScalarFieldEnum | SystemSettingScalarFieldEnum[]
+  }
+
+  /**
+   * SystemSetting findMany
+   */
+  export type SystemSettingFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SystemSetting
+     */
+    select?: SystemSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SystemSetting
+     */
+    omit?: SystemSettingOmit<ExtArgs> | null
+    /**
+     * Filter, which SystemSettings to fetch.
+     */
+    where?: SystemSettingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SystemSettings to fetch.
+     */
+    orderBy?: SystemSettingOrderByWithRelationInput | SystemSettingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing SystemSettings.
+     */
+    cursor?: SystemSettingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SystemSettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SystemSettings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SystemSettings.
+     */
+    distinct?: SystemSettingScalarFieldEnum | SystemSettingScalarFieldEnum[]
+  }
+
+  /**
+   * SystemSetting create
+   */
+  export type SystemSettingCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SystemSetting
+     */
+    select?: SystemSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SystemSetting
+     */
+    omit?: SystemSettingOmit<ExtArgs> | null
+    /**
+     * The data needed to create a SystemSetting.
+     */
+    data: XOR<SystemSettingCreateInput, SystemSettingUncheckedCreateInput>
+  }
+
+  /**
+   * SystemSetting createMany
+   */
+  export type SystemSettingCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many SystemSettings.
+     */
+    data: SystemSettingCreateManyInput | SystemSettingCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * SystemSetting createManyAndReturn
+   */
+  export type SystemSettingCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SystemSetting
+     */
+    select?: SystemSettingSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the SystemSetting
+     */
+    omit?: SystemSettingOmit<ExtArgs> | null
+    /**
+     * The data used to create many SystemSettings.
+     */
+    data: SystemSettingCreateManyInput | SystemSettingCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * SystemSetting update
+   */
+  export type SystemSettingUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SystemSetting
+     */
+    select?: SystemSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SystemSetting
+     */
+    omit?: SystemSettingOmit<ExtArgs> | null
+    /**
+     * The data needed to update a SystemSetting.
+     */
+    data: XOR<SystemSettingUpdateInput, SystemSettingUncheckedUpdateInput>
+    /**
+     * Choose, which SystemSetting to update.
+     */
+    where: SystemSettingWhereUniqueInput
+  }
+
+  /**
+   * SystemSetting updateMany
+   */
+  export type SystemSettingUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update SystemSettings.
+     */
+    data: XOR<SystemSettingUpdateManyMutationInput, SystemSettingUncheckedUpdateManyInput>
+    /**
+     * Filter which SystemSettings to update
+     */
+    where?: SystemSettingWhereInput
+    /**
+     * Limit how many SystemSettings to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * SystemSetting updateManyAndReturn
+   */
+  export type SystemSettingUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SystemSetting
+     */
+    select?: SystemSettingSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the SystemSetting
+     */
+    omit?: SystemSettingOmit<ExtArgs> | null
+    /**
+     * The data used to update SystemSettings.
+     */
+    data: XOR<SystemSettingUpdateManyMutationInput, SystemSettingUncheckedUpdateManyInput>
+    /**
+     * Filter which SystemSettings to update
+     */
+    where?: SystemSettingWhereInput
+    /**
+     * Limit how many SystemSettings to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * SystemSetting upsert
+   */
+  export type SystemSettingUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SystemSetting
+     */
+    select?: SystemSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SystemSetting
+     */
+    omit?: SystemSettingOmit<ExtArgs> | null
+    /**
+     * The filter to search for the SystemSetting to update in case it exists.
+     */
+    where: SystemSettingWhereUniqueInput
+    /**
+     * In case the SystemSetting found by the `where` argument doesn't exist, create a new SystemSetting with this data.
+     */
+    create: XOR<SystemSettingCreateInput, SystemSettingUncheckedCreateInput>
+    /**
+     * In case the SystemSetting was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<SystemSettingUpdateInput, SystemSettingUncheckedUpdateInput>
+  }
+
+  /**
+   * SystemSetting delete
+   */
+  export type SystemSettingDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SystemSetting
+     */
+    select?: SystemSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SystemSetting
+     */
+    omit?: SystemSettingOmit<ExtArgs> | null
+    /**
+     * Filter which SystemSetting to delete.
+     */
+    where: SystemSettingWhereUniqueInput
+  }
+
+  /**
+   * SystemSetting deleteMany
+   */
+  export type SystemSettingDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which SystemSettings to delete
+     */
+    where?: SystemSettingWhereInput
+    /**
+     * Limit how many SystemSettings to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * SystemSetting without action
+   */
+  export type SystemSettingDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SystemSetting
+     */
+    select?: SystemSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SystemSetting
+     */
+    omit?: SystemSettingOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model TradingBot
+   */
+
+  export type AggregateTradingBot = {
+    _count: TradingBotCountAggregateOutputType | null
+    _min: TradingBotMinAggregateOutputType | null
+    _max: TradingBotMaxAggregateOutputType | null
+  }
+
+  export type TradingBotMinAggregateOutputType = {
+    id: string | null
+    name: string | null
+    strategy: string | null
+    symbol: string | null
+    active: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type TradingBotMaxAggregateOutputType = {
+    id: string | null
+    name: string | null
+    strategy: string | null
+    symbol: string | null
+    active: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type TradingBotCountAggregateOutputType = {
+    id: number
+    name: number
+    strategy: number
+    parameters: number
+    symbol: number
+    active: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type TradingBotMinAggregateInputType = {
+    id?: true
+    name?: true
+    strategy?: true
+    symbol?: true
+    active?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type TradingBotMaxAggregateInputType = {
+    id?: true
+    name?: true
+    strategy?: true
+    symbol?: true
+    active?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type TradingBotCountAggregateInputType = {
+    id?: true
+    name?: true
+    strategy?: true
+    parameters?: true
+    symbol?: true
+    active?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type TradingBotAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TradingBot to aggregate.
+     */
+    where?: TradingBotWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TradingBots to fetch.
+     */
+    orderBy?: TradingBotOrderByWithRelationInput | TradingBotOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: TradingBotWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TradingBots from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TradingBots.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned TradingBots
+    **/
+    _count?: true | TradingBotCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: TradingBotMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: TradingBotMaxAggregateInputType
+  }
+
+  export type GetTradingBotAggregateType<T extends TradingBotAggregateArgs> = {
+        [P in keyof T & keyof AggregateTradingBot]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateTradingBot[P]>
+      : GetScalarType<T[P], AggregateTradingBot[P]>
+  }
+
+
+
+
+  export type TradingBotGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TradingBotWhereInput
+    orderBy?: TradingBotOrderByWithAggregationInput | TradingBotOrderByWithAggregationInput[]
+    by: TradingBotScalarFieldEnum[] | TradingBotScalarFieldEnum
+    having?: TradingBotScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: TradingBotCountAggregateInputType | true
+    _min?: TradingBotMinAggregateInputType
+    _max?: TradingBotMaxAggregateInputType
+  }
+
+  export type TradingBotGroupByOutputType = {
+    id: string
+    name: string
+    strategy: string
+    parameters: JsonValue
+    symbol: string
+    active: boolean
+    createdAt: Date
+    updatedAt: Date
+    _count: TradingBotCountAggregateOutputType | null
+    _min: TradingBotMinAggregateOutputType | null
+    _max: TradingBotMaxAggregateOutputType | null
+  }
+
+  type GetTradingBotGroupByPayload<T extends TradingBotGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<TradingBotGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof TradingBotGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], TradingBotGroupByOutputType[P]>
+            : GetScalarType<T[P], TradingBotGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type TradingBotSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    strategy?: boolean
+    parameters?: boolean
+    symbol?: boolean
+    active?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["tradingBot"]>
+
+  export type TradingBotSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    strategy?: boolean
+    parameters?: boolean
+    symbol?: boolean
+    active?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["tradingBot"]>
+
+  export type TradingBotSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    strategy?: boolean
+    parameters?: boolean
+    symbol?: boolean
+    active?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["tradingBot"]>
+
+  export type TradingBotSelectScalar = {
+    id?: boolean
+    name?: boolean
+    strategy?: boolean
+    parameters?: boolean
+    symbol?: boolean
+    active?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type TradingBotOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "strategy" | "parameters" | "symbol" | "active" | "createdAt" | "updatedAt", ExtArgs["result"]["tradingBot"]>
+
+  export type $TradingBotPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "TradingBot"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      name: string
+      strategy: string
+      parameters: Prisma.JsonValue
+      symbol: string
+      active: boolean
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["tradingBot"]>
+    composites: {}
+  }
+
+  type TradingBotGetPayload<S extends boolean | null | undefined | TradingBotDefaultArgs> = $Result.GetResult<Prisma.$TradingBotPayload, S>
+
+  type TradingBotCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<TradingBotFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: TradingBotCountAggregateInputType | true
+    }
+
+  export interface TradingBotDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['TradingBot'], meta: { name: 'TradingBot' } }
+    /**
+     * Find zero or one TradingBot that matches the filter.
+     * @param {TradingBotFindUniqueArgs} args - Arguments to find a TradingBot
+     * @example
+     * // Get one TradingBot
+     * const tradingBot = await prisma.tradingBot.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends TradingBotFindUniqueArgs>(args: SelectSubset<T, TradingBotFindUniqueArgs<ExtArgs>>): Prisma__TradingBotClient<$Result.GetResult<Prisma.$TradingBotPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one TradingBot that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {TradingBotFindUniqueOrThrowArgs} args - Arguments to find a TradingBot
+     * @example
+     * // Get one TradingBot
+     * const tradingBot = await prisma.tradingBot.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends TradingBotFindUniqueOrThrowArgs>(args: SelectSubset<T, TradingBotFindUniqueOrThrowArgs<ExtArgs>>): Prisma__TradingBotClient<$Result.GetResult<Prisma.$TradingBotPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first TradingBot that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TradingBotFindFirstArgs} args - Arguments to find a TradingBot
+     * @example
+     * // Get one TradingBot
+     * const tradingBot = await prisma.tradingBot.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends TradingBotFindFirstArgs>(args?: SelectSubset<T, TradingBotFindFirstArgs<ExtArgs>>): Prisma__TradingBotClient<$Result.GetResult<Prisma.$TradingBotPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first TradingBot that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TradingBotFindFirstOrThrowArgs} args - Arguments to find a TradingBot
+     * @example
+     * // Get one TradingBot
+     * const tradingBot = await prisma.tradingBot.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends TradingBotFindFirstOrThrowArgs>(args?: SelectSubset<T, TradingBotFindFirstOrThrowArgs<ExtArgs>>): Prisma__TradingBotClient<$Result.GetResult<Prisma.$TradingBotPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more TradingBots that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TradingBotFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all TradingBots
+     * const tradingBots = await prisma.tradingBot.findMany()
+     * 
+     * // Get first 10 TradingBots
+     * const tradingBots = await prisma.tradingBot.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const tradingBotWithIdOnly = await prisma.tradingBot.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends TradingBotFindManyArgs>(args?: SelectSubset<T, TradingBotFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TradingBotPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a TradingBot.
+     * @param {TradingBotCreateArgs} args - Arguments to create a TradingBot.
+     * @example
+     * // Create one TradingBot
+     * const TradingBot = await prisma.tradingBot.create({
+     *   data: {
+     *     // ... data to create a TradingBot
+     *   }
+     * })
+     * 
+     */
+    create<T extends TradingBotCreateArgs>(args: SelectSubset<T, TradingBotCreateArgs<ExtArgs>>): Prisma__TradingBotClient<$Result.GetResult<Prisma.$TradingBotPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many TradingBots.
+     * @param {TradingBotCreateManyArgs} args - Arguments to create many TradingBots.
+     * @example
+     * // Create many TradingBots
+     * const tradingBot = await prisma.tradingBot.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends TradingBotCreateManyArgs>(args?: SelectSubset<T, TradingBotCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many TradingBots and returns the data saved in the database.
+     * @param {TradingBotCreateManyAndReturnArgs} args - Arguments to create many TradingBots.
+     * @example
+     * // Create many TradingBots
+     * const tradingBot = await prisma.tradingBot.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many TradingBots and only return the `id`
+     * const tradingBotWithIdOnly = await prisma.tradingBot.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends TradingBotCreateManyAndReturnArgs>(args?: SelectSubset<T, TradingBotCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TradingBotPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a TradingBot.
+     * @param {TradingBotDeleteArgs} args - Arguments to delete one TradingBot.
+     * @example
+     * // Delete one TradingBot
+     * const TradingBot = await prisma.tradingBot.delete({
+     *   where: {
+     *     // ... filter to delete one TradingBot
+     *   }
+     * })
+     * 
+     */
+    delete<T extends TradingBotDeleteArgs>(args: SelectSubset<T, TradingBotDeleteArgs<ExtArgs>>): Prisma__TradingBotClient<$Result.GetResult<Prisma.$TradingBotPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one TradingBot.
+     * @param {TradingBotUpdateArgs} args - Arguments to update one TradingBot.
+     * @example
+     * // Update one TradingBot
+     * const tradingBot = await prisma.tradingBot.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends TradingBotUpdateArgs>(args: SelectSubset<T, TradingBotUpdateArgs<ExtArgs>>): Prisma__TradingBotClient<$Result.GetResult<Prisma.$TradingBotPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more TradingBots.
+     * @param {TradingBotDeleteManyArgs} args - Arguments to filter TradingBots to delete.
+     * @example
+     * // Delete a few TradingBots
+     * const { count } = await prisma.tradingBot.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends TradingBotDeleteManyArgs>(args?: SelectSubset<T, TradingBotDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more TradingBots.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TradingBotUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many TradingBots
+     * const tradingBot = await prisma.tradingBot.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends TradingBotUpdateManyArgs>(args: SelectSubset<T, TradingBotUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more TradingBots and returns the data updated in the database.
+     * @param {TradingBotUpdateManyAndReturnArgs} args - Arguments to update many TradingBots.
+     * @example
+     * // Update many TradingBots
+     * const tradingBot = await prisma.tradingBot.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more TradingBots and only return the `id`
+     * const tradingBotWithIdOnly = await prisma.tradingBot.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends TradingBotUpdateManyAndReturnArgs>(args: SelectSubset<T, TradingBotUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TradingBotPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one TradingBot.
+     * @param {TradingBotUpsertArgs} args - Arguments to update or create a TradingBot.
+     * @example
+     * // Update or create a TradingBot
+     * const tradingBot = await prisma.tradingBot.upsert({
+     *   create: {
+     *     // ... data to create a TradingBot
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the TradingBot we want to update
+     *   }
+     * })
+     */
+    upsert<T extends TradingBotUpsertArgs>(args: SelectSubset<T, TradingBotUpsertArgs<ExtArgs>>): Prisma__TradingBotClient<$Result.GetResult<Prisma.$TradingBotPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of TradingBots.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TradingBotCountArgs} args - Arguments to filter TradingBots to count.
+     * @example
+     * // Count the number of TradingBots
+     * const count = await prisma.tradingBot.count({
+     *   where: {
+     *     // ... the filter for the TradingBots we want to count
+     *   }
+     * })
+    **/
+    count<T extends TradingBotCountArgs>(
+      args?: Subset<T, TradingBotCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], TradingBotCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a TradingBot.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TradingBotAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends TradingBotAggregateArgs>(args: Subset<T, TradingBotAggregateArgs>): Prisma.PrismaPromise<GetTradingBotAggregateType<T>>
+
+    /**
+     * Group by TradingBot.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TradingBotGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends TradingBotGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: TradingBotGroupByArgs['orderBy'] }
+        : { orderBy?: TradingBotGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, TradingBotGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetTradingBotGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the TradingBot model
+   */
+  readonly fields: TradingBotFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for TradingBot.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__TradingBotClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the TradingBot model
+   */
+  interface TradingBotFieldRefs {
+    readonly id: FieldRef<"TradingBot", 'String'>
+    readonly name: FieldRef<"TradingBot", 'String'>
+    readonly strategy: FieldRef<"TradingBot", 'String'>
+    readonly parameters: FieldRef<"TradingBot", 'Json'>
+    readonly symbol: FieldRef<"TradingBot", 'String'>
+    readonly active: FieldRef<"TradingBot", 'Boolean'>
+    readonly createdAt: FieldRef<"TradingBot", 'DateTime'>
+    readonly updatedAt: FieldRef<"TradingBot", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * TradingBot findUnique
+   */
+  export type TradingBotFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingBot
+     */
+    select?: TradingBotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingBot
+     */
+    omit?: TradingBotOmit<ExtArgs> | null
+    /**
+     * Filter, which TradingBot to fetch.
+     */
+    where: TradingBotWhereUniqueInput
+  }
+
+  /**
+   * TradingBot findUniqueOrThrow
+   */
+  export type TradingBotFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingBot
+     */
+    select?: TradingBotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingBot
+     */
+    omit?: TradingBotOmit<ExtArgs> | null
+    /**
+     * Filter, which TradingBot to fetch.
+     */
+    where: TradingBotWhereUniqueInput
+  }
+
+  /**
+   * TradingBot findFirst
+   */
+  export type TradingBotFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingBot
+     */
+    select?: TradingBotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingBot
+     */
+    omit?: TradingBotOmit<ExtArgs> | null
+    /**
+     * Filter, which TradingBot to fetch.
+     */
+    where?: TradingBotWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TradingBots to fetch.
+     */
+    orderBy?: TradingBotOrderByWithRelationInput | TradingBotOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TradingBots.
+     */
+    cursor?: TradingBotWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TradingBots from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TradingBots.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TradingBots.
+     */
+    distinct?: TradingBotScalarFieldEnum | TradingBotScalarFieldEnum[]
+  }
+
+  /**
+   * TradingBot findFirstOrThrow
+   */
+  export type TradingBotFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingBot
+     */
+    select?: TradingBotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingBot
+     */
+    omit?: TradingBotOmit<ExtArgs> | null
+    /**
+     * Filter, which TradingBot to fetch.
+     */
+    where?: TradingBotWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TradingBots to fetch.
+     */
+    orderBy?: TradingBotOrderByWithRelationInput | TradingBotOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TradingBots.
+     */
+    cursor?: TradingBotWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TradingBots from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TradingBots.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TradingBots.
+     */
+    distinct?: TradingBotScalarFieldEnum | TradingBotScalarFieldEnum[]
+  }
+
+  /**
+   * TradingBot findMany
+   */
+  export type TradingBotFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingBot
+     */
+    select?: TradingBotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingBot
+     */
+    omit?: TradingBotOmit<ExtArgs> | null
+    /**
+     * Filter, which TradingBots to fetch.
+     */
+    where?: TradingBotWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TradingBots to fetch.
+     */
+    orderBy?: TradingBotOrderByWithRelationInput | TradingBotOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing TradingBots.
+     */
+    cursor?: TradingBotWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TradingBots from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TradingBots.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TradingBots.
+     */
+    distinct?: TradingBotScalarFieldEnum | TradingBotScalarFieldEnum[]
+  }
+
+  /**
+   * TradingBot create
+   */
+  export type TradingBotCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingBot
+     */
+    select?: TradingBotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingBot
+     */
+    omit?: TradingBotOmit<ExtArgs> | null
+    /**
+     * The data needed to create a TradingBot.
+     */
+    data: XOR<TradingBotCreateInput, TradingBotUncheckedCreateInput>
+  }
+
+  /**
+   * TradingBot createMany
+   */
+  export type TradingBotCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many TradingBots.
+     */
+    data: TradingBotCreateManyInput | TradingBotCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * TradingBot createManyAndReturn
+   */
+  export type TradingBotCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingBot
+     */
+    select?: TradingBotSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingBot
+     */
+    omit?: TradingBotOmit<ExtArgs> | null
+    /**
+     * The data used to create many TradingBots.
+     */
+    data: TradingBotCreateManyInput | TradingBotCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * TradingBot update
+   */
+  export type TradingBotUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingBot
+     */
+    select?: TradingBotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingBot
+     */
+    omit?: TradingBotOmit<ExtArgs> | null
+    /**
+     * The data needed to update a TradingBot.
+     */
+    data: XOR<TradingBotUpdateInput, TradingBotUncheckedUpdateInput>
+    /**
+     * Choose, which TradingBot to update.
+     */
+    where: TradingBotWhereUniqueInput
+  }
+
+  /**
+   * TradingBot updateMany
+   */
+  export type TradingBotUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update TradingBots.
+     */
+    data: XOR<TradingBotUpdateManyMutationInput, TradingBotUncheckedUpdateManyInput>
+    /**
+     * Filter which TradingBots to update
+     */
+    where?: TradingBotWhereInput
+    /**
+     * Limit how many TradingBots to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * TradingBot updateManyAndReturn
+   */
+  export type TradingBotUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingBot
+     */
+    select?: TradingBotSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingBot
+     */
+    omit?: TradingBotOmit<ExtArgs> | null
+    /**
+     * The data used to update TradingBots.
+     */
+    data: XOR<TradingBotUpdateManyMutationInput, TradingBotUncheckedUpdateManyInput>
+    /**
+     * Filter which TradingBots to update
+     */
+    where?: TradingBotWhereInput
+    /**
+     * Limit how many TradingBots to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * TradingBot upsert
+   */
+  export type TradingBotUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingBot
+     */
+    select?: TradingBotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingBot
+     */
+    omit?: TradingBotOmit<ExtArgs> | null
+    /**
+     * The filter to search for the TradingBot to update in case it exists.
+     */
+    where: TradingBotWhereUniqueInput
+    /**
+     * In case the TradingBot found by the `where` argument doesn't exist, create a new TradingBot with this data.
+     */
+    create: XOR<TradingBotCreateInput, TradingBotUncheckedCreateInput>
+    /**
+     * In case the TradingBot was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<TradingBotUpdateInput, TradingBotUncheckedUpdateInput>
+  }
+
+  /**
+   * TradingBot delete
+   */
+  export type TradingBotDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingBot
+     */
+    select?: TradingBotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingBot
+     */
+    omit?: TradingBotOmit<ExtArgs> | null
+    /**
+     * Filter which TradingBot to delete.
+     */
+    where: TradingBotWhereUniqueInput
+  }
+
+  /**
+   * TradingBot deleteMany
+   */
+  export type TradingBotDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TradingBots to delete
+     */
+    where?: TradingBotWhereInput
+    /**
+     * Limit how many TradingBots to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * TradingBot without action
+   */
+  export type TradingBotDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TradingBot
+     */
+    select?: TradingBotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TradingBot
+     */
+    omit?: TradingBotOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -5819,12 +12934,99 @@ export namespace Prisma {
   export type FundamentalMetricScalarFieldEnum = (typeof FundamentalMetricScalarFieldEnum)[keyof typeof FundamentalMetricScalarFieldEnum]
 
 
+  export const TradingSessionScalarFieldEnum: {
+    id: 'id',
+    provider: 'provider',
+    accessToken: 'accessToken',
+    publicToken: 'publicToken',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type TradingSessionScalarFieldEnum = (typeof TradingSessionScalarFieldEnum)[keyof typeof TradingSessionScalarFieldEnum]
+
+
+  export const TradingAccountScalarFieldEnum: {
+    id: 'id',
+    provider: 'provider',
+    name: 'name',
+    isLive: 'isLive',
+    balance: 'balance',
+    currency: 'currency',
+    createdAt: 'createdAt'
+  };
+
+  export type TradingAccountScalarFieldEnum = (typeof TradingAccountScalarFieldEnum)[keyof typeof TradingAccountScalarFieldEnum]
+
+
+  export const TradingOrderScalarFieldEnum: {
+    id: 'id',
+    accountId: 'accountId',
+    symbol: 'symbol',
+    qty: 'qty',
+    side: 'side',
+    type: 'type',
+    price: 'price',
+    status: 'status',
+    filledPrice: 'filledPrice',
+    commission: 'commission',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type TradingOrderScalarFieldEnum = (typeof TradingOrderScalarFieldEnum)[keyof typeof TradingOrderScalarFieldEnum]
+
+
+  export const TradingPositionScalarFieldEnum: {
+    id: 'id',
+    accountId: 'accountId',
+    symbol: 'symbol',
+    qty: 'qty',
+    entryPrice: 'entryPrice',
+    marketPrice: 'marketPrice',
+    updatedAt: 'updatedAt'
+  };
+
+  export type TradingPositionScalarFieldEnum = (typeof TradingPositionScalarFieldEnum)[keyof typeof TradingPositionScalarFieldEnum]
+
+
+  export const SystemSettingScalarFieldEnum: {
+    id: 'id',
+    key: 'key',
+    value: 'value',
+    updatedAt: 'updatedAt'
+  };
+
+  export type SystemSettingScalarFieldEnum = (typeof SystemSettingScalarFieldEnum)[keyof typeof SystemSettingScalarFieldEnum]
+
+
+  export const TradingBotScalarFieldEnum: {
+    id: 'id',
+    name: 'name',
+    strategy: 'strategy',
+    parameters: 'parameters',
+    symbol: 'symbol',
+    active: 'active',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type TradingBotScalarFieldEnum = (typeof TradingBotScalarFieldEnum)[keyof typeof TradingBotScalarFieldEnum]
+
+
   export const SortOrder: {
     asc: 'asc',
     desc: 'desc'
   };
 
   export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+  export const JsonNullValueInput: {
+    JsonNull: typeof JsonNull
+  };
+
+  export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
   export const QueryMode: {
@@ -5841,6 +13043,15 @@ export namespace Prisma {
   };
 
   export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+  export const JsonNullValueFilter: {
+    DbNull: typeof DbNull,
+    JsonNull: typeof JsonNull,
+    AnyNull: typeof AnyNull
+  };
+
+  export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 
 
   /**
@@ -5887,6 +13098,27 @@ export namespace Prisma {
    * Reference to a field of type 'Float[]'
    */
   export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Boolean'
+   */
+  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+  /**
+   * Reference to a field of type 'Json'
+   */
+  export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+  /**
+   * Reference to a field of type 'QueryMode'
+   */
+  export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 
@@ -6186,6 +13418,406 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"FundamentalMetric"> | Date | string
   }
 
+  export type TradingSessionWhereInput = {
+    AND?: TradingSessionWhereInput | TradingSessionWhereInput[]
+    OR?: TradingSessionWhereInput[]
+    NOT?: TradingSessionWhereInput | TradingSessionWhereInput[]
+    id?: StringFilter<"TradingSession"> | string
+    provider?: StringFilter<"TradingSession"> | string
+    accessToken?: StringFilter<"TradingSession"> | string
+    publicToken?: StringNullableFilter<"TradingSession"> | string | null
+    createdAt?: DateTimeFilter<"TradingSession"> | Date | string
+    updatedAt?: DateTimeFilter<"TradingSession"> | Date | string
+  }
+
+  export type TradingSessionOrderByWithRelationInput = {
+    id?: SortOrder
+    provider?: SortOrder
+    accessToken?: SortOrder
+    publicToken?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TradingSessionWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: TradingSessionWhereInput | TradingSessionWhereInput[]
+    OR?: TradingSessionWhereInput[]
+    NOT?: TradingSessionWhereInput | TradingSessionWhereInput[]
+    provider?: StringFilter<"TradingSession"> | string
+    accessToken?: StringFilter<"TradingSession"> | string
+    publicToken?: StringNullableFilter<"TradingSession"> | string | null
+    createdAt?: DateTimeFilter<"TradingSession"> | Date | string
+    updatedAt?: DateTimeFilter<"TradingSession"> | Date | string
+  }, "id">
+
+  export type TradingSessionOrderByWithAggregationInput = {
+    id?: SortOrder
+    provider?: SortOrder
+    accessToken?: SortOrder
+    publicToken?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: TradingSessionCountOrderByAggregateInput
+    _max?: TradingSessionMaxOrderByAggregateInput
+    _min?: TradingSessionMinOrderByAggregateInput
+  }
+
+  export type TradingSessionScalarWhereWithAggregatesInput = {
+    AND?: TradingSessionScalarWhereWithAggregatesInput | TradingSessionScalarWhereWithAggregatesInput[]
+    OR?: TradingSessionScalarWhereWithAggregatesInput[]
+    NOT?: TradingSessionScalarWhereWithAggregatesInput | TradingSessionScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"TradingSession"> | string
+    provider?: StringWithAggregatesFilter<"TradingSession"> | string
+    accessToken?: StringWithAggregatesFilter<"TradingSession"> | string
+    publicToken?: StringNullableWithAggregatesFilter<"TradingSession"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"TradingSession"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"TradingSession"> | Date | string
+  }
+
+  export type TradingAccountWhereInput = {
+    AND?: TradingAccountWhereInput | TradingAccountWhereInput[]
+    OR?: TradingAccountWhereInput[]
+    NOT?: TradingAccountWhereInput | TradingAccountWhereInput[]
+    id?: StringFilter<"TradingAccount"> | string
+    provider?: StringFilter<"TradingAccount"> | string
+    name?: StringFilter<"TradingAccount"> | string
+    isLive?: BoolFilter<"TradingAccount"> | boolean
+    balance?: FloatFilter<"TradingAccount"> | number
+    currency?: StringFilter<"TradingAccount"> | string
+    createdAt?: DateTimeFilter<"TradingAccount"> | Date | string
+    orders?: TradingOrderListRelationFilter
+    positions?: TradingPositionListRelationFilter
+  }
+
+  export type TradingAccountOrderByWithRelationInput = {
+    id?: SortOrder
+    provider?: SortOrder
+    name?: SortOrder
+    isLive?: SortOrder
+    balance?: SortOrder
+    currency?: SortOrder
+    createdAt?: SortOrder
+    orders?: TradingOrderOrderByRelationAggregateInput
+    positions?: TradingPositionOrderByRelationAggregateInput
+  }
+
+  export type TradingAccountWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: TradingAccountWhereInput | TradingAccountWhereInput[]
+    OR?: TradingAccountWhereInput[]
+    NOT?: TradingAccountWhereInput | TradingAccountWhereInput[]
+    provider?: StringFilter<"TradingAccount"> | string
+    name?: StringFilter<"TradingAccount"> | string
+    isLive?: BoolFilter<"TradingAccount"> | boolean
+    balance?: FloatFilter<"TradingAccount"> | number
+    currency?: StringFilter<"TradingAccount"> | string
+    createdAt?: DateTimeFilter<"TradingAccount"> | Date | string
+    orders?: TradingOrderListRelationFilter
+    positions?: TradingPositionListRelationFilter
+  }, "id">
+
+  export type TradingAccountOrderByWithAggregationInput = {
+    id?: SortOrder
+    provider?: SortOrder
+    name?: SortOrder
+    isLive?: SortOrder
+    balance?: SortOrder
+    currency?: SortOrder
+    createdAt?: SortOrder
+    _count?: TradingAccountCountOrderByAggregateInput
+    _avg?: TradingAccountAvgOrderByAggregateInput
+    _max?: TradingAccountMaxOrderByAggregateInput
+    _min?: TradingAccountMinOrderByAggregateInput
+    _sum?: TradingAccountSumOrderByAggregateInput
+  }
+
+  export type TradingAccountScalarWhereWithAggregatesInput = {
+    AND?: TradingAccountScalarWhereWithAggregatesInput | TradingAccountScalarWhereWithAggregatesInput[]
+    OR?: TradingAccountScalarWhereWithAggregatesInput[]
+    NOT?: TradingAccountScalarWhereWithAggregatesInput | TradingAccountScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"TradingAccount"> | string
+    provider?: StringWithAggregatesFilter<"TradingAccount"> | string
+    name?: StringWithAggregatesFilter<"TradingAccount"> | string
+    isLive?: BoolWithAggregatesFilter<"TradingAccount"> | boolean
+    balance?: FloatWithAggregatesFilter<"TradingAccount"> | number
+    currency?: StringWithAggregatesFilter<"TradingAccount"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"TradingAccount"> | Date | string
+  }
+
+  export type TradingOrderWhereInput = {
+    AND?: TradingOrderWhereInput | TradingOrderWhereInput[]
+    OR?: TradingOrderWhereInput[]
+    NOT?: TradingOrderWhereInput | TradingOrderWhereInput[]
+    id?: StringFilter<"TradingOrder"> | string
+    accountId?: StringFilter<"TradingOrder"> | string
+    symbol?: StringFilter<"TradingOrder"> | string
+    qty?: FloatFilter<"TradingOrder"> | number
+    side?: StringFilter<"TradingOrder"> | string
+    type?: StringFilter<"TradingOrder"> | string
+    price?: FloatNullableFilter<"TradingOrder"> | number | null
+    status?: StringFilter<"TradingOrder"> | string
+    filledPrice?: FloatNullableFilter<"TradingOrder"> | number | null
+    commission?: FloatFilter<"TradingOrder"> | number
+    createdAt?: DateTimeFilter<"TradingOrder"> | Date | string
+    updatedAt?: DateTimeFilter<"TradingOrder"> | Date | string
+    account?: XOR<TradingAccountScalarRelationFilter, TradingAccountWhereInput>
+  }
+
+  export type TradingOrderOrderByWithRelationInput = {
+    id?: SortOrder
+    accountId?: SortOrder
+    symbol?: SortOrder
+    qty?: SortOrder
+    side?: SortOrder
+    type?: SortOrder
+    price?: SortOrderInput | SortOrder
+    status?: SortOrder
+    filledPrice?: SortOrderInput | SortOrder
+    commission?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    account?: TradingAccountOrderByWithRelationInput
+  }
+
+  export type TradingOrderWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: TradingOrderWhereInput | TradingOrderWhereInput[]
+    OR?: TradingOrderWhereInput[]
+    NOT?: TradingOrderWhereInput | TradingOrderWhereInput[]
+    accountId?: StringFilter<"TradingOrder"> | string
+    symbol?: StringFilter<"TradingOrder"> | string
+    qty?: FloatFilter<"TradingOrder"> | number
+    side?: StringFilter<"TradingOrder"> | string
+    type?: StringFilter<"TradingOrder"> | string
+    price?: FloatNullableFilter<"TradingOrder"> | number | null
+    status?: StringFilter<"TradingOrder"> | string
+    filledPrice?: FloatNullableFilter<"TradingOrder"> | number | null
+    commission?: FloatFilter<"TradingOrder"> | number
+    createdAt?: DateTimeFilter<"TradingOrder"> | Date | string
+    updatedAt?: DateTimeFilter<"TradingOrder"> | Date | string
+    account?: XOR<TradingAccountScalarRelationFilter, TradingAccountWhereInput>
+  }, "id">
+
+  export type TradingOrderOrderByWithAggregationInput = {
+    id?: SortOrder
+    accountId?: SortOrder
+    symbol?: SortOrder
+    qty?: SortOrder
+    side?: SortOrder
+    type?: SortOrder
+    price?: SortOrderInput | SortOrder
+    status?: SortOrder
+    filledPrice?: SortOrderInput | SortOrder
+    commission?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: TradingOrderCountOrderByAggregateInput
+    _avg?: TradingOrderAvgOrderByAggregateInput
+    _max?: TradingOrderMaxOrderByAggregateInput
+    _min?: TradingOrderMinOrderByAggregateInput
+    _sum?: TradingOrderSumOrderByAggregateInput
+  }
+
+  export type TradingOrderScalarWhereWithAggregatesInput = {
+    AND?: TradingOrderScalarWhereWithAggregatesInput | TradingOrderScalarWhereWithAggregatesInput[]
+    OR?: TradingOrderScalarWhereWithAggregatesInput[]
+    NOT?: TradingOrderScalarWhereWithAggregatesInput | TradingOrderScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"TradingOrder"> | string
+    accountId?: StringWithAggregatesFilter<"TradingOrder"> | string
+    symbol?: StringWithAggregatesFilter<"TradingOrder"> | string
+    qty?: FloatWithAggregatesFilter<"TradingOrder"> | number
+    side?: StringWithAggregatesFilter<"TradingOrder"> | string
+    type?: StringWithAggregatesFilter<"TradingOrder"> | string
+    price?: FloatNullableWithAggregatesFilter<"TradingOrder"> | number | null
+    status?: StringWithAggregatesFilter<"TradingOrder"> | string
+    filledPrice?: FloatNullableWithAggregatesFilter<"TradingOrder"> | number | null
+    commission?: FloatWithAggregatesFilter<"TradingOrder"> | number
+    createdAt?: DateTimeWithAggregatesFilter<"TradingOrder"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"TradingOrder"> | Date | string
+  }
+
+  export type TradingPositionWhereInput = {
+    AND?: TradingPositionWhereInput | TradingPositionWhereInput[]
+    OR?: TradingPositionWhereInput[]
+    NOT?: TradingPositionWhereInput | TradingPositionWhereInput[]
+    id?: StringFilter<"TradingPosition"> | string
+    accountId?: StringFilter<"TradingPosition"> | string
+    symbol?: StringFilter<"TradingPosition"> | string
+    qty?: FloatFilter<"TradingPosition"> | number
+    entryPrice?: FloatFilter<"TradingPosition"> | number
+    marketPrice?: FloatFilter<"TradingPosition"> | number
+    updatedAt?: DateTimeFilter<"TradingPosition"> | Date | string
+    account?: XOR<TradingAccountScalarRelationFilter, TradingAccountWhereInput>
+  }
+
+  export type TradingPositionOrderByWithRelationInput = {
+    id?: SortOrder
+    accountId?: SortOrder
+    symbol?: SortOrder
+    qty?: SortOrder
+    entryPrice?: SortOrder
+    marketPrice?: SortOrder
+    updatedAt?: SortOrder
+    account?: TradingAccountOrderByWithRelationInput
+  }
+
+  export type TradingPositionWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: TradingPositionWhereInput | TradingPositionWhereInput[]
+    OR?: TradingPositionWhereInput[]
+    NOT?: TradingPositionWhereInput | TradingPositionWhereInput[]
+    accountId?: StringFilter<"TradingPosition"> | string
+    symbol?: StringFilter<"TradingPosition"> | string
+    qty?: FloatFilter<"TradingPosition"> | number
+    entryPrice?: FloatFilter<"TradingPosition"> | number
+    marketPrice?: FloatFilter<"TradingPosition"> | number
+    updatedAt?: DateTimeFilter<"TradingPosition"> | Date | string
+    account?: XOR<TradingAccountScalarRelationFilter, TradingAccountWhereInput>
+  }, "id">
+
+  export type TradingPositionOrderByWithAggregationInput = {
+    id?: SortOrder
+    accountId?: SortOrder
+    symbol?: SortOrder
+    qty?: SortOrder
+    entryPrice?: SortOrder
+    marketPrice?: SortOrder
+    updatedAt?: SortOrder
+    _count?: TradingPositionCountOrderByAggregateInput
+    _avg?: TradingPositionAvgOrderByAggregateInput
+    _max?: TradingPositionMaxOrderByAggregateInput
+    _min?: TradingPositionMinOrderByAggregateInput
+    _sum?: TradingPositionSumOrderByAggregateInput
+  }
+
+  export type TradingPositionScalarWhereWithAggregatesInput = {
+    AND?: TradingPositionScalarWhereWithAggregatesInput | TradingPositionScalarWhereWithAggregatesInput[]
+    OR?: TradingPositionScalarWhereWithAggregatesInput[]
+    NOT?: TradingPositionScalarWhereWithAggregatesInput | TradingPositionScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"TradingPosition"> | string
+    accountId?: StringWithAggregatesFilter<"TradingPosition"> | string
+    symbol?: StringWithAggregatesFilter<"TradingPosition"> | string
+    qty?: FloatWithAggregatesFilter<"TradingPosition"> | number
+    entryPrice?: FloatWithAggregatesFilter<"TradingPosition"> | number
+    marketPrice?: FloatWithAggregatesFilter<"TradingPosition"> | number
+    updatedAt?: DateTimeWithAggregatesFilter<"TradingPosition"> | Date | string
+  }
+
+  export type SystemSettingWhereInput = {
+    AND?: SystemSettingWhereInput | SystemSettingWhereInput[]
+    OR?: SystemSettingWhereInput[]
+    NOT?: SystemSettingWhereInput | SystemSettingWhereInput[]
+    id?: StringFilter<"SystemSetting"> | string
+    key?: StringFilter<"SystemSetting"> | string
+    value?: StringFilter<"SystemSetting"> | string
+    updatedAt?: DateTimeFilter<"SystemSetting"> | Date | string
+  }
+
+  export type SystemSettingOrderByWithRelationInput = {
+    id?: SortOrder
+    key?: SortOrder
+    value?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SystemSettingWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    key?: string
+    AND?: SystemSettingWhereInput | SystemSettingWhereInput[]
+    OR?: SystemSettingWhereInput[]
+    NOT?: SystemSettingWhereInput | SystemSettingWhereInput[]
+    value?: StringFilter<"SystemSetting"> | string
+    updatedAt?: DateTimeFilter<"SystemSetting"> | Date | string
+  }, "id" | "key">
+
+  export type SystemSettingOrderByWithAggregationInput = {
+    id?: SortOrder
+    key?: SortOrder
+    value?: SortOrder
+    updatedAt?: SortOrder
+    _count?: SystemSettingCountOrderByAggregateInput
+    _max?: SystemSettingMaxOrderByAggregateInput
+    _min?: SystemSettingMinOrderByAggregateInput
+  }
+
+  export type SystemSettingScalarWhereWithAggregatesInput = {
+    AND?: SystemSettingScalarWhereWithAggregatesInput | SystemSettingScalarWhereWithAggregatesInput[]
+    OR?: SystemSettingScalarWhereWithAggregatesInput[]
+    NOT?: SystemSettingScalarWhereWithAggregatesInput | SystemSettingScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"SystemSetting"> | string
+    key?: StringWithAggregatesFilter<"SystemSetting"> | string
+    value?: StringWithAggregatesFilter<"SystemSetting"> | string
+    updatedAt?: DateTimeWithAggregatesFilter<"SystemSetting"> | Date | string
+  }
+
+  export type TradingBotWhereInput = {
+    AND?: TradingBotWhereInput | TradingBotWhereInput[]
+    OR?: TradingBotWhereInput[]
+    NOT?: TradingBotWhereInput | TradingBotWhereInput[]
+    id?: StringFilter<"TradingBot"> | string
+    name?: StringFilter<"TradingBot"> | string
+    strategy?: StringFilter<"TradingBot"> | string
+    parameters?: JsonFilter<"TradingBot">
+    symbol?: StringFilter<"TradingBot"> | string
+    active?: BoolFilter<"TradingBot"> | boolean
+    createdAt?: DateTimeFilter<"TradingBot"> | Date | string
+    updatedAt?: DateTimeFilter<"TradingBot"> | Date | string
+  }
+
+  export type TradingBotOrderByWithRelationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    strategy?: SortOrder
+    parameters?: SortOrder
+    symbol?: SortOrder
+    active?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TradingBotWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    name?: string
+    AND?: TradingBotWhereInput | TradingBotWhereInput[]
+    OR?: TradingBotWhereInput[]
+    NOT?: TradingBotWhereInput | TradingBotWhereInput[]
+    strategy?: StringFilter<"TradingBot"> | string
+    parameters?: JsonFilter<"TradingBot">
+    symbol?: StringFilter<"TradingBot"> | string
+    active?: BoolFilter<"TradingBot"> | boolean
+    createdAt?: DateTimeFilter<"TradingBot"> | Date | string
+    updatedAt?: DateTimeFilter<"TradingBot"> | Date | string
+  }, "id" | "name">
+
+  export type TradingBotOrderByWithAggregationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    strategy?: SortOrder
+    parameters?: SortOrder
+    symbol?: SortOrder
+    active?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: TradingBotCountOrderByAggregateInput
+    _max?: TradingBotMaxOrderByAggregateInput
+    _min?: TradingBotMinOrderByAggregateInput
+  }
+
+  export type TradingBotScalarWhereWithAggregatesInput = {
+    AND?: TradingBotScalarWhereWithAggregatesInput | TradingBotScalarWhereWithAggregatesInput[]
+    OR?: TradingBotScalarWhereWithAggregatesInput[]
+    NOT?: TradingBotScalarWhereWithAggregatesInput | TradingBotScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"TradingBot"> | string
+    name?: StringWithAggregatesFilter<"TradingBot"> | string
+    strategy?: StringWithAggregatesFilter<"TradingBot"> | string
+    parameters?: JsonWithAggregatesFilter<"TradingBot">
+    symbol?: StringWithAggregatesFilter<"TradingBot"> | string
+    active?: BoolWithAggregatesFilter<"TradingBot"> | boolean
+    createdAt?: DateTimeWithAggregatesFilter<"TradingBot"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"TradingBot"> | Date | string
+  }
+
   export type SymbolCreateInput = {
     id: string
     sector?: string | null
@@ -6479,6 +14111,446 @@ export namespace Prisma {
     fcfYield?: NullableFloatFieldUpdateOperationsInput | number | null
     revGrowth?: NullableFloatFieldUpdateOperationsInput | number | null
     epsGrowth?: NullableFloatFieldUpdateOperationsInput | number | null
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TradingSessionCreateInput = {
+    id?: string
+    provider: string
+    accessToken: string
+    publicToken?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TradingSessionUncheckedCreateInput = {
+    id?: string
+    provider: string
+    accessToken: string
+    publicToken?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TradingSessionUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    accessToken?: StringFieldUpdateOperationsInput | string
+    publicToken?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TradingSessionUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    accessToken?: StringFieldUpdateOperationsInput | string
+    publicToken?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TradingSessionCreateManyInput = {
+    id?: string
+    provider: string
+    accessToken: string
+    publicToken?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TradingSessionUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    accessToken?: StringFieldUpdateOperationsInput | string
+    publicToken?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TradingSessionUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    accessToken?: StringFieldUpdateOperationsInput | string
+    publicToken?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TradingAccountCreateInput = {
+    id?: string
+    provider: string
+    name: string
+    isLive?: boolean
+    balance: number
+    currency?: string
+    createdAt?: Date | string
+    orders?: TradingOrderCreateNestedManyWithoutAccountInput
+    positions?: TradingPositionCreateNestedManyWithoutAccountInput
+  }
+
+  export type TradingAccountUncheckedCreateInput = {
+    id?: string
+    provider: string
+    name: string
+    isLive?: boolean
+    balance: number
+    currency?: string
+    createdAt?: Date | string
+    orders?: TradingOrderUncheckedCreateNestedManyWithoutAccountInput
+    positions?: TradingPositionUncheckedCreateNestedManyWithoutAccountInput
+  }
+
+  export type TradingAccountUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    isLive?: BoolFieldUpdateOperationsInput | boolean
+    balance?: FloatFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    orders?: TradingOrderUpdateManyWithoutAccountNestedInput
+    positions?: TradingPositionUpdateManyWithoutAccountNestedInput
+  }
+
+  export type TradingAccountUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    isLive?: BoolFieldUpdateOperationsInput | boolean
+    balance?: FloatFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    orders?: TradingOrderUncheckedUpdateManyWithoutAccountNestedInput
+    positions?: TradingPositionUncheckedUpdateManyWithoutAccountNestedInput
+  }
+
+  export type TradingAccountCreateManyInput = {
+    id?: string
+    provider: string
+    name: string
+    isLive?: boolean
+    balance: number
+    currency?: string
+    createdAt?: Date | string
+  }
+
+  export type TradingAccountUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    isLive?: BoolFieldUpdateOperationsInput | boolean
+    balance?: FloatFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TradingAccountUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    isLive?: BoolFieldUpdateOperationsInput | boolean
+    balance?: FloatFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TradingOrderCreateInput = {
+    id?: string
+    symbol: string
+    qty: number
+    side: string
+    type: string
+    price?: number | null
+    status: string
+    filledPrice?: number | null
+    commission?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    account: TradingAccountCreateNestedOneWithoutOrdersInput
+  }
+
+  export type TradingOrderUncheckedCreateInput = {
+    id?: string
+    accountId: string
+    symbol: string
+    qty: number
+    side: string
+    type: string
+    price?: number | null
+    status: string
+    filledPrice?: number | null
+    commission?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TradingOrderUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    symbol?: StringFieldUpdateOperationsInput | string
+    qty?: FloatFieldUpdateOperationsInput | number
+    side?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    price?: NullableFloatFieldUpdateOperationsInput | number | null
+    status?: StringFieldUpdateOperationsInput | string
+    filledPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    commission?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    account?: TradingAccountUpdateOneRequiredWithoutOrdersNestedInput
+  }
+
+  export type TradingOrderUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    accountId?: StringFieldUpdateOperationsInput | string
+    symbol?: StringFieldUpdateOperationsInput | string
+    qty?: FloatFieldUpdateOperationsInput | number
+    side?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    price?: NullableFloatFieldUpdateOperationsInput | number | null
+    status?: StringFieldUpdateOperationsInput | string
+    filledPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    commission?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TradingOrderCreateManyInput = {
+    id?: string
+    accountId: string
+    symbol: string
+    qty: number
+    side: string
+    type: string
+    price?: number | null
+    status: string
+    filledPrice?: number | null
+    commission?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TradingOrderUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    symbol?: StringFieldUpdateOperationsInput | string
+    qty?: FloatFieldUpdateOperationsInput | number
+    side?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    price?: NullableFloatFieldUpdateOperationsInput | number | null
+    status?: StringFieldUpdateOperationsInput | string
+    filledPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    commission?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TradingOrderUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    accountId?: StringFieldUpdateOperationsInput | string
+    symbol?: StringFieldUpdateOperationsInput | string
+    qty?: FloatFieldUpdateOperationsInput | number
+    side?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    price?: NullableFloatFieldUpdateOperationsInput | number | null
+    status?: StringFieldUpdateOperationsInput | string
+    filledPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    commission?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TradingPositionCreateInput = {
+    id?: string
+    symbol: string
+    qty: number
+    entryPrice: number
+    marketPrice: number
+    updatedAt?: Date | string
+    account: TradingAccountCreateNestedOneWithoutPositionsInput
+  }
+
+  export type TradingPositionUncheckedCreateInput = {
+    id?: string
+    accountId: string
+    symbol: string
+    qty: number
+    entryPrice: number
+    marketPrice: number
+    updatedAt?: Date | string
+  }
+
+  export type TradingPositionUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    symbol?: StringFieldUpdateOperationsInput | string
+    qty?: FloatFieldUpdateOperationsInput | number
+    entryPrice?: FloatFieldUpdateOperationsInput | number
+    marketPrice?: FloatFieldUpdateOperationsInput | number
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    account?: TradingAccountUpdateOneRequiredWithoutPositionsNestedInput
+  }
+
+  export type TradingPositionUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    accountId?: StringFieldUpdateOperationsInput | string
+    symbol?: StringFieldUpdateOperationsInput | string
+    qty?: FloatFieldUpdateOperationsInput | number
+    entryPrice?: FloatFieldUpdateOperationsInput | number
+    marketPrice?: FloatFieldUpdateOperationsInput | number
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TradingPositionCreateManyInput = {
+    id?: string
+    accountId: string
+    symbol: string
+    qty: number
+    entryPrice: number
+    marketPrice: number
+    updatedAt?: Date | string
+  }
+
+  export type TradingPositionUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    symbol?: StringFieldUpdateOperationsInput | string
+    qty?: FloatFieldUpdateOperationsInput | number
+    entryPrice?: FloatFieldUpdateOperationsInput | number
+    marketPrice?: FloatFieldUpdateOperationsInput | number
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TradingPositionUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    accountId?: StringFieldUpdateOperationsInput | string
+    symbol?: StringFieldUpdateOperationsInput | string
+    qty?: FloatFieldUpdateOperationsInput | number
+    entryPrice?: FloatFieldUpdateOperationsInput | number
+    marketPrice?: FloatFieldUpdateOperationsInput | number
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SystemSettingCreateInput = {
+    id?: string
+    key: string
+    value: string
+    updatedAt?: Date | string
+  }
+
+  export type SystemSettingUncheckedCreateInput = {
+    id?: string
+    key: string
+    value: string
+    updatedAt?: Date | string
+  }
+
+  export type SystemSettingUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    key?: StringFieldUpdateOperationsInput | string
+    value?: StringFieldUpdateOperationsInput | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SystemSettingUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    key?: StringFieldUpdateOperationsInput | string
+    value?: StringFieldUpdateOperationsInput | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SystemSettingCreateManyInput = {
+    id?: string
+    key: string
+    value: string
+    updatedAt?: Date | string
+  }
+
+  export type SystemSettingUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    key?: StringFieldUpdateOperationsInput | string
+    value?: StringFieldUpdateOperationsInput | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SystemSettingUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    key?: StringFieldUpdateOperationsInput | string
+    value?: StringFieldUpdateOperationsInput | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TradingBotCreateInput = {
+    id?: string
+    name: string
+    strategy: string
+    parameters: JsonNullValueInput | InputJsonValue
+    symbol: string
+    active?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TradingBotUncheckedCreateInput = {
+    id?: string
+    name: string
+    strategy: string
+    parameters: JsonNullValueInput | InputJsonValue
+    symbol: string
+    active?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TradingBotUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    strategy?: StringFieldUpdateOperationsInput | string
+    parameters?: JsonNullValueInput | InputJsonValue
+    symbol?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TradingBotUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    strategy?: StringFieldUpdateOperationsInput | string
+    parameters?: JsonNullValueInput | InputJsonValue
+    symbol?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TradingBotCreateManyInput = {
+    id?: string
+    name: string
+    strategy: string
+    parameters: JsonNullValueInput | InputJsonValue
+    symbol: string
+    active?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TradingBotUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    strategy?: StringFieldUpdateOperationsInput | string
+    parameters?: JsonNullValueInput | InputJsonValue
+    symbol?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TradingBotUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    strategy?: StringFieldUpdateOperationsInput | string
+    parameters?: JsonNullValueInput | InputJsonValue
+    symbol?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -6840,6 +14912,311 @@ export namespace Prisma {
     _max?: NestedFloatNullableFilter<$PrismaModel>
   }
 
+  export type TradingSessionCountOrderByAggregateInput = {
+    id?: SortOrder
+    provider?: SortOrder
+    accessToken?: SortOrder
+    publicToken?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TradingSessionMaxOrderByAggregateInput = {
+    id?: SortOrder
+    provider?: SortOrder
+    accessToken?: SortOrder
+    publicToken?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TradingSessionMinOrderByAggregateInput = {
+    id?: SortOrder
+    provider?: SortOrder
+    accessToken?: SortOrder
+    publicToken?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
+  export type TradingOrderListRelationFilter = {
+    every?: TradingOrderWhereInput
+    some?: TradingOrderWhereInput
+    none?: TradingOrderWhereInput
+  }
+
+  export type TradingPositionListRelationFilter = {
+    every?: TradingPositionWhereInput
+    some?: TradingPositionWhereInput
+    none?: TradingPositionWhereInput
+  }
+
+  export type TradingOrderOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type TradingPositionOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type TradingAccountCountOrderByAggregateInput = {
+    id?: SortOrder
+    provider?: SortOrder
+    name?: SortOrder
+    isLive?: SortOrder
+    balance?: SortOrder
+    currency?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type TradingAccountAvgOrderByAggregateInput = {
+    balance?: SortOrder
+  }
+
+  export type TradingAccountMaxOrderByAggregateInput = {
+    id?: SortOrder
+    provider?: SortOrder
+    name?: SortOrder
+    isLive?: SortOrder
+    balance?: SortOrder
+    currency?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type TradingAccountMinOrderByAggregateInput = {
+    id?: SortOrder
+    provider?: SortOrder
+    name?: SortOrder
+    isLive?: SortOrder
+    balance?: SortOrder
+    currency?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type TradingAccountSumOrderByAggregateInput = {
+    balance?: SortOrder
+  }
+
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
+  }
+
+  export type TradingAccountScalarRelationFilter = {
+    is?: TradingAccountWhereInput
+    isNot?: TradingAccountWhereInput
+  }
+
+  export type TradingOrderCountOrderByAggregateInput = {
+    id?: SortOrder
+    accountId?: SortOrder
+    symbol?: SortOrder
+    qty?: SortOrder
+    side?: SortOrder
+    type?: SortOrder
+    price?: SortOrder
+    status?: SortOrder
+    filledPrice?: SortOrder
+    commission?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TradingOrderAvgOrderByAggregateInput = {
+    qty?: SortOrder
+    price?: SortOrder
+    filledPrice?: SortOrder
+    commission?: SortOrder
+  }
+
+  export type TradingOrderMaxOrderByAggregateInput = {
+    id?: SortOrder
+    accountId?: SortOrder
+    symbol?: SortOrder
+    qty?: SortOrder
+    side?: SortOrder
+    type?: SortOrder
+    price?: SortOrder
+    status?: SortOrder
+    filledPrice?: SortOrder
+    commission?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TradingOrderMinOrderByAggregateInput = {
+    id?: SortOrder
+    accountId?: SortOrder
+    symbol?: SortOrder
+    qty?: SortOrder
+    side?: SortOrder
+    type?: SortOrder
+    price?: SortOrder
+    status?: SortOrder
+    filledPrice?: SortOrder
+    commission?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TradingOrderSumOrderByAggregateInput = {
+    qty?: SortOrder
+    price?: SortOrder
+    filledPrice?: SortOrder
+    commission?: SortOrder
+  }
+
+  export type TradingPositionCountOrderByAggregateInput = {
+    id?: SortOrder
+    accountId?: SortOrder
+    symbol?: SortOrder
+    qty?: SortOrder
+    entryPrice?: SortOrder
+    marketPrice?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TradingPositionAvgOrderByAggregateInput = {
+    qty?: SortOrder
+    entryPrice?: SortOrder
+    marketPrice?: SortOrder
+  }
+
+  export type TradingPositionMaxOrderByAggregateInput = {
+    id?: SortOrder
+    accountId?: SortOrder
+    symbol?: SortOrder
+    qty?: SortOrder
+    entryPrice?: SortOrder
+    marketPrice?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TradingPositionMinOrderByAggregateInput = {
+    id?: SortOrder
+    accountId?: SortOrder
+    symbol?: SortOrder
+    qty?: SortOrder
+    entryPrice?: SortOrder
+    marketPrice?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TradingPositionSumOrderByAggregateInput = {
+    qty?: SortOrder
+    entryPrice?: SortOrder
+    marketPrice?: SortOrder
+  }
+
+  export type SystemSettingCountOrderByAggregateInput = {
+    id?: SortOrder
+    key?: SortOrder
+    value?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SystemSettingMaxOrderByAggregateInput = {
+    id?: SortOrder
+    key?: SortOrder
+    value?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SystemSettingMinOrderByAggregateInput = {
+    id?: SortOrder
+    key?: SortOrder
+    value?: SortOrder
+    updatedAt?: SortOrder
+  }
+  export type JsonFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type TradingBotCountOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    strategy?: SortOrder
+    parameters?: SortOrder
+    symbol?: SortOrder
+    active?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TradingBotMaxOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    strategy?: SortOrder
+    symbol?: SortOrder
+    active?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TradingBotMinOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    strategy?: SortOrder
+    symbol?: SortOrder
+    active?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+  export type JsonWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedJsonFilter<$PrismaModel>
+    _max?: NestedJsonFilter<$PrismaModel>
+  }
+
   export type HistoricalPriceCreateNestedManyWithoutSymbolInput = {
     create?: XOR<HistoricalPriceCreateWithoutSymbolInput, HistoricalPriceUncheckedCreateWithoutSymbolInput> | HistoricalPriceCreateWithoutSymbolInput[] | HistoricalPriceUncheckedCreateWithoutSymbolInput[]
     connectOrCreate?: HistoricalPriceCreateOrConnectWithoutSymbolInput | HistoricalPriceCreateOrConnectWithoutSymbolInput[]
@@ -7026,6 +15403,122 @@ export namespace Prisma {
     update?: XOR<XOR<SymbolUpdateToOneWithWhereWithoutMetricsInput, SymbolUpdateWithoutMetricsInput>, SymbolUncheckedUpdateWithoutMetricsInput>
   }
 
+  export type TradingOrderCreateNestedManyWithoutAccountInput = {
+    create?: XOR<TradingOrderCreateWithoutAccountInput, TradingOrderUncheckedCreateWithoutAccountInput> | TradingOrderCreateWithoutAccountInput[] | TradingOrderUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: TradingOrderCreateOrConnectWithoutAccountInput | TradingOrderCreateOrConnectWithoutAccountInput[]
+    createMany?: TradingOrderCreateManyAccountInputEnvelope
+    connect?: TradingOrderWhereUniqueInput | TradingOrderWhereUniqueInput[]
+  }
+
+  export type TradingPositionCreateNestedManyWithoutAccountInput = {
+    create?: XOR<TradingPositionCreateWithoutAccountInput, TradingPositionUncheckedCreateWithoutAccountInput> | TradingPositionCreateWithoutAccountInput[] | TradingPositionUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: TradingPositionCreateOrConnectWithoutAccountInput | TradingPositionCreateOrConnectWithoutAccountInput[]
+    createMany?: TradingPositionCreateManyAccountInputEnvelope
+    connect?: TradingPositionWhereUniqueInput | TradingPositionWhereUniqueInput[]
+  }
+
+  export type TradingOrderUncheckedCreateNestedManyWithoutAccountInput = {
+    create?: XOR<TradingOrderCreateWithoutAccountInput, TradingOrderUncheckedCreateWithoutAccountInput> | TradingOrderCreateWithoutAccountInput[] | TradingOrderUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: TradingOrderCreateOrConnectWithoutAccountInput | TradingOrderCreateOrConnectWithoutAccountInput[]
+    createMany?: TradingOrderCreateManyAccountInputEnvelope
+    connect?: TradingOrderWhereUniqueInput | TradingOrderWhereUniqueInput[]
+  }
+
+  export type TradingPositionUncheckedCreateNestedManyWithoutAccountInput = {
+    create?: XOR<TradingPositionCreateWithoutAccountInput, TradingPositionUncheckedCreateWithoutAccountInput> | TradingPositionCreateWithoutAccountInput[] | TradingPositionUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: TradingPositionCreateOrConnectWithoutAccountInput | TradingPositionCreateOrConnectWithoutAccountInput[]
+    createMany?: TradingPositionCreateManyAccountInputEnvelope
+    connect?: TradingPositionWhereUniqueInput | TradingPositionWhereUniqueInput[]
+  }
+
+  export type BoolFieldUpdateOperationsInput = {
+    set?: boolean
+  }
+
+  export type TradingOrderUpdateManyWithoutAccountNestedInput = {
+    create?: XOR<TradingOrderCreateWithoutAccountInput, TradingOrderUncheckedCreateWithoutAccountInput> | TradingOrderCreateWithoutAccountInput[] | TradingOrderUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: TradingOrderCreateOrConnectWithoutAccountInput | TradingOrderCreateOrConnectWithoutAccountInput[]
+    upsert?: TradingOrderUpsertWithWhereUniqueWithoutAccountInput | TradingOrderUpsertWithWhereUniqueWithoutAccountInput[]
+    createMany?: TradingOrderCreateManyAccountInputEnvelope
+    set?: TradingOrderWhereUniqueInput | TradingOrderWhereUniqueInput[]
+    disconnect?: TradingOrderWhereUniqueInput | TradingOrderWhereUniqueInput[]
+    delete?: TradingOrderWhereUniqueInput | TradingOrderWhereUniqueInput[]
+    connect?: TradingOrderWhereUniqueInput | TradingOrderWhereUniqueInput[]
+    update?: TradingOrderUpdateWithWhereUniqueWithoutAccountInput | TradingOrderUpdateWithWhereUniqueWithoutAccountInput[]
+    updateMany?: TradingOrderUpdateManyWithWhereWithoutAccountInput | TradingOrderUpdateManyWithWhereWithoutAccountInput[]
+    deleteMany?: TradingOrderScalarWhereInput | TradingOrderScalarWhereInput[]
+  }
+
+  export type TradingPositionUpdateManyWithoutAccountNestedInput = {
+    create?: XOR<TradingPositionCreateWithoutAccountInput, TradingPositionUncheckedCreateWithoutAccountInput> | TradingPositionCreateWithoutAccountInput[] | TradingPositionUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: TradingPositionCreateOrConnectWithoutAccountInput | TradingPositionCreateOrConnectWithoutAccountInput[]
+    upsert?: TradingPositionUpsertWithWhereUniqueWithoutAccountInput | TradingPositionUpsertWithWhereUniqueWithoutAccountInput[]
+    createMany?: TradingPositionCreateManyAccountInputEnvelope
+    set?: TradingPositionWhereUniqueInput | TradingPositionWhereUniqueInput[]
+    disconnect?: TradingPositionWhereUniqueInput | TradingPositionWhereUniqueInput[]
+    delete?: TradingPositionWhereUniqueInput | TradingPositionWhereUniqueInput[]
+    connect?: TradingPositionWhereUniqueInput | TradingPositionWhereUniqueInput[]
+    update?: TradingPositionUpdateWithWhereUniqueWithoutAccountInput | TradingPositionUpdateWithWhereUniqueWithoutAccountInput[]
+    updateMany?: TradingPositionUpdateManyWithWhereWithoutAccountInput | TradingPositionUpdateManyWithWhereWithoutAccountInput[]
+    deleteMany?: TradingPositionScalarWhereInput | TradingPositionScalarWhereInput[]
+  }
+
+  export type TradingOrderUncheckedUpdateManyWithoutAccountNestedInput = {
+    create?: XOR<TradingOrderCreateWithoutAccountInput, TradingOrderUncheckedCreateWithoutAccountInput> | TradingOrderCreateWithoutAccountInput[] | TradingOrderUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: TradingOrderCreateOrConnectWithoutAccountInput | TradingOrderCreateOrConnectWithoutAccountInput[]
+    upsert?: TradingOrderUpsertWithWhereUniqueWithoutAccountInput | TradingOrderUpsertWithWhereUniqueWithoutAccountInput[]
+    createMany?: TradingOrderCreateManyAccountInputEnvelope
+    set?: TradingOrderWhereUniqueInput | TradingOrderWhereUniqueInput[]
+    disconnect?: TradingOrderWhereUniqueInput | TradingOrderWhereUniqueInput[]
+    delete?: TradingOrderWhereUniqueInput | TradingOrderWhereUniqueInput[]
+    connect?: TradingOrderWhereUniqueInput | TradingOrderWhereUniqueInput[]
+    update?: TradingOrderUpdateWithWhereUniqueWithoutAccountInput | TradingOrderUpdateWithWhereUniqueWithoutAccountInput[]
+    updateMany?: TradingOrderUpdateManyWithWhereWithoutAccountInput | TradingOrderUpdateManyWithWhereWithoutAccountInput[]
+    deleteMany?: TradingOrderScalarWhereInput | TradingOrderScalarWhereInput[]
+  }
+
+  export type TradingPositionUncheckedUpdateManyWithoutAccountNestedInput = {
+    create?: XOR<TradingPositionCreateWithoutAccountInput, TradingPositionUncheckedCreateWithoutAccountInput> | TradingPositionCreateWithoutAccountInput[] | TradingPositionUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: TradingPositionCreateOrConnectWithoutAccountInput | TradingPositionCreateOrConnectWithoutAccountInput[]
+    upsert?: TradingPositionUpsertWithWhereUniqueWithoutAccountInput | TradingPositionUpsertWithWhereUniqueWithoutAccountInput[]
+    createMany?: TradingPositionCreateManyAccountInputEnvelope
+    set?: TradingPositionWhereUniqueInput | TradingPositionWhereUniqueInput[]
+    disconnect?: TradingPositionWhereUniqueInput | TradingPositionWhereUniqueInput[]
+    delete?: TradingPositionWhereUniqueInput | TradingPositionWhereUniqueInput[]
+    connect?: TradingPositionWhereUniqueInput | TradingPositionWhereUniqueInput[]
+    update?: TradingPositionUpdateWithWhereUniqueWithoutAccountInput | TradingPositionUpdateWithWhereUniqueWithoutAccountInput[]
+    updateMany?: TradingPositionUpdateManyWithWhereWithoutAccountInput | TradingPositionUpdateManyWithWhereWithoutAccountInput[]
+    deleteMany?: TradingPositionScalarWhereInput | TradingPositionScalarWhereInput[]
+  }
+
+  export type TradingAccountCreateNestedOneWithoutOrdersInput = {
+    create?: XOR<TradingAccountCreateWithoutOrdersInput, TradingAccountUncheckedCreateWithoutOrdersInput>
+    connectOrCreate?: TradingAccountCreateOrConnectWithoutOrdersInput
+    connect?: TradingAccountWhereUniqueInput
+  }
+
+  export type TradingAccountUpdateOneRequiredWithoutOrdersNestedInput = {
+    create?: XOR<TradingAccountCreateWithoutOrdersInput, TradingAccountUncheckedCreateWithoutOrdersInput>
+    connectOrCreate?: TradingAccountCreateOrConnectWithoutOrdersInput
+    upsert?: TradingAccountUpsertWithoutOrdersInput
+    connect?: TradingAccountWhereUniqueInput
+    update?: XOR<XOR<TradingAccountUpdateToOneWithWhereWithoutOrdersInput, TradingAccountUpdateWithoutOrdersInput>, TradingAccountUncheckedUpdateWithoutOrdersInput>
+  }
+
+  export type TradingAccountCreateNestedOneWithoutPositionsInput = {
+    create?: XOR<TradingAccountCreateWithoutPositionsInput, TradingAccountUncheckedCreateWithoutPositionsInput>
+    connectOrCreate?: TradingAccountCreateOrConnectWithoutPositionsInput
+    connect?: TradingAccountWhereUniqueInput
+  }
+
+  export type TradingAccountUpdateOneRequiredWithoutPositionsNestedInput = {
+    create?: XOR<TradingAccountCreateWithoutPositionsInput, TradingAccountUncheckedCreateWithoutPositionsInput>
+    connectOrCreate?: TradingAccountCreateOrConnectWithoutPositionsInput
+    upsert?: TradingAccountUpsertWithoutPositionsInput
+    connect?: TradingAccountWhereUniqueInput
+    update?: XOR<XOR<TradingAccountUpdateToOneWithWhereWithoutPositionsInput, TradingAccountUpdateWithoutPositionsInput>, TradingAccountUncheckedUpdateWithoutPositionsInput>
+  }
+
   export type NestedStringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -7187,6 +15680,42 @@ export namespace Prisma {
     _sum?: NestedFloatNullableFilter<$PrismaModel>
     _min?: NestedFloatNullableFilter<$PrismaModel>
     _max?: NestedFloatNullableFilter<$PrismaModel>
+  }
+
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
+  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
+  }
+  export type NestedJsonFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<NestedJsonFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
   export type HistoricalPriceCreateWithoutSymbolInput = {
@@ -7534,6 +16063,255 @@ export namespace Prisma {
     signals?: StrategySignalUncheckedUpdateManyWithoutSymbolNestedInput
   }
 
+  export type TradingOrderCreateWithoutAccountInput = {
+    id?: string
+    symbol: string
+    qty: number
+    side: string
+    type: string
+    price?: number | null
+    status: string
+    filledPrice?: number | null
+    commission?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TradingOrderUncheckedCreateWithoutAccountInput = {
+    id?: string
+    symbol: string
+    qty: number
+    side: string
+    type: string
+    price?: number | null
+    status: string
+    filledPrice?: number | null
+    commission?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TradingOrderCreateOrConnectWithoutAccountInput = {
+    where: TradingOrderWhereUniqueInput
+    create: XOR<TradingOrderCreateWithoutAccountInput, TradingOrderUncheckedCreateWithoutAccountInput>
+  }
+
+  export type TradingOrderCreateManyAccountInputEnvelope = {
+    data: TradingOrderCreateManyAccountInput | TradingOrderCreateManyAccountInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type TradingPositionCreateWithoutAccountInput = {
+    id?: string
+    symbol: string
+    qty: number
+    entryPrice: number
+    marketPrice: number
+    updatedAt?: Date | string
+  }
+
+  export type TradingPositionUncheckedCreateWithoutAccountInput = {
+    id?: string
+    symbol: string
+    qty: number
+    entryPrice: number
+    marketPrice: number
+    updatedAt?: Date | string
+  }
+
+  export type TradingPositionCreateOrConnectWithoutAccountInput = {
+    where: TradingPositionWhereUniqueInput
+    create: XOR<TradingPositionCreateWithoutAccountInput, TradingPositionUncheckedCreateWithoutAccountInput>
+  }
+
+  export type TradingPositionCreateManyAccountInputEnvelope = {
+    data: TradingPositionCreateManyAccountInput | TradingPositionCreateManyAccountInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type TradingOrderUpsertWithWhereUniqueWithoutAccountInput = {
+    where: TradingOrderWhereUniqueInput
+    update: XOR<TradingOrderUpdateWithoutAccountInput, TradingOrderUncheckedUpdateWithoutAccountInput>
+    create: XOR<TradingOrderCreateWithoutAccountInput, TradingOrderUncheckedCreateWithoutAccountInput>
+  }
+
+  export type TradingOrderUpdateWithWhereUniqueWithoutAccountInput = {
+    where: TradingOrderWhereUniqueInput
+    data: XOR<TradingOrderUpdateWithoutAccountInput, TradingOrderUncheckedUpdateWithoutAccountInput>
+  }
+
+  export type TradingOrderUpdateManyWithWhereWithoutAccountInput = {
+    where: TradingOrderScalarWhereInput
+    data: XOR<TradingOrderUpdateManyMutationInput, TradingOrderUncheckedUpdateManyWithoutAccountInput>
+  }
+
+  export type TradingOrderScalarWhereInput = {
+    AND?: TradingOrderScalarWhereInput | TradingOrderScalarWhereInput[]
+    OR?: TradingOrderScalarWhereInput[]
+    NOT?: TradingOrderScalarWhereInput | TradingOrderScalarWhereInput[]
+    id?: StringFilter<"TradingOrder"> | string
+    accountId?: StringFilter<"TradingOrder"> | string
+    symbol?: StringFilter<"TradingOrder"> | string
+    qty?: FloatFilter<"TradingOrder"> | number
+    side?: StringFilter<"TradingOrder"> | string
+    type?: StringFilter<"TradingOrder"> | string
+    price?: FloatNullableFilter<"TradingOrder"> | number | null
+    status?: StringFilter<"TradingOrder"> | string
+    filledPrice?: FloatNullableFilter<"TradingOrder"> | number | null
+    commission?: FloatFilter<"TradingOrder"> | number
+    createdAt?: DateTimeFilter<"TradingOrder"> | Date | string
+    updatedAt?: DateTimeFilter<"TradingOrder"> | Date | string
+  }
+
+  export type TradingPositionUpsertWithWhereUniqueWithoutAccountInput = {
+    where: TradingPositionWhereUniqueInput
+    update: XOR<TradingPositionUpdateWithoutAccountInput, TradingPositionUncheckedUpdateWithoutAccountInput>
+    create: XOR<TradingPositionCreateWithoutAccountInput, TradingPositionUncheckedCreateWithoutAccountInput>
+  }
+
+  export type TradingPositionUpdateWithWhereUniqueWithoutAccountInput = {
+    where: TradingPositionWhereUniqueInput
+    data: XOR<TradingPositionUpdateWithoutAccountInput, TradingPositionUncheckedUpdateWithoutAccountInput>
+  }
+
+  export type TradingPositionUpdateManyWithWhereWithoutAccountInput = {
+    where: TradingPositionScalarWhereInput
+    data: XOR<TradingPositionUpdateManyMutationInput, TradingPositionUncheckedUpdateManyWithoutAccountInput>
+  }
+
+  export type TradingPositionScalarWhereInput = {
+    AND?: TradingPositionScalarWhereInput | TradingPositionScalarWhereInput[]
+    OR?: TradingPositionScalarWhereInput[]
+    NOT?: TradingPositionScalarWhereInput | TradingPositionScalarWhereInput[]
+    id?: StringFilter<"TradingPosition"> | string
+    accountId?: StringFilter<"TradingPosition"> | string
+    symbol?: StringFilter<"TradingPosition"> | string
+    qty?: FloatFilter<"TradingPosition"> | number
+    entryPrice?: FloatFilter<"TradingPosition"> | number
+    marketPrice?: FloatFilter<"TradingPosition"> | number
+    updatedAt?: DateTimeFilter<"TradingPosition"> | Date | string
+  }
+
+  export type TradingAccountCreateWithoutOrdersInput = {
+    id?: string
+    provider: string
+    name: string
+    isLive?: boolean
+    balance: number
+    currency?: string
+    createdAt?: Date | string
+    positions?: TradingPositionCreateNestedManyWithoutAccountInput
+  }
+
+  export type TradingAccountUncheckedCreateWithoutOrdersInput = {
+    id?: string
+    provider: string
+    name: string
+    isLive?: boolean
+    balance: number
+    currency?: string
+    createdAt?: Date | string
+    positions?: TradingPositionUncheckedCreateNestedManyWithoutAccountInput
+  }
+
+  export type TradingAccountCreateOrConnectWithoutOrdersInput = {
+    where: TradingAccountWhereUniqueInput
+    create: XOR<TradingAccountCreateWithoutOrdersInput, TradingAccountUncheckedCreateWithoutOrdersInput>
+  }
+
+  export type TradingAccountUpsertWithoutOrdersInput = {
+    update: XOR<TradingAccountUpdateWithoutOrdersInput, TradingAccountUncheckedUpdateWithoutOrdersInput>
+    create: XOR<TradingAccountCreateWithoutOrdersInput, TradingAccountUncheckedCreateWithoutOrdersInput>
+    where?: TradingAccountWhereInput
+  }
+
+  export type TradingAccountUpdateToOneWithWhereWithoutOrdersInput = {
+    where?: TradingAccountWhereInput
+    data: XOR<TradingAccountUpdateWithoutOrdersInput, TradingAccountUncheckedUpdateWithoutOrdersInput>
+  }
+
+  export type TradingAccountUpdateWithoutOrdersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    isLive?: BoolFieldUpdateOperationsInput | boolean
+    balance?: FloatFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    positions?: TradingPositionUpdateManyWithoutAccountNestedInput
+  }
+
+  export type TradingAccountUncheckedUpdateWithoutOrdersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    isLive?: BoolFieldUpdateOperationsInput | boolean
+    balance?: FloatFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    positions?: TradingPositionUncheckedUpdateManyWithoutAccountNestedInput
+  }
+
+  export type TradingAccountCreateWithoutPositionsInput = {
+    id?: string
+    provider: string
+    name: string
+    isLive?: boolean
+    balance: number
+    currency?: string
+    createdAt?: Date | string
+    orders?: TradingOrderCreateNestedManyWithoutAccountInput
+  }
+
+  export type TradingAccountUncheckedCreateWithoutPositionsInput = {
+    id?: string
+    provider: string
+    name: string
+    isLive?: boolean
+    balance: number
+    currency?: string
+    createdAt?: Date | string
+    orders?: TradingOrderUncheckedCreateNestedManyWithoutAccountInput
+  }
+
+  export type TradingAccountCreateOrConnectWithoutPositionsInput = {
+    where: TradingAccountWhereUniqueInput
+    create: XOR<TradingAccountCreateWithoutPositionsInput, TradingAccountUncheckedCreateWithoutPositionsInput>
+  }
+
+  export type TradingAccountUpsertWithoutPositionsInput = {
+    update: XOR<TradingAccountUpdateWithoutPositionsInput, TradingAccountUncheckedUpdateWithoutPositionsInput>
+    create: XOR<TradingAccountCreateWithoutPositionsInput, TradingAccountUncheckedCreateWithoutPositionsInput>
+    where?: TradingAccountWhereInput
+  }
+
+  export type TradingAccountUpdateToOneWithWhereWithoutPositionsInput = {
+    where?: TradingAccountWhereInput
+    data: XOR<TradingAccountUpdateWithoutPositionsInput, TradingAccountUncheckedUpdateWithoutPositionsInput>
+  }
+
+  export type TradingAccountUpdateWithoutPositionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    isLive?: BoolFieldUpdateOperationsInput | boolean
+    balance?: FloatFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    orders?: TradingOrderUpdateManyWithoutAccountNestedInput
+  }
+
+  export type TradingAccountUncheckedUpdateWithoutPositionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    isLive?: BoolFieldUpdateOperationsInput | boolean
+    balance?: FloatFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    orders?: TradingOrderUncheckedUpdateManyWithoutAccountNestedInput
+  }
+
   export type HistoricalPriceCreateManySymbolInput = {
     date: Date | string
     open: number
@@ -7607,6 +16385,98 @@ export namespace Prisma {
     signalValue?: StringFieldUpdateOperationsInput | string
     price?: FloatFieldUpdateOperationsInput | number
     triggeredAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TradingOrderCreateManyAccountInput = {
+    id?: string
+    symbol: string
+    qty: number
+    side: string
+    type: string
+    price?: number | null
+    status: string
+    filledPrice?: number | null
+    commission?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TradingPositionCreateManyAccountInput = {
+    id?: string
+    symbol: string
+    qty: number
+    entryPrice: number
+    marketPrice: number
+    updatedAt?: Date | string
+  }
+
+  export type TradingOrderUpdateWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    symbol?: StringFieldUpdateOperationsInput | string
+    qty?: FloatFieldUpdateOperationsInput | number
+    side?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    price?: NullableFloatFieldUpdateOperationsInput | number | null
+    status?: StringFieldUpdateOperationsInput | string
+    filledPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    commission?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TradingOrderUncheckedUpdateWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    symbol?: StringFieldUpdateOperationsInput | string
+    qty?: FloatFieldUpdateOperationsInput | number
+    side?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    price?: NullableFloatFieldUpdateOperationsInput | number | null
+    status?: StringFieldUpdateOperationsInput | string
+    filledPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    commission?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TradingOrderUncheckedUpdateManyWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    symbol?: StringFieldUpdateOperationsInput | string
+    qty?: FloatFieldUpdateOperationsInput | number
+    side?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    price?: NullableFloatFieldUpdateOperationsInput | number | null
+    status?: StringFieldUpdateOperationsInput | string
+    filledPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    commission?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TradingPositionUpdateWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    symbol?: StringFieldUpdateOperationsInput | string
+    qty?: FloatFieldUpdateOperationsInput | number
+    entryPrice?: FloatFieldUpdateOperationsInput | number
+    marketPrice?: FloatFieldUpdateOperationsInput | number
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TradingPositionUncheckedUpdateWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    symbol?: StringFieldUpdateOperationsInput | string
+    qty?: FloatFieldUpdateOperationsInput | number
+    entryPrice?: FloatFieldUpdateOperationsInput | number
+    marketPrice?: FloatFieldUpdateOperationsInput | number
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TradingPositionUncheckedUpdateManyWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    symbol?: StringFieldUpdateOperationsInput | string
+    qty?: FloatFieldUpdateOperationsInput | number
+    entryPrice?: FloatFieldUpdateOperationsInput | number
+    marketPrice?: FloatFieldUpdateOperationsInput | number
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 

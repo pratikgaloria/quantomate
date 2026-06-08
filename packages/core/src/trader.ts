@@ -34,10 +34,10 @@ export class Trader<P = unknown, T = number> {
    * @param quote new `Quote`.
    * @returns a promise that resolves with StrategyValue.
    */
-  tick(quote: T) {
+  tick(quote: T, timestamp?: number) {
     return new Promise<StrategyValue>((resolve, reject) => {
       try {
-        this._dataset.add(new Quote(quote));
+        this._dataset.add(new Quote(quote, timestamp));
         const strategyValue = this.dataset.at(-1)?.getStrategy(this._strategy.name);
         
         if (strategyValue) {

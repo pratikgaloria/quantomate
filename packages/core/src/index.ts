@@ -6,4 +6,7 @@ export { TradePosition } from './position';
 export { Trader } from './trader';
 export { Backtest } from './backtest';
 export { BacktestReport } from './backtestReport';
+export * from './broker';
+
+
 

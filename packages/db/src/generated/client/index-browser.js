@@ -161,9 +161,75 @@ exports.Prisma.FundamentalMetricScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.TradingSessionScalarFieldEnum = {
+  id: 'id',
+  provider: 'provider',
+  accessToken: 'accessToken',
+  publicToken: 'publicToken',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.TradingAccountScalarFieldEnum = {
+  id: 'id',
+  provider: 'provider',
+  name: 'name',
+  isLive: 'isLive',
+  balance: 'balance',
+  currency: 'currency',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.TradingOrderScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  symbol: 'symbol',
+  qty: 'qty',
+  side: 'side',
+  type: 'type',
+  price: 'price',
+  status: 'status',
+  filledPrice: 'filledPrice',
+  commission: 'commission',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.TradingPositionScalarFieldEnum = {
+  id: 'id',
+  accountId: 'accountId',
+  symbol: 'symbol',
+  qty: 'qty',
+  entryPrice: 'entryPrice',
+  marketPrice: 'marketPrice',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.SystemSettingScalarFieldEnum = {
+  id: 'id',
+  key: 'key',
+  value: 'value',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.TradingBotScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  strategy: 'strategy',
+  parameters: 'parameters',
+  symbol: 'symbol',
+  active: 'active',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
+};
+
+exports.Prisma.JsonNullValueInput = {
+  JsonNull: Prisma.JsonNull
 };
 
 exports.Prisma.QueryMode = {
@@ -176,12 +242,24 @@ exports.Prisma.NullsOrder = {
   last: 'last'
 };
 
+exports.Prisma.JsonNullValueFilter = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull,
+  AnyNull: Prisma.AnyNull
+};
+
 
 exports.Prisma.ModelName = {
   Symbol: 'Symbol',
   HistoricalPrice: 'HistoricalPrice',
   StrategySignal: 'StrategySignal',
-  FundamentalMetric: 'FundamentalMetric'
+  FundamentalMetric: 'FundamentalMetric',
+  TradingSession: 'TradingSession',
+  TradingAccount: 'TradingAccount',
+  TradingOrder: 'TradingOrder',
+  TradingPosition: 'TradingPosition',
+  SystemSetting: 'SystemSetting',
+  TradingBot: 'TradingBot'
 };
 
 /**

@@ -4,8 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "npm run build -w @quantomate/core && npm run build -w @quantomate/library",
-    "test": "npm test --workspaces"
+    "build": "npm run build -w @quantomate/core && npm run build -w @quantomate/db && npm run build -w @quantomate/library && npm run build -w @quantomate/data && npm run build -w @quantomate/trade",
+    "test": "npm test --workspaces",
+    "ui": "npm run dev -w @quantomate/ui",
+    "trade": "npm run cli start -w @quantomate/trade",
+    "cli": "npm run cli -w @quantomate/trade --"
   },
   "keywords": [],
   "author": "",
@@ -16,7 +19,8 @@
     "packages/playground",
     "packages/ui",
     "packages/db",
-    "packages/data"
+    "packages/data",
+    "packages/trade"
   ],
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

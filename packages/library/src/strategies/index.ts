@@ -6,3 +6,5 @@ export * from './bollingerBands/bollingerBands';
 export * from './macd/macd';
 export * from './ohiain/ohiain';
 export * from './strongPullback/strongPullback';
+export * from './indexOptionMomentum/indexOptionMomentum';
+export * from './indexOptionRsiReversion/indexOptionRsiReversion';

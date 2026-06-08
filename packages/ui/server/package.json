@@ -12,6 +12,7 @@
         "@quantomate/library": "file:../../library",
         "@quantomate/db": "^0.1.0",
         "@quantomate/data": "^0.1.0",
+        "@quantomate/trade": "file:../../trade",
         "cors": "^2.8.5",
         "express": "^4.18.2"
     },

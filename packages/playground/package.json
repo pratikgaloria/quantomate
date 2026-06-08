@@ -37,8 +37,9 @@
     },
     "dependencies": {
         "@quantomate/core": "^0.1.0",
+        "@quantomate/data": "^0.1.0",
         "@quantomate/library": "^0.1.0",
-        "@quantomate/data": "^0.1.0"
+        "dotenv": "^17.4.2"
     },
     "jest": {
         "testEnvironment": "node",

@@ -14,10 +14,34 @@ export class DataService {
     limit?: number,
     interval: string = "1d"
   ): Promise<any[]> {
-    // 1. Ensure symbol metadata exists in db
+    // 1. If interval is not Daily, fetch on-the-fly and keep in-memory
+    if (interval !== "1d") {
+      const now = new Date();
+      const startFrom = new Date();
+      if (interval === '1m') {
+        startFrom.setDate(startFrom.getDate() - 7);
+      } else if (interval === '5m' || interval === '15m' || interval === '1h') {
+        startFrom.setDate(startFrom.getDate() - 59);
+      } else {
+        startFrom.setFullYear(startFrom.getFullYear() - 5);
+      }
+      try {
+        const quotes = await DataService.provider.getHistoricalData(symbolId, startFrom, now, interval);
+        let result = quotes || [];
+        if (limit !== undefined) {
+          result = result.slice(-limit);
+        }
+        return result;
+      } catch (error) {
+        console.error(`Error fetching on-the-fly historical data for ${symbolId} (${interval}):`, error);
+        return [];
+      }
+    }
+
+    // 2. Ensure symbol metadata exists in db
     const symbolMeta = await this.ensureSymbolExists(symbolId);
 
-    // 2. Find latest price in database for this interval
+    // 3. Find latest price in database for this interval
     const latestPrice = await prisma.historicalPrice.findFirst({
       where: { symbolId, interval },
       orderBy: { date: "desc" },
@@ -28,12 +52,10 @@ export class DataService {
     const isSyncedRecently =
       symbolMeta && now.getTime() - symbolMeta.updatedAt.getTime() < SYNC_TTL;
 
-    if (!isSyncedRecently) {
+    if (!isSyncedRecently || !latestPrice) {
       if (!latestPrice) {
-        // Missing entirely: fetch 5 years
-        console.log(
-          `No local data found for ${symbolId} (${interval}). Fetching 5 years history...`,
-        );
+        // Missing entirely: fetch 5 years history for Daily data
+        console.log(`No local data found for ${symbolId} (${interval}). Fetching 5 years history...`);
         const startFrom = new Date();
         startFrom.setFullYear(startFrom.getFullYear() - 5);
         await this.fetchAndStoreHistoricalData(symbolId, startFrom, now, interval);

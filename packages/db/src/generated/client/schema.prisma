@@ -67,3 +67,83 @@ model FundamentalMetric {
 
   @@map("fundamental_metrics")
 }
+
+model TradingSession {
+  id          String   @id @default(uuid())
+  provider    String // "zerodha", "tradier", etc.
+  accessToken String
+  publicToken String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("trading_sessions")
+}
+
+model TradingAccount {
+  id        String            @id @default(uuid())
+  provider  String // "zerodha", "tradier", "paper"
+  name      String
+  isLive    Boolean           @default(false)
+  balance   Float
+  currency  String            @default("INR")
+  orders    TradingOrder[]
+  positions TradingPosition[]
+  createdAt DateTime          @default(now())
+
+  @@map("trading_accounts")
+}
+
+model TradingOrder {
+  id          String   @id @default(uuid())
+  accountId   String
+  symbol      String
+  qty         Float
+  side        String // "BUY", "SELL"
+  type        String // "LIMIT", "MARKET"
+  price       Float?
+  status      String // "PENDING", "FILLED", "CANCELED", "REJECTED"
+  filledPrice Float?
+  commission  Float    @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  account TradingAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@map("trading_orders")
+}
+
+model TradingPosition {
+  id          String   @id @default(uuid())
+  accountId   String
+  symbol      String
+  qty         Float
+  entryPrice  Float
+  marketPrice Float
+  updatedAt   DateTime @updatedAt
+
+  account TradingAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@map("trading_positions")
+}
+
+model SystemSetting {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String // Stores JSON-serialized config values
+  updatedAt DateTime @updatedAt
+
+  @@map("system_settings")
+}
+
+model TradingBot {
+  id         String   @id @default(uuid())
+  name       String   @unique
+  strategy   String // "GoldenCross", "RSIMeanReversion", "IndexOptionMomentum", "IndexOptionRsiReversion"
+  parameters Json // Stores strategy parameters as JSON object
+  symbol     String // E.g., "SBIN", "RELIANCE"
+  active     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("trading_bots")
+}
