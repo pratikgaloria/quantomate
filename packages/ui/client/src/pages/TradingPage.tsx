@@ -108,6 +108,20 @@ const AVAILABLE_STRATEGIES = {
       { name: 'overboughtThreshold', label: 'Overbought Threshold', type: 'number', default: 70 },
       { name: 'source', label: 'Source Candle Value', type: 'select', options: ['close', 'open', 'high', 'low'], default: 'close' },
     ]
+  },
+  PivotTrend: {
+    name: 'Pivot Trend',
+    defaultParams: { direction: 'both' },
+    paramSchema: [
+      { name: 'direction', label: 'Direction', type: 'select', options: ['both', 'long', 'short'], default: 'both' },
+    ]
+  },
+  PivotTrendOption: {
+    name: 'Pivot Trend Option',
+    defaultParams: { direction: 'both' },
+    paramSchema: [
+      { name: 'direction', label: 'Direction', type: 'select', options: ['both', 'long', 'short'], default: 'both' },
+    ]
   }
 };
 

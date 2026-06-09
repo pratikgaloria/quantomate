@@ -24,6 +24,12 @@ export const PriceChart: FC<PriceChartProps> = ({ data, trades }) => {
   useEffect(() => {
     if (!chartRef.current || data.length === 0) return;
 
+    // Configure decimal count globally
+    if (anychart && (anychart as any).format && (anychart as any).format.locales) {
+      (anychart as any).format.locales.default.numberLocale.decimalsCount = 2;
+      (anychart as any).format.locales.default.numberLocale.zeroFillDecimals = true;
+    }
+
     // Dispose previous chart
     if (chartInstance.current) {
       chartInstance.current.dispose();
@@ -107,25 +113,45 @@ export const PriceChart: FC<PriceChartProps> = ({ data, trades }) => {
         t.price
       ]);
       const entryMarkers = plot.marker(entryData);
+      entryMarkers.name('Entry');
       entryMarkers.type('arrow-up');
       entryMarkers.fill('#4caf50');
       entryMarkers.stroke('#4caf50', 2);
       entryMarkers.size(10);
+      entryMarkers.tooltip().enabled(false);
     }
 
-    // Add exit markers (color-coded by reason)
+    // Add exit markers (grouped by exit reason to avoid creating multiple series)
     const exitTrades = trades.filter(t => t.type === 'exit');
-    exitTrades.forEach(trade => {
-      const color = trade.exitReason === 'stop-loss' ? '#f44336' :
-                    trade.exitReason === 'take-profit' ? '#2196f3' :
-                    '#ff9800';
-      
-      const exitData = [[new Date(trade.date).getTime(), trade.price]];
-      const exitMarker = plot.marker(exitData);
-      exitMarker.type('arrow-down');
-      exitMarker.fill(color);
-      exitMarker.stroke(color, 2);
-      exitMarker.size(10);
+    
+    const exitReasons: Array<'stop-loss' | 'take-profit' | 'strategy'> = ['stop-loss', 'take-profit', 'strategy'];
+    const exitColors = {
+      'stop-loss': '#f44336',
+      'take-profit': '#2196f3',
+      'strategy': '#ff9800'
+    };
+    const exitNames = {
+      'stop-loss': 'Stop-Loss Exit',
+      'take-profit': 'Take-Profit Exit',
+      'strategy': 'Strategy Exit'
+    };
+
+    exitReasons.forEach(reason => {
+      const reasonTrades = exitTrades.filter(t => t.exitReason === reason || (!t.exitReason && reason === 'strategy'));
+      if (reasonTrades.length > 0) {
+        const exitData = reasonTrades.map(t => [
+          new Date(t.date).getTime(),
+          t.price
+        ]);
+        const exitMarker = plot.marker(exitData);
+        exitMarker.name(exitNames[reason]);
+        exitMarker.type('arrow-down');
+        const color = exitColors[reason];
+        exitMarker.fill(color);
+        exitMarker.stroke(color, 2);
+        exitMarker.size(10);
+        exitMarker.tooltip().enabled(false);
+      }
     });
 
     // Configure chart with 2 decimal formatting

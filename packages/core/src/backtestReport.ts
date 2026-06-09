@@ -32,6 +32,7 @@ export class BacktestReport<T = number> {
   sharesOwned: number;
   isShort: boolean = false;
   entryTradedValue: number = 0;
+  activeEntryDate?: Date;
 
   profit: number;
   loss: number;
@@ -94,6 +95,7 @@ export class BacktestReport<T = number> {
   markEntry(tradedValue: number, quote: Quote<T>, strategyName: string) {
     const position = quote.getStrategy(strategyName).position;
     this.isShort = !!position.options?.short;
+    this.activeEntryDate = (quote.value as any)?.date || (quote.timestamp ? new Date(quote.timestamp) : new Date());
 
     // Apply slippage to entry price
     const slippageFactor = this.isShort ? (1 - (this.config.slippage || 0)) : (1 + (this.config.slippage || 0));
@@ -235,8 +237,8 @@ export class BacktestReport<T = number> {
     position: any,
     exitPrice: number
   ): ExitContext | undefined {
-    const entryPrice = position.options?.entryPrice;
-    const entryDate = position.options?.entryDate;
+    const entryPrice = position.options?.entryPrice || this.entryTradedValue;
+    const entryDate = position.options?.entryDate || this.activeEntryDate;
 
     if (!entryPrice || !entryDate) {
       return undefined;

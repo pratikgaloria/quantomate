@@ -55,14 +55,13 @@ export const TradeList: FC<TradeListProps> = ({ trades }) => {
     }
   }
 
-  const formatDate = (dateStr: string) => {
+  const formatCustomDate = (dateStr: string) => {
     const d = new Date(dateStr);
     if (isNaN(d.getTime())) return 'Invalid Date';
-    return d.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
-    });
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}.${month}.${year}`;
   };
 
   const formatFullDate = (dateStr: string) => {
@@ -104,10 +103,9 @@ export const TradeList: FC<TradeListProps> = ({ trades }) => {
           <table>
             <thead>
               <tr>
-                <th>Entry Date</th>
+                <th>Period</th>
                 <th>Direction</th>
                 <th>Entry Price</th>
-                <th>Exit Date</th>
                 <th>Exit Price</th>
                 <th>Exit Reason</th>
                 <th>P&L ($)</th>
@@ -117,14 +115,15 @@ export const TradeList: FC<TradeListProps> = ({ trades }) => {
             <tbody>
               {positions.map((position, index) => (
                 <tr key={index}>
-                  <td title={formatFullDate(position.entryDate)}>{formatDate(position.entryDate)}</td>
+                  <td title={`${formatFullDate(position.entryDate)} - ${formatFullDate(position.exitDate)}`}>
+                    {formatCustomDate(position.entryDate)} - {formatCustomDate(position.exitDate)}
+                  </td>
                   <td>
                     <span className={`direction-label ${position.isShort ? 'short' : 'long'}`}>
                       {position.isShort ? 'Short' : 'Long'}
                     </span>
                   </td>
                   <td>${position.entryPrice?.toFixed(2) ?? '0.00'}</td>
-                  <td title={formatFullDate(position.exitDate)}>{formatDate(position.exitDate)}</td>
                   <td>${position.exitPrice?.toFixed(2) ?? '0.00'}</td>
                   <td>
                     <span className={`exit-reason ${getExitReasonClass(position.exitReason)}`}>

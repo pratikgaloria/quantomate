@@ -62,7 +62,7 @@ export class SignalMetrics {
     momentum_raw = weightSum > 0 ? momentum_raw / weightSum : 0;
 
     // Volume confirmation
-    let volume_ratio = undefined;
+    let volume_ratio: number | undefined = undefined;
     const validVolumeData = history.filter(h => h.volume !== undefined);
     
     if (validVolumeData.length >= 60) {

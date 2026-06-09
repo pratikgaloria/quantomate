@@ -182,8 +182,19 @@ body {
 }
 
 /* Chart containers global style */
-.chart-wrapper, .chart-container {
+.chart-wrapper {
   height: 350px;
+  width: 100%;
+  position: relative;
+
+  /* Ensure child divs take full height */
+  > div {
+    height: 100% !important;
+  }
+}
+
+.chart-container {
+  height: 800px;
   width: 100%;
   position: relative;
 
@@ -260,11 +271,28 @@ body {
   font-size: 0.8rem;
 }
 
-.metrics-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+.metrics-rows-container {
+  display: flex;
+  flex-direction: column;
   gap: 1rem;
   margin-bottom: 1.5rem;
+}
+
+.metrics-row {
+  display: grid;
+  gap: 1rem;
+
+  &.row-5 {
+    grid-template-columns: repeat(5, 1fr);
+  }
+
+  &.row-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  &.row-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 .metric {
@@ -325,8 +353,18 @@ body {
 }
 
 @media (max-width: 1200px) {
-  .metrics-grid {
-    grid-template-columns: repeat(2, 1fr);
+  .metrics-row {
+    &.row-5, &.row-4, &.row-3 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .metrics-row {
+    &.row-5, &.row-4, &.row-3 {
+      grid-template-columns: 1fr;
+    }
   }
 }
 
@@ -477,3 +515,27 @@ body {
   from { transform: translateY(10px); }
   to { transform: translateY(0); }
 }
+
+.zero-trades-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background-color: #fef3c7;
+  border: 1px solid #fcd34d;
+  color: #92400e;
+  padding: 1rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.4;
+
+  .tip-icon {
+    font-size: 1.1rem;
+    line-height: 1;
+  }
+
+  .tip-message strong {
+    color: #78350f;
+  }
+}
+

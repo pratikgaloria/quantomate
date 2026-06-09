@@ -14,7 +14,7 @@ export function BacktestPage() {
   const [symbol, setSymbol] = useState('NVDA');
   const [startDate, setStartDate] = useState('2024-01-01');
   const [endDate, setEndDate] = useState('2025-01-01');
-  const [interval, setInterval] = useState('5m');
+  const [interval, setInterval] = useState('1d');
   const [capital, setCapital] = useState(100000);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<BacktestResponse | null>(null);
@@ -239,6 +239,7 @@ export function BacktestPage() {
               <option value="1h">1 Hour</option>
               <option value="15m">15 Minutes</option>
               <option value="5m">5 Minutes</option>
+              <option value="1m">1 Minute</option>
             </select>
           </div>
           <div className="form-group">
@@ -250,7 +251,6 @@ export function BacktestPage() {
               min={100}
             />
           </div>
-
         </CollapsibleSection>
 
         <button
@@ -268,50 +268,81 @@ export function BacktestPage() {
         <h2>Results</h2>
         {result ? (
           <div className="results-content">
+            {result.report.numberOfTrades === 0 && (
+              <div className="zero-trades-tip">
+                <span className="tip-icon">💡</span>
+                <div className="tip-message">
+                  <strong>No trades executed:</strong> This is normal if the strategy's entry criteria (e.g. RSI going below the oversold threshold or fast/slow SMAs crossing) were not met during the selected time period. Try adjusting the strategy parameters or changing the date range.
+                </div>
+              </div>
+            )}
             {/* Metrics */}
             <CollapsibleSection title="Performance Metrics" className="metrics-section">
-              <div className="metrics-grid">
-                <div className="metric">
-                  <span className="metric-label">Initial Capital</span>
-                  <span className="metric-value">${result.report.initialCapital.toFixed(2)}</span>
+              <div className="metrics-rows-container">
+                {/* First row: Returns, Final Capital, Initial Capital, Other Costs */}
+                <div className="metrics-row row-4">
+                  <div className="metric">
+                    <span className="metric-label">Returns</span>
+                    <span className={`metric-value ${result.report.returns >= 0 ? 'positive' : 'negative'}`}>
+                      ${result.report.returns.toFixed(2)} ({result.report.returnsPercentage.toFixed(2)}%)
+                    </span>
+                  </div>
+                  <div className="metric">
+                    <span className="metric-label">Final Capital</span>
+                    <span className="metric-value">${result.report.finalCapital.toFixed(2)}</span>
+                  </div>
+                  <div className="metric">
+                    <span className="metric-label">Initial Capital</span>
+                    <span className="metric-value">${result.report.initialCapital.toFixed(2)}</span>
+                  </div>
+                  <div className="metric">
+                    <span className="metric-label">Other Costs</span>
+                    <span className="metric-value" style={{ fontSize: '0.9rem' }}>
+                      Comm: ${result.report.totalCommissions.toFixed(2)} / Slip: ${result.report.totalSlippage.toFixed(2)}
+                    </span>
+                  </div>
                 </div>
-                <div className="metric">
-                  <span className="metric-label">Final Capital</span>
-                  <span className="metric-value">${result.report.finalCapital.toFixed(2)}</span>
+
+                {/* Second row: Number of Trades, Winning Trades, Losing Trades, Win Rate */}
+                <div className="metrics-row row-4">
+                  <div className="metric">
+                    <span className="metric-label">Number of Trades</span>
+                    <span className="metric-value">{result.report.numberOfTrades}</span>
+                  </div>
+                  <div className="metric">
+                    <span className="metric-label">Winning Trades</span>
+                    <span className="metric-value">
+                      {result.report.numberOfWinningTrades} (${result.report.profit.toFixed(2)})
+                    </span>
+                  </div>
+                  <div className="metric">
+                    <span className="metric-label">Losing Trades</span>
+                    <span className="metric-value">
+                      {result.report.numberOfLosingTrades} (${result.report.loss.toFixed(2)})
+                    </span>
+                  </div>
+                  <div className="metric">
+                    <span className="metric-label">Win Rate</span>
+                    <span className="metric-value">
+                      {isNaN(result.report.winningRate) ? '0.00' : (result.report.winningRate * 100).toFixed(2)}%
+                    </span>
+                  </div>
                 </div>
-                <div className="metric">
-                  <span className="metric-label">Returns</span>
-                  <span className={`metric-value ${result.report.returns >= 0 ? 'positive' : 'negative'}`}>
-                    ${result.report.returns.toFixed(2)} ({result.report.returnsPercentage.toFixed(2)}%)
-                  </span>
-                </div>
-                <div className="metric">
-                  <span className="metric-label">Number of Trades</span>
-                  <span className="metric-value">{result.report.numberOfTrades}</span>
-                </div>
-                <div className="metric">
-                  <span className="metric-label">Win Rate</span>
-                  <span className="metric-value">{(result.report.winningRate * 100).toFixed(2)}%</span>
-                </div>
-                <div className="metric">
-                  <span className="metric-label">Stop-Loss Exits</span>
-                  <span className="metric-value">{result.report.stopLossExits}</span>
-                </div>
-                <div className="metric">
-                  <span className="metric-label">Take-Profit Exits</span>
-                  <span className="metric-value">{result.report.takeProfitExits}</span>
-                </div>
-                <div className="metric">
-                  <span className="metric-label">Strategy Exits</span>
-                  <span className="metric-value">{result.report.strategyExits}</span>
-                </div>
-                <div className="metric">
-                  <span className="metric-label">Total Commissions</span>
-                  <span className="metric-value">${result.report.totalCommissions.toFixed(2)}</span>
-                </div>
-                <div className="metric">
-                  <span className="metric-label">Total Slippage</span>
-                  <span className="metric-value">${result.report.totalSlippage.toFixed(2)}</span>
+
+                {/* Third row: Stop-Loss Exits, Take-Profit Exits, Strategy Exits */}
+                <div className="metrics-row row-3">
+                  <div className="metric">
+                    <span className="metric-label">Stop-Loss Exits</span>
+                    <span className="metric-value">{result.report.stopLossExits}</span>
+                  </div>
+                  <div className="metric">
+                    <span className="metric-label">Take-Profit Exits</span>
+                    <span className="metric-value">{result.report.takeProfitExits}</span>
+                  </div>
+                  <div className="metric">
+                    <span className="metric-label">Strategy Exits</span>
+                    <span className="metric-value">{result.report.strategyExits}</span>
+                  </div>
                 </div>
               </div>
             </CollapsibleSection>
@@ -335,7 +366,7 @@ export function BacktestPage() {
               </div>
             </CollapsibleSection>
 
-            {/* Trade List - Collapsible handled internally but it wraps itself */}
+            {/* Trade List */}
             <TradeList trades={result.report.trades} />
           </div>
         ) : (

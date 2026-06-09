@@ -2,7 +2,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Sidebar } from './components/Sidebar';
 import { BacktestPage } from './pages/BacktestPage';
 import { ScreenerPage } from './pages/ScreenerPage';
-import { SimulationPage } from './pages/SimulationPage';
 import { TradingPage } from './pages/TradingPage';
 import './styles/App.scss';
 
@@ -17,7 +16,6 @@ function App() {
               <Route path="/" element={<Navigate to="/backtest" replace />} />
               <Route path="/backtest" element={<BacktestPage />} />
               <Route path="/screener" element={<ScreenerPage />} />
-              <Route path="/simulation" element={<SimulationPage />} />
               <Route path="/trade" element={<TradingPage />} />
             </Routes>
           </main>

@@ -6,7 +6,7 @@ import strategiesRouter from './routes/strategies';
 import backtestRouter from './routes/backtest';
 import scanRouter from './routes/scanner';
 import portfolioSignalsRouter from './routes/portfolioSignals';
-import simulationRouter from './routes/simulation';
+
 import tradeRouter from './routes/trade';
 
 const app = express();
@@ -22,7 +22,7 @@ app.use('/api/backtest', backtestRouter);
 app.use('/api/scan', scanRouter);
 app.use('/api/portfolio-signals', portfolioSignalsRouter);
 app.use('/api/quotes', portfolioSignalsRouter);
-app.use('/api/simulation', simulationRouter);
+
 app.use('/api/trade', tradeRouter);
 
 // Health check

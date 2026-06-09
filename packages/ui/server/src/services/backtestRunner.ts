@@ -73,20 +73,47 @@ export async function runBacktest(request: BacktestRequest) {
     return quoteTs >= startTs;
   });
 
+  // Calculate metrics based on filtered trades
+  let profit = 0;
+  let loss = 0;
+  let numberOfWinningTrades = 0;
+  let numberOfLosingTrades = 0;
+
+  filteredTrades.forEach(t => {
+    if (t.type === 'exit' && t.exitContext) {
+      const pnl = (t.shares || 0) * t.exitContext.priceChange - ((t as any).commission || 0);
+      if (pnl > 0) {
+        profit += pnl;
+        numberOfWinningTrades++;
+      } else {
+        loss += Math.abs(pnl);
+        numberOfLosingTrades++;
+      }
+    }
+  });
+
+  const totalCompletedExits = numberOfWinningTrades + numberOfLosingTrades;
+  const winningRate = totalCompletedExits > 0 ? numberOfWinningTrades / totalCompletedExits : 0;
+
+  const stopLossExits = filteredTrades.filter(t => t.type === 'exit' && t.exitReason === 'stop-loss').length;
+  const takeProfitExits = filteredTrades.filter(t => t.type === 'exit' && t.exitReason === 'take-profit').length;
+  const strategyExits = filteredTrades.filter(t => t.type === 'exit' && t.exitReason === 'strategy').length;
+
   return {
     report: {
       initialCapital: fullReport.initialCapital,
       finalCapital: fullReport.finalCapital,
       returns: fullReport.returns,
       returnsPercentage: fullReport.returnsPercentage,
-      numberOfTrades: filteredTrades.length,
-      numberOfWinningTrades: filteredTrades.filter(t => t.type === 'exit' && t.currentCapital > (t as any).entryCapital).length,
-      winningRate: fullReport.winningRate,
-      profit: fullReport.profit,
-      loss: fullReport.loss,
-      stopLossExits: (fullReport as any).stopLossExits || 0,
-      takeProfitExits: (fullReport as any).takeProfitExits || 0,
-      strategyExits: (fullReport as any).strategyExits || 0,
+      numberOfTrades: totalCompletedExits,
+      numberOfWinningTrades,
+      numberOfLosingTrades,
+      winningRate,
+      profit,
+      loss,
+      stopLossExits,
+      takeProfitExits,
+      strategyExits,
       totalCommissions: (fullReport as any).totalCommissions || 0,
       totalSlippage: (fullReport as any).totalSlippage || 0,
       trades: filteredTrades.map((trade) => ({

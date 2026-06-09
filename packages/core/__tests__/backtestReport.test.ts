@@ -63,7 +63,34 @@ describe('BacktestReport', () => {
       expect(backtestReport.returnsPercentage).toBe(100);
       expect(backtestReport.trades).toStrictEqual([
         { type: 'entry', quote: quote1, tradedValue: 50, shares: 20, short: false, currentCapital: 0, commission: 0, slippage: 0 },
-        { type: 'exit', quote: quote2, tradedValue: 100, shares: 20, short: false, currentCapital: 2000, exitReason: undefined, exitContext: undefined, commission: 0, slippage: 0 }
+        {
+          type: 'exit',
+          quote: quote2,
+          tradedValue: 100,
+          shares: 20,
+          short: false,
+          currentCapital: 2000,
+          exitReason: undefined,
+          exitContext: {
+            entryPrice: 50,
+            exitPrice: 100,
+            entryDate: expect.any(Date),
+            exitDate: expect.any(Date),
+            holdDuration: expect.any(Number),
+            priceChange: 50,
+            priceChangePercent: 100,
+            indicators: {
+              rsi: undefined,
+              atr: undefined,
+              sma: undefined,
+              ema: undefined,
+              macd: undefined,
+              bb: undefined,
+            },
+          },
+          commission: 0,
+          slippage: 0,
+        }
       ])
     });
 

@@ -16,6 +16,12 @@ export const EquityCurve: FC<EquityCurveProps> = ({ data, initialCapital }) => {
   useEffect(() => {
     if (!chartRef.current || data.length === 0) return;
 
+    // Configure decimal count globally
+    if (anychart && (anychart as any).format && (anychart as any).format.locales) {
+      (anychart as any).format.locales.default.numberLocale.decimalsCount = 2;
+      (anychart as any).format.locales.default.numberLocale.zeroFillDecimals = true;
+    }
+
     if (chartInstance.current) {
       chartInstance.current.dispose();
     }
