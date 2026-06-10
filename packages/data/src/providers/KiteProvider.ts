@@ -81,10 +81,25 @@ export class KiteInstrumentMapper {
   }
 
   static getInstrumentToken(symbol: string): number | undefined {
+    if (this.instrumentsMap.size === 0) {
+      const cached = this.getCachedList();
+      for (const item of cached) {
+        const symbolKey = `${item.exchange}:${item.tradingsymbol}`.toUpperCase();
+        this.instrumentsMap.set(symbolKey, item.instrument_token);
+        if (item.exchange === 'NSE' || item.exchange === 'BSE' || item.exchange === 'NFO') {
+          this.instrumentsMap.set(item.tradingsymbol.toUpperCase(), item.instrument_token);
+        }
+        this.tokenToSymbolMap.set(item.instrument_token, item.tradingsymbol);
+      }
+    }
     return this.instrumentsMap.get(symbol.toUpperCase());
   }
 
   static getSymbolFromToken(token: number): string | undefined {
+    if (this.tokenToSymbolMap.size === 0) {
+      // Trigger lazy load
+      this.getInstrumentToken('');
+    }
     return this.tokenToSymbolMap.get(token);
   }
 
@@ -110,9 +125,9 @@ export class KiteInstrumentMapper {
     selector?: OptionSelector
   ): any | undefined {
     let name = underlying.toUpperCase();
-    if (name.includes('NIFTY 50') || name === 'NIFTY') {
+    if (name.includes('NIFTY 50') || name === 'NIFTY' || name === '^NSEI' || name === 'NSEI') {
       name = 'NIFTY';
-    } else if (name.includes('BANK') || name.includes('NIFTYBANK') || name === 'BANKNIFTY') {
+    } else if (name.includes('BANK') || name.includes('NIFTYBANK') || name === 'BANKNIFTY' || name === '^NSEBANK' || name === 'NSEBANK') {
       name = 'BANKNIFTY';
     }
 

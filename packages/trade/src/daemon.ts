@@ -59,7 +59,7 @@ let lastOpenBotsHash = "";
 
 // Helper: Determine market from symbol name
 function getMarketForSymbol(symbol: string): string {
-  const sym = symbol.toUpperCase();
+  const sym = symbol.toUpperCase().trim();
   const cryptoAssets = ["BTC", "ETH", "SOL", "ADA", "DOT", "DOGE", "XRP"];
   if (
     cryptoAssets.some(
@@ -75,8 +75,13 @@ function getMarketForSymbol(symbol: string): string {
   if (
     sym.startsWith("NIFTY") ||
     sym.startsWith("BANKNIFTY") ||
-    sym === "SBIN" ||
-    sym === "RELIANCE"
+    sym.startsWith("^NSE") ||
+    sym.endsWith(".NS") ||
+    sym.includes("NSEI") ||
+    sym.includes("NSEBANK") ||
+    sym.startsWith("NSE:") ||
+    sym.startsWith("NFO:") ||
+    ["SBIN", "RELIANCE", "TCS", "INFY", "HDFCBANK", "ICICIBANK"].includes(sym)
   ) {
     return "india";
   }

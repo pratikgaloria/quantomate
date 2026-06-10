@@ -3,6 +3,7 @@ import { Sidebar } from './components/Sidebar';
 import { BacktestPage } from './pages/BacktestPage';
 import { ScreenerPage } from './pages/ScreenerPage';
 import { TradingPage } from './pages/TradingPage';
+import { IndicatorVisualizationPage } from './pages/IndicatorVisualizationPage';
 import './styles/App.scss';
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
               <Route path="/backtest" element={<BacktestPage />} />
               <Route path="/screener" element={<ScreenerPage />} />
               <Route path="/trade" element={<TradingPage />} />
+              <Route path="/indicators" element={<IndicatorVisualizationPage />} />
             </Routes>
           </main>
         </div>

@@ -1,5 +1,5 @@
 import { Dataset, Backtest } from '@quantomate/core';
-import { PivotTrendStrategy, GoldenCrossStrategy, RSIMeanReversionStrategy, BollingerBandsStrategy, MACDStrategy, OhiainStrategy, StrongPullback } from '@quantomate/library';
+import { PivotTrendStrategy, GoldenCrossStrategy, RSIMeanReversionStrategy, BollingerBandsStrategy, MACDStrategy, OhiainStrategy, StrongPullback, BearPutSpreadStrategy, LongStraddleStrategy, LongStrangleStrategy } from '@quantomate/library';
 import { fetchStockData, StockData } from './stockDataFetcher';
 
 interface BacktestRequest {
@@ -187,6 +187,15 @@ export function createStrategy(strategyId: string, parameters: Record<string, an
     }
     case 'strong-pullback': {
       return new StrongPullback(parameters);
+    }
+    case 'bear-put-spread': {
+      return new BearPutSpreadStrategy('Bear Put Spread', parameters);
+    }
+    case 'long-straddle': {
+      return new LongStraddleStrategy('Long Straddle', parameters);
+    }
+    case 'long-strangle': {
+      return new LongStrangleStrategy('Long Strangle', parameters);
     }
     default:
       throw new Error(`Unknown strategy: ${strategyId}`);

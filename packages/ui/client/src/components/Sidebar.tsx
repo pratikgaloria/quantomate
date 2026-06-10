@@ -20,6 +20,10 @@ export function Sidebar() {
           <i className="la la-exchange-alt"></i>
           <span>Trading</span>
         </NavLink>
+        <NavLink to="/indicators" className={({ isActive }) => isActive ? 'active' : ''}>
+          <i className="la la-chart-bar"></i>
+          <span>Indicators</span>
+        </NavLink>
       </nav>
     </div>
   );

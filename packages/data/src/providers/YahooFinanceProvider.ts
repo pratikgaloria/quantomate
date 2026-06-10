@@ -8,22 +8,72 @@ import {
   EarningsData,
   ScreenerResult
 } from './IDataProvider';
+import { KiteInstrumentMapper } from './KiteProvider';
 
 const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 
 export class YahooFinanceProvider implements IDataProvider {
+  private toYahooTicker(symbol: string): string {
+    const sym = symbol.toUpperCase().trim();
+    if (sym === "NIFTY 50" || sym === "NSEI" || sym === "NIFTY" || sym === "^NSEI") {
+      return "^NSEI";
+    }
+    if (sym === "NIFTY BANK" || sym === "NSEBANK" || sym === "BANKNIFTY" || sym === "^NSEBANK") {
+      return "^NSEBANK";
+    }
+    if (sym.endsWith(".NS") || sym.startsWith("^")) {
+      return sym;
+    }
+    
+    // Check if it exists in Kite Instrument Mapper (indicates Indian market asset)
+    const hasKiteToken = KiteInstrumentMapper.getInstrumentToken(sym) !== undefined || 
+                         KiteInstrumentMapper.getInstrumentToken("NSE:" + sym) !== undefined;
+                         
+    if (hasKiteToken) {
+      const cleanSym = sym.replace("NSE:", "").replace("NFO:", "");
+      return `${cleanSym}.NS`;
+    }
+
+    // Fallback crypto
+    const cryptoAssets = ["BTC", "ETH", "SOL", "ADA", "DOT", "DOGE", "XRP"];
+    if (
+      cryptoAssets.some(
+        (c) =>
+          sym.startsWith(c) ||
+          sym.endsWith(c) ||
+          sym.includes("/USD") ||
+          sym.includes("-USD"),
+      )
+    ) {
+      return sym.replace("/", "-");
+    }
+    
+    // Fallback: Indian hardcoded list
+    if (
+      sym.startsWith("NSE:") ||
+      sym.startsWith("NFO:") ||
+      ["SBIN", "RELIANCE", "TCS", "INFY", "HDFCBANK", "ICICIBANK"].includes(sym)
+    ) {
+      const cleanSym = sym.replace("NSE:", "").replace("NFO:", "");
+      return `${cleanSym}.NS`;
+    }
+    
+    return sym;
+  }
+
   async getHistoricalData(
     symbol: string,
     start: Date,
     end: Date,
     interval: string = '1d'
   ): Promise<HistoricalPriceData[]> {
+    const yahooSymbol = this.toYahooTicker(symbol);
     const period1 = start.toISOString().split('T')[0];
     const period2 = end.toISOString().split('T')[0];
 
     try {
       // Use chart api to support sub-daily intervals (e.g. 1h)
-      const result = await yahooFinance.chart(symbol, {
+      const result = await yahooFinance.chart(yahooSymbol, {
         period1,
         period2,
         interval: interval as any,
@@ -51,12 +101,12 @@ export class YahooFinanceProvider implements IDataProvider {
           volume: Number(q.volume || 0),
         }));
     } catch (error) {
-      console.error(`YahooFinanceProvider: Failed to fetch chart data for ${symbol}:`, error);
+      console.error(`YahooFinanceProvider: Failed to fetch chart data for ${symbol} (mapped to ${yahooSymbol}):`, error);
       
       // Fallback to historical api for 1d if chart fails
       if (interval === '1d') {
         try {
-          const quotes = await yahooFinance.historical(symbol, {
+          const quotes = await yahooFinance.historical(yahooSymbol, {
             period1,
             period2,
             interval: '1d',
@@ -81,7 +131,7 @@ export class YahooFinanceProvider implements IDataProvider {
               volume: Number(q.volume || 0),
             }));
         } catch (histError) {
-          console.error(`YahooFinanceProvider: Fallback historical failed for ${symbol}:`, histError);
+          console.error(`YahooFinanceProvider: Fallback historical failed for ${symbol} (mapped to ${yahooSymbol}):`, histError);
         }
       }
       return [];
@@ -89,8 +139,9 @@ export class YahooFinanceProvider implements IDataProvider {
   }
 
   async getFundamentals(symbol: string): Promise<FundamentalData> {
+    const yahooSymbol = this.toYahooTicker(symbol);
     try {
-      const summary = await yahooFinance.quoteSummary(symbol, {
+      const summary = await yahooFinance.quoteSummary(yahooSymbol, {
         modules: ['defaultKeyStatistics', 'summaryDetail', 'financialData', 'summaryProfile', 'price']
       }) as any;
 
@@ -111,7 +162,7 @@ export class YahooFinanceProvider implements IDataProvider {
       const industry = summary.summaryProfile?.industry || 'Unknown';
 
       return {
-        symbol: summary.price?.symbol || symbol,
+        symbol: symbol, // Return the requested symbol ID
         peRatio,
         forwardPe,
         priceToSales,
@@ -124,7 +175,7 @@ export class YahooFinanceProvider implements IDataProvider {
         industry
       };
     } catch (error) {
-      console.error(`YahooFinanceProvider: Failed to fetch fundamentals for ${symbol}:`, error);
+      console.error(`YahooFinanceProvider: Failed to fetch fundamentals for ${symbol} (mapped to ${yahooSymbol}):`, error);
       throw error;
     }
   }
@@ -133,9 +184,16 @@ export class YahooFinanceProvider implements IDataProvider {
     const quotesMap = new Map<string, QuoteData>();
     if (symbols.length === 0) return quotesMap;
 
+    const yahooToOriginal = new Map<string, string>();
+    const yahooSymbols = symbols.map(s => {
+      const ys = this.toYahooTicker(s);
+      yahooToOriginal.set(ys.toUpperCase(), s);
+      return ys;
+    });
+
     try {
       const quotes = await yahooFinance.quote(
-        symbols,
+        yahooSymbols,
         {
           return: 'map',
           fields: [
@@ -156,9 +214,10 @@ export class YahooFinanceProvider implements IDataProvider {
       ) as any;
 
       if (quotes) {
-        for (const [sym, quote] of quotes.entries()) {
-          quotesMap.set(sym, {
-            symbol: sym,
+        for (const [yahooSym, quote] of quotes.entries()) {
+          const original = yahooToOriginal.get(yahooSym.toUpperCase()) || yahooSym;
+          quotesMap.set(original, {
+            symbol: original, // Return the requested symbol ID
             shortName: quote.shortName,
             longName: quote.longName,
             displayName: quote.displayName,
@@ -212,8 +271,9 @@ export class YahooFinanceProvider implements IDataProvider {
 
     await Promise.all(
       symbols.map(async (symbol) => {
+        const yahooSymbol = this.toYahooTicker(symbol);
         try {
-          const summary = await yahooFinance.quoteSummary(symbol, {
+          const summary = await yahooFinance.quoteSummary(yahooSymbol, {
             modules: ['defaultKeyStatistics', 'summaryDetail', 'financialData']
           }) as any;
 
@@ -232,7 +292,7 @@ export class YahooFinanceProvider implements IDataProvider {
             operatingMargins: summary.financialData?.operatingMargins ?? undefined
           });
         } catch (error) {
-          console.error(`YahooFinanceProvider: Failed to fetch summary for ${symbol}:`, error);
+          console.error(`YahooFinanceProvider: Failed to fetch summary for ${symbol} (mapped to ${yahooSymbol}):`, error);
         }
       })
     );
@@ -241,20 +301,22 @@ export class YahooFinanceProvider implements IDataProvider {
   }
 
   async getPeers(symbol: string): Promise<string[]> {
+    const yahooSymbol = this.toYahooTicker(symbol);
     try {
-      const recommendations = await yahooFinance.recommendationsBySymbol(symbol);
+      const recommendations = await yahooFinance.recommendationsBySymbol(yahooSymbol);
       return (recommendations.recommendedSymbols || [])
         .map((s: any) => s.symbol)
         .slice(0, 10);
     } catch (error) {
-      console.error(`YahooFinanceProvider: Failed to fetch peers for ${symbol}:`, error);
+      console.error(`YahooFinanceProvider: Failed to fetch peers for ${symbol} (mapped to ${yahooSymbol}):`, error);
       return [];
     }
   }
 
   async getEarnings(symbol: string): Promise<EarningsData | null> {
+    const yahooSymbol = this.toYahooTicker(symbol);
     try {
-      const summary = await yahooFinance.quoteSummary(symbol, {
+      const summary = await yahooFinance.quoteSummary(yahooSymbol, {
         modules: ['earnings', 'calendarEvents']
       }) as any;
 
@@ -299,7 +361,7 @@ export class YahooFinanceProvider implements IDataProvider {
         calendarEvents: formattedCalendarEvents
       };
     } catch (error) {
-      console.error(`YahooFinanceProvider: Failed to fetch earnings for ${symbol}:`, error);
+      console.error(`YahooFinanceProvider: Failed to fetch earnings for ${symbol} (mapped to ${yahooSymbol}):`, error);
       return null;
     }
   }
@@ -309,7 +371,10 @@ export class YahooFinanceProvider implements IDataProvider {
       const results = await yahooFinance.screener({
         scrIds: scrId as any,
         count: count,
-      });
+        params: {
+          formatted: false
+        }
+      } as any);
 
       if (!results || !results.quotes) {
         return { quotes: [] };

@@ -42,6 +42,7 @@ interface Order {
   commissionPaid?: number;
   symbol?: string;
   side?: string;
+  realizedPL?: number | null;
 }
 
 interface TradeStatus {
@@ -146,7 +147,17 @@ export function TradingPage() {
     if (cryptoAssets.some(c => sym.startsWith(c) || sym.endsWith(c) || sym.includes('/USD') || sym.includes('-USD'))) {
       return 'crypto';
     }
-    if (sym.startsWith('NIFTY') || sym.startsWith('BANKNIFTY') || ['SBIN', 'RELIANCE', 'TCS', 'INFY', 'HDFCBANK', 'ICICIBANK'].includes(sym)) {
+    if (
+      sym.startsWith('NIFTY') ||
+      sym.startsWith('BANKNIFTY') ||
+      sym.startsWith('^NSE') ||
+      sym.endsWith('.NS') ||
+      sym.includes('NSEI') ||
+      sym.includes('NSEBANK') ||
+      sym.startsWith('NSE:') ||
+      sym.startsWith('NFO:') ||
+      ['SBIN', 'RELIANCE', 'TCS', 'INFY', 'HDFCBANK', 'ICICIBANK'].includes(sym)
+    ) {
       return 'india';
     }
     return 'us';
@@ -190,6 +201,171 @@ export function TradingPage() {
   const [botFormSymbol, setBotFormSymbol] = useState('NIFTY 50');
   const [botFormParameters, setBotFormParameters] = useState<Record<string, any>>({});
   const [botFormSessionId, setBotFormSessionId] = useState('');
+  const [symbolSuggestions, setSymbolSuggestions] = useState<any[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+
+  const symbolMatchesBot = (tradeSymbol: string, botSym: string): boolean => {
+    const tSym = tradeSymbol.toUpperCase();
+    const bSym = botSym.toUpperCase();
+    if (tSym === bSym) return true;
+    if (bSym === 'NIFTY 50' && tSym.startsWith('NIFTY')) return true;
+    if (bSym === 'NIFTY BANK' && tSym.startsWith('BANKNIFTY')) return true;
+    if (tSym.startsWith(bSym)) return true;
+    return false;
+  };
+
+  const calculateBotPL = (botSymbol: string) => {
+    const botOrders = orders.filter(o => o.symbol && symbolMatchesBot(o.symbol, botSymbol) && o.status.toLowerCase() === 'filled');
+    
+    let realizedPL = 0;
+    let currentQty = 0;
+    let avgCost = 0;
+    
+    const sortedOrders = [...botOrders].sort((a, b) => new Date(a.filledAt || '').getTime() - new Date(b.filledAt || '').getTime());
+    
+    for (const ord of sortedOrders) {
+      const isBuy = ord.side?.toLowerCase() === 'buy' || ord.side?.toLowerCase() === 'buy_to_open' || ord.side?.toLowerCase() === 'buy_to_close';
+      const price = ord.avgFillPrice || 0;
+      const qty = ord.filledQty || 0;
+      const commission = ord.commissionPaid || 0;
+      
+      if (isBuy) {
+        if (currentQty >= 0) {
+          const newQty = currentQty + qty;
+          avgCost = newQty > 0 ? (currentQty * avgCost + qty * price) / newQty : 0;
+          currentQty = newQty;
+        } else {
+          const closedQty = Math.min(Math.abs(currentQty), qty);
+          realizedPL += closedQty * (avgCost - price) - commission;
+          currentQty += qty;
+          if (currentQty > 0) avgCost = price;
+        }
+      } else {
+        if (currentQty <= 0) {
+          const newQty = currentQty - qty;
+          avgCost = newQty < 0 ? (Math.abs(currentQty) * avgCost + qty * price) / Math.abs(newQty) : 0;
+          currentQty = newQty;
+        } else {
+          const closedQty = Math.min(currentQty, qty);
+          realizedPL += closedQty * (price - avgCost) - commission;
+          currentQty -= qty;
+          if (currentQty < 0) avgCost = price;
+        }
+      }
+    }
+    
+    const botPositions = positions.filter(p => symbolMatchesBot(p.symbol, botSymbol));
+    const unrealizedPL = botPositions.reduce((sum, pos) => sum + pos.unrealizedPL, 0);
+    
+    return {
+      realizedPL,
+      unrealizedPL,
+      totalPL: realizedPL + unrealizedPL
+    };
+  };
+
+  const calculateSessionPL = (session: AllocationSession) => {
+    const sessionBots = bots.filter(b => b.allocationSessionId === session.id);
+    
+    const symbolMatchesAnyBot = (tradeSymbol: string): boolean => {
+      return sessionBots.some(b => symbolMatchesBot(tradeSymbol, b.symbol));
+    };
+
+    const sessionPositions = positions.filter(p => symbolMatchesAnyBot(p.symbol));
+    const positionsValue = sessionPositions.reduce((sum, pos) => sum + (pos.qty * pos.marketPrice), 0);
+    
+    const currentValue = session.virtualCash + positionsValue;
+    const totalPL = currentValue - session.capital;
+    const totalPLPct = session.capital > 0 ? (totalPL / session.capital) * 100 : 0;
+    
+    return {
+      currentValue,
+      totalPL,
+      totalPLPct
+    };
+  };
+
+  const enrichOrdersWithPL = (ordersList: Order[]): (Order & { realizedPL?: number | null })[] => {
+    const sorted = [...ordersList].sort((a, b) => new Date(a.filledAt || '').getTime() - new Date(b.filledAt || '').getTime());
+    
+    const symbolPositions = new Map<string, { qty: number; avgPrice: number }>();
+    
+    const enriched = sorted.map(ord => {
+      if (ord.status.toLowerCase() !== 'filled') return ord;
+      
+      const symbol = ord.symbol || '';
+      const isBuy = ord.side?.toLowerCase() === 'buy' || ord.side?.toLowerCase() === 'buy_to_open' || ord.side?.toLowerCase() === 'buy_to_close';
+      const price = ord.avgFillPrice || 0;
+      const qty = ord.filledQty || 0;
+      const commission = ord.commissionPaid || 0;
+      
+      let realizedPL: number | null = null;
+      
+      let pos = symbolPositions.get(symbol);
+      if (!pos) {
+        pos = { qty: 0, avgPrice: 0 };
+        symbolPositions.set(symbol, pos);
+      }
+      
+      if (isBuy) {
+        if (pos.qty >= 0) {
+          const newQty = pos.qty + qty;
+          pos.avgPrice = newQty > 0 ? (pos.qty * pos.avgPrice + qty * price) / newQty : 0;
+          pos.qty = newQty;
+        } else {
+          const closedQty = Math.min(Math.abs(pos.qty), qty);
+          realizedPL = closedQty * (pos.avgPrice - price) - commission;
+          pos.qty += qty;
+          if (pos.qty > 0) pos.avgPrice = price;
+        }
+      } else {
+        if (pos.qty <= 0) {
+          const newQty = pos.qty - qty;
+          pos.avgPrice = newQty < 0 ? (Math.abs(pos.qty) * pos.avgPrice + qty * price) / Math.abs(newQty) : 0;
+          pos.qty = newQty;
+        } else {
+          const closedQty = Math.min(pos.qty, qty);
+          realizedPL = closedQty * (price - pos.avgPrice) - commission;
+          pos.qty -= qty;
+          if (pos.qty < 0) pos.avgPrice = price;
+        }
+      }
+      
+      return {
+        ...ord,
+        realizedPL
+      };
+    });
+    
+    return enriched.reverse();
+  };
+
+  useEffect(() => {
+    if (!botFormSymbol || !botFormSessionId) {
+      setSymbolSuggestions([]);
+      return;
+    }
+
+    const selectedSession = sessions.find(s => s.id === botFormSessionId);
+    const market = selectedSession?.enabledMarkets?.[0] || 'india';
+
+    const timer = setTimeout(async () => {
+      setLoadingSuggestions(true);
+      try {
+        const res = await axios.get(`/api/trade/search-symbols?market=${market}&query=${botFormSymbol}`);
+        if (res.data.success) {
+          setSymbolSuggestions(res.data.data || []);
+        }
+      } catch (err) {
+        console.error('Error fetching suggestions:', err);
+      } finally {
+        setLoadingSuggestions(false);
+      }
+    }, 250);
+
+    return () => clearTimeout(timer);
+  }, [botFormSymbol, botFormSessionId, sessions]);
 
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -299,12 +475,6 @@ export function TradingPage() {
     }
   };
 
-  const toggleSessionMarketCheckbox = (market: string) => {
-    setSessionFormMarkets((prev) =>
-      prev.includes(market) ? prev.filter((m) => m !== market) : [...prev, market]
-    );
-  };
-
   const handleStrategyChange = (strat: keyof typeof AVAILABLE_STRATEGIES) => {
     setBotFormStrategy(strat);
     setBotFormParameters(AVAILABLE_STRATEGIES[strat].defaultParams);
@@ -315,9 +485,9 @@ export function TradingPage() {
     setEditingBotId(null);
     setBotFormName('');
     setBotFormStrategy('GoldenCross');
-    setBotFormSymbol('NIFTY 50');
+    setBotFormSymbol('');
     setBotFormParameters(AVAILABLE_STRATEGIES.GoldenCross.defaultParams);
-    setBotFormSessionId(sessions[0]?.id || '');
+    setBotFormSessionId('');
     setShowBotModal(true);
   };
 
@@ -647,12 +817,27 @@ export function TradingPage() {
                         <button onClick={() => handleDeleteSession(sess.id, sess.name)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.65rem', padding: 0 }}>Delete</button>
                       </div>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: '#64748b' }}>
-                      <span>Cap: {sess.provider === 'zerodha' ? '₹' : '$'}{sess.capital.toLocaleString()}</span>
-                      <span style={{ fontWeight: 600, color: sess.virtualCash >= sess.capital ? '#16a34a' : '#ef4444' }}>
-                        Cash: {sess.provider === 'zerodha' ? '₹' : '$'}{sess.virtualCash.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-                      </span>
-                    </div>
+                    {(() => {
+                      const sessPL = calculateSessionPL(sess);
+                      const isIndia = sess.provider === 'zerodha';
+                      const sym = isIndia ? '₹' : '$';
+                      return (
+                        <>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: '#64748b' }}>
+                            <span>Cap: {sym}{sess.capital.toLocaleString()}</span>
+                            <span style={{ fontWeight: 600, color: sess.virtualCash >= sess.capital ? '#16a34a' : '#ef4444' }}>
+                              Cash: {sym}{sess.virtualCash.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                            </span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: '#64748b', marginTop: '0.2rem' }}>
+                            <span>Val: {sym}{sessPL.currentValue.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
+                            <span style={{ fontWeight: 600, color: sessPL.totalPL >= 0 ? '#16a34a' : '#ef4444' }}>
+                              P/L: {sessPL.totalPL >= 0 ? '+' : ''}{sym}{sessPL.totalPL.toLocaleString(undefined, { maximumFractionDigits: 2 })} ({sessPL.totalPLPct.toFixed(2)}%)
+                            </span>
+                          </div>
+                        </>
+                      );
+                    })()}
                   </div>
                 ))}
               </div>
@@ -711,6 +896,30 @@ export function TradingPage() {
                       <div className="bot-params" title={JSON.stringify(bot.parameters)}>
                         {JSON.stringify(bot.parameters)}
                       </div>
+                      {(() => {
+                        const botPL = calculateBotPL(bot.symbol);
+                        const isIndia = getMarketForSymbol(bot.symbol) === 'india';
+                        const sym = isIndia ? '₹' : '$';
+                        return (
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem', background: '#f8fafc', padding: '0.4rem 0.6rem', borderRadius: '4px', border: '1px solid #f1f5f9' }}>
+                            <div style={{ fontSize: '0.7rem', color: '#64748b' }}>
+                              Realized: <span style={{ fontWeight: 600, color: botPL.realizedPL >= 0 ? '#16a34a' : '#ef4444' }}>
+                                {botPL.realizedPL >= 0 ? '+' : ''}{sym}{botPL.realizedPL.toFixed(2)}
+                              </span>
+                            </div>
+                            <div style={{ fontSize: '0.7rem', color: '#64748b' }}>
+                              Unrealized: <span style={{ fontWeight: 600, color: botPL.unrealizedPL >= 0 ? '#16a34a' : '#ef4444' }}>
+                                {botPL.unrealizedPL >= 0 ? '+' : ''}{sym}{botPL.unrealizedPL.toFixed(2)}
+                              </span>
+                            </div>
+                            <div style={{ fontSize: '0.7rem', color: '#0f172a', fontWeight: 700 }}>
+                              Total: <span style={{ color: botPL.totalPL >= 0 ? '#16a34a' : '#ef4444' }}>
+                                {botPL.totalPL >= 0 ? '+' : ''}{sym}{botPL.totalPL.toFixed(2)}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
                     <div className="bot-actions">
                       <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
@@ -834,6 +1043,7 @@ export function TradingPage() {
                     <th>Side</th>
                     <th>Qty</th>
                     <th>Avg. Fill Price</th>
+                    <th>Realized P/L</th>
                     <th>Status</th>
                     <th>Executed At</th>
                   </tr>
@@ -841,32 +1051,42 @@ export function TradingPage() {
                 <tbody>
                   {orders.length === 0 ? (
                     <tr>
-                      <td colSpan={7} style={{ textAlign: 'center', color: '#94a3b8', padding: '1.5rem' }}>
+                      <td colSpan={8} style={{ textAlign: 'center', color: '#94a3b8', padding: '1.5rem' }}>
                         No orders executed yet.
                       </td>
                     </tr>
                   ) : (
-                    orders.map((ord) => (
-                      <tr key={ord.id}>
-                        <td style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#64748b' }}>{ord.id}</td>
-                        <td style={{ fontWeight: 700 }}>{ord.symbol || 'SBIN'}</td>
-                        <td>
-                          <span className={`side-badge ${(ord.side === 'buy' || ord.side === 'BUY') ? 'buy' : 'sell'}`}>
-                            {ord.side}
-                          </span>
-                        </td>
-                        <td>{ord.filledQty}</td>
-                        <td>₹{ord.avgFillPrice ? ord.avgFillPrice.toFixed(2) : '0.00'}</td>
-                        <td>
-                          <span className={`status-label ${ord.status.toLowerCase()}`}>
-                            {ord.status}
-                          </span>
-                        </td>
-                        <td style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                          {ord.filledAt ? new Date(ord.filledAt).toLocaleTimeString() : '-'}
-                        </td>
-                      </tr>
-                    ))
+                    enrichOrdersWithPL(orders).map((ord) => {
+                      const currencySymbol = getMarketForSymbol(ord.symbol || '') === 'india' ? '₹' : '$';
+                      return (
+                        <tr key={ord.id}>
+                          <td style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#64748b' }}>{ord.id}</td>
+                          <td style={{ fontWeight: 700 }}>{ord.symbol || 'SBIN'}</td>
+                          <td>
+                            <span className={`side-badge ${(ord.side === 'buy' || ord.side === 'BUY' || ord.side === 'buy_to_open' || ord.side === 'buy_to_close') ? 'buy' : 'sell'}`}>
+                              {ord.side}
+                            </span>
+                          </td>
+                          <td>{ord.filledQty}</td>
+                          <td>{currencySymbol}{ord.avgFillPrice ? ord.avgFillPrice.toFixed(2) : '0.00'}</td>
+                          <td style={{ fontWeight: 600 }} className={ord.realizedPL !== undefined && ord.realizedPL !== null ? (ord.realizedPL >= 0 ? 'pnl-badge positive' : 'pnl-badge negative') : ''}>
+                            {ord.realizedPL !== undefined && ord.realizedPL !== null ? (
+                              `${ord.realizedPL >= 0 ? '+' : ''}${currencySymbol}${ord.realizedPL.toFixed(2)}`
+                            ) : (
+                              '-'
+                            )}
+                          </td>
+                          <td>
+                            <span className={`status-label ${ord.status.toLowerCase()}`}>
+                              {ord.status}
+                            </span>
+                          </td>
+                          <td style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                            {ord.filledAt ? new Date(ord.filledAt).toLocaleTimeString() : '-'}
+                          </td>
+                        </tr>
+                      );
+                    })
                   )}
                 </tbody>
               </table>
@@ -881,6 +1101,24 @@ export function TradingPage() {
           <div className="modal-content">
             <h2>{isEditMode ? 'Edit Strategy Bot Parameters' : 'Create New Strategy Bot'}</h2>
             <form onSubmit={handleSaveBot}>
+              <div className="form-group">
+                <label>Allocation Session</label>
+                <select
+                  required
+                  value={botFormSessionId}
+                  onChange={(e) => {
+                    setBotFormSessionId(e.target.value);
+                    // Clear symbol when session changes to force selection of a correct symbol for new market
+                    setBotFormSymbol('');
+                  }}
+                >
+                  <option value="">Select a session...</option>
+                  {sessions.map(s => (
+                    <option key={s.id} value={s.id}>{s.name} ({s.provider === 'zerodha' ? '₹' : '$'}{s.capital.toLocaleString()})</option>
+                  ))}
+                </select>
+              </div>
+
               <div className="form-group">
                 <label>Bot Name</label>
                 <input
@@ -901,20 +1139,6 @@ export function TradingPage() {
               </div>
 
               <div className="form-group">
-                <label>Allocation Session</label>
-                <select
-                  required
-                  value={botFormSessionId}
-                  onChange={(e) => setBotFormSessionId(e.target.value)}
-                >
-                  <option value="">Select a session...</option>
-                  {sessions.map(s => (
-                    <option key={s.id} value={s.id}>{s.name} ({s.provider === 'zerodha' ? '₹' : '$'}{s.capital.toLocaleString()})</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="form-group">
                 <label>Strategy Type</label>
                 <select
                   disabled={isEditMode}
@@ -929,14 +1153,27 @@ export function TradingPage() {
                 </select>
               </div>
 
-              <div className="form-group">
+              <div className="form-group" style={{ position: 'relative' }}>
                 <label>Trading Symbol</label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. NIFTY 50, SBIN, RELIANCE"
+                  disabled={!botFormSessionId}
+                  placeholder={
+                    !botFormSessionId
+                      ? 'Please select a session first...'
+                      : 'Type to search (e.g. NIFTY, SBIN, AAPL)...'
+                  }
                   value={botFormSymbol}
-                  onChange={(e) => setBotFormSymbol(e.target.value)}
+                  onChange={(e) => {
+                    setBotFormSymbol(e.target.value);
+                    setShowSuggestions(true);
+                  }}
+                  onFocus={() => setShowSuggestions(true)}
+                  onBlur={() => {
+                    // Slight delay to allow clicking on list items before they disappear
+                    setTimeout(() => setShowSuggestions(false), 200);
+                  }}
                   style={{
                     width: '100%',
                     padding: '0.6rem',
@@ -946,6 +1183,56 @@ export function TradingPage() {
                     boxSizing: 'border-box'
                   }}
                 />
+                
+                {showSuggestions && botFormSessionId && (symbolSuggestions.length > 0 || loadingSuggestions) && (
+                  <div
+                    className="suggestions-dropdown"
+                    style={{
+                      position: 'absolute',
+                      top: '100%',
+                      left: 0,
+                      right: 0,
+                      zIndex: 1000,
+                      maxHeight: '200px',
+                      overflowY: 'auto',
+                      background: 'white',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '4px',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                      marginTop: '2px'
+                    }}
+                  >
+                    {loadingSuggestions && (
+                      <div style={{ padding: '0.5rem 1rem', fontSize: '0.8rem', color: '#64748b' }}>
+                        Loading...
+                      </div>
+                    )}
+                    {!loadingSuggestions && symbolSuggestions.map((item) => (
+                      <div
+                        key={item.symbol}
+                        onMouseDown={() => {
+                          setBotFormSymbol(item.symbol);
+                          setShowSuggestions(false);
+                        }}
+                        style={{
+                          padding: '0.5rem 1rem',
+                          cursor: 'pointer',
+                          borderBottom: '1px solid #f1f5f9',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          fontSize: '0.85rem'
+                        }}
+                        className="suggestion-item"
+                      >
+                        <span style={{ fontWeight: 600, color: '#0f172a' }}>{item.symbol}</span>
+                        <span style={{ color: '#64748b', fontSize: '0.75rem', maxWidth: '70%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {item.name}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Dynamic Strategy Parameters Form Section */}
@@ -1141,33 +1428,14 @@ export function TradingPage() {
               </div>
 
               <div className="form-group">
-                <label>Enabled Markets</label>
-                <div className="checkbox-group">
-                  <label className="checkbox-item">
-                    <input
-                      type="checkbox"
-                      checked={sessionFormMarkets.includes('india')}
-                      onChange={() => toggleSessionMarketCheckbox('india')}
-                    />
-                    <span>India (NSE/BSE)</span>
-                  </label>
-                  <label className="checkbox-item">
-                    <input
-                      type="checkbox"
-                      checked={sessionFormMarkets.includes('us')}
-                      onChange={() => toggleSessionMarketCheckbox('us')}
-                    />
-                    <span>US (NYSE/NASDAQ)</span>
-                  </label>
-                  <label className="checkbox-item">
-                    <input
-                      type="checkbox"
-                      checked={sessionFormMarkets.includes('crypto')}
-                      onChange={() => toggleSessionMarketCheckbox('crypto')}
-                    />
-                    <span>Crypto (24/7)</span>
-                  </label>
-                </div>
+                <label>Enabled Market</label>
+                <select
+                  value={sessionFormMarkets[0] || 'india'}
+                  onChange={(e) => setSessionFormMarkets([e.target.value])}
+                >
+                  <option value="india">India (NSE/BSE)</option>
+                  <option value="us">US (NYSE/NASDAQ)</option>
+                </select>
               </div>
 
               <div className="modal-actions">

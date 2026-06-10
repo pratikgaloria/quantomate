@@ -307,6 +307,129 @@ async function fetchStrategies() {
                         description: 'Slippage (e.g. 0.0002 for 0.02%)'
                     }
                 ]
+            },
+            {
+                id: 'bear-put-spread',
+                name: 'Bear Put Spread',
+                description: 'Bearish options spread. Buy ATM Put and Sell OTM Put (-2 strikes) on bearish crossovers.',
+                parameters: [
+                    {
+                        name: 'fastPeriod',
+                        type: 'number',
+                        default: 9,
+                        min: 2,
+                        max: 50,
+                        description: 'Fast EMA period'
+                    },
+                    {
+                        name: 'slowPeriod',
+                        type: 'number',
+                        default: 20,
+                        min: 5,
+                        max: 100,
+                        description: 'Slow EMA period'
+                    },
+                    {
+                        name: 'rsiPeriod',
+                        type: 'number',
+                        default: 14,
+                        min: 2,
+                        max: 50,
+                        description: 'RSI period'
+                    },
+                    {
+                        name: 'rsiOversold',
+                        type: 'number',
+                        default: 35,
+                        min: 10,
+                        max: 50,
+                        description: 'RSI exit oversold threshold'
+                    },
+                    {
+                        name: 'useRsiExit',
+                        type: 'boolean',
+                        default: true,
+                        description: 'Use RSI oversold for early exit'
+                    },
+                    {
+                        name: 'strikeOffset',
+                        type: 'number',
+                        default: 2,
+                        min: 1,
+                        max: 10,
+                        description: 'Strike offset count'
+                    }
+                ]
+            },
+            {
+                id: 'long-straddle',
+                name: 'Long Straddle',
+                description: 'Buy ATM Call and ATM Put when RSI is outside middle zone (breakout/high volatility).',
+                parameters: [
+                    {
+                        name: 'rsiPeriod',
+                        type: 'number',
+                        default: 14,
+                        min: 2,
+                        max: 50,
+                        description: 'RSI period'
+                    },
+                    {
+                        name: 'lowerThreshold',
+                        type: 'number',
+                        default: 35,
+                        min: 10,
+                        max: 49,
+                        description: 'Lower RSI breakout limit'
+                    },
+                    {
+                        name: 'upperThreshold',
+                        type: 'number',
+                        default: 65,
+                        min: 51,
+                        max: 90,
+                        description: 'Upper RSI breakout limit'
+                    }
+                ]
+            },
+            {
+                id: 'long-strangle',
+                name: 'Long Strangle',
+                description: 'Buy OTM Call and OTM Put when RSI is outside middle zone (cheaper breakout play).',
+                parameters: [
+                    {
+                        name: 'rsiPeriod',
+                        type: 'number',
+                        default: 14,
+                        min: 2,
+                        max: 50,
+                        description: 'RSI period'
+                    },
+                    {
+                        name: 'lowerThreshold',
+                        type: 'number',
+                        default: 35,
+                        min: 10,
+                        max: 49,
+                        description: 'Lower RSI breakout limit'
+                    },
+                    {
+                        name: 'upperThreshold',
+                        type: 'number',
+                        default: 65,
+                        min: 51,
+                        max: 90,
+                        description: 'Upper RSI breakout limit'
+                    },
+                    {
+                        name: 'strikeOffset',
+                        type: 'number',
+                        default: 2,
+                        min: 1,
+                        max: 10,
+                        description: 'Strike offset count'
+                    }
+                ]
             }
         ];
 

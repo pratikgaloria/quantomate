@@ -83,6 +83,23 @@ export class SessionManager {
   }
 
   /**
+   * Get virtual positions for a session with current market prices and P/L
+   */
+  getVirtualPositions(sessionId: string): (VirtualPosition & { marketPrice: number; unrealizedPL: number })[] {
+    const positions = this.positionsMap.get(sessionId);
+    if (!positions) return [];
+    
+    return Array.from(positions.values()).map(pos => {
+      const lastPrice = this.lastPrices.get(pos.symbol.toUpperCase()) ?? pos.entryPrice;
+      return {
+        ...pos,
+        marketPrice: lastPrice,
+        unrealizedPL: (lastPrice - pos.entryPrice) * pos.qty
+      };
+    });
+  }
+
+  /**
    * Checks if a session has hit its maximum allowed drawdown limit.
    */
   isDrawdownLimitHit(sessionId: string): boolean {

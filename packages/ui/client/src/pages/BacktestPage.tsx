@@ -405,6 +405,15 @@ export function BacktestPage() {
                       placeholder={String(param.default ?? '')}
                     />
                   )}
+                  {param.type === 'boolean' && (
+                    <select
+                      value={String(parameters[param.name] ?? param.default)}
+                      onChange={(e) => handleParameterChange(param.name, e.target.value === 'true')}
+                    >
+                      <option value="true">True</option>
+                      <option value="false">False</option>
+                    </select>
+                  )}
                   {param.type === 'select' && (
                     <select
                       value={parameters[param.name] ?? param.default}
