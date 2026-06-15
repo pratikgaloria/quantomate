@@ -133,11 +133,16 @@ export class MemoryBroker implements IBroker {
       const existing = this.positions.get(order.symbol);
       if (existing) {
         const newQty = existing.qty + order.qty;
-        const newAvgPrice = (existing.qty * existing.avgEntryPrice + order.qty * fillPrice) / newQty;
-        existing.qty = newQty;
-        existing.avgEntryPrice = newAvgPrice;
-        existing.marketPrice = fillPrice;
-        existing.costBasis = newAvgPrice * newQty;
+        if (Math.abs(newQty) < 0.0001) {
+          this.positions.delete(order.symbol);
+        } else {
+          if (existing.qty > 0) {
+            existing.avgEntryPrice = (existing.qty * existing.avgEntryPrice + order.qty * fillPrice) / newQty;
+          }
+          existing.qty = newQty;
+          existing.marketPrice = fillPrice;
+          existing.costBasis = existing.avgEntryPrice * newQty;
+        }
       } else {
         this.positions.set(order.symbol, {
           symbol: order.symbol,
@@ -151,17 +156,20 @@ export class MemoryBroker implements IBroker {
     } else {
       // Sell order
       const existing = this.positions.get(order.symbol);
-      const positionQty = existing ? existing.qty : 0;
 
       // Update balance
       this.account.cashBalance += (totalCost - commission);
 
       if (existing) {
         const newQty = existing.qty - order.qty;
-        if (newQty <= 0) {
+        if (Math.abs(newQty) < 0.0001) {
           this.positions.delete(order.symbol);
         } else {
+          if (existing.qty < 0) {
+            existing.avgEntryPrice = (Math.abs(existing.qty) * existing.avgEntryPrice + order.qty * fillPrice) / Math.abs(newQty);
+          }
           existing.qty = newQty;
+          existing.marketPrice = fillPrice;
           existing.costBasis = existing.avgEntryPrice * newQty;
         }
       } else {
@@ -190,5 +198,37 @@ export class MemoryBroker implements IBroker {
     order.status = 'canceled';
     console.log(`[MemoryBroker] Order CANCELED: ID ${orderId}`);
     return true;
+  }
+
+  async cleanupSymbols(symbols: string[]): Promise<void> {
+    const symbolMatchesAny = (tradeSymbol: string): boolean => {
+      const tSym = tradeSymbol.toUpperCase();
+      return symbols.some(botSymbol => {
+        const bSym = botSymbol.toUpperCase();
+        if (tSym === bSym) return true;
+        if (bSym === 'NIFTY 50' && tSym.startsWith('NIFTY')) return true;
+        if (bSym === 'NIFTY BANK' && tSym.startsWith('BANKNIFTY')) return true;
+        if (tSym.startsWith(bSym)) return true;
+        return false;
+      });
+    };
+
+    this.orders = this.orders.filter(o => !o.symbol || !symbolMatchesAny(o.symbol));
+
+    for (const sym of Array.from(this.positions.keys())) {
+      if (symbolMatchesAny(sym)) {
+        this.positions.delete(sym);
+      }
+    }
+
+    this.updatePortfolioValue();
+  }
+
+  reset(): void {
+    this.positions.clear();
+    this.orders = [];
+    this.account.cashBalance = this.initialBalance;
+    this.account.portfolioValue = this.initialBalance;
+    this.account.marginBuyingPower = this.initialBalance;
   }
 }

@@ -1,91 +1,107 @@
-import { QuoteData } from './IDataProvider';
-import { YahooFinanceProvider } from './YahooFinanceProvider';
+import { IDataProvider, HistoricalPriceData, QuoteData, FundamentalData, StockSummaryData, EarningsData, ScreenerResult } from './IDataProvider';
+import { KiteDataProvider } from './KiteDataProvider';
+import { TradierDataProvider } from './TradierDataProvider';
 
-export class RoutingDataProvider extends YahooFinanceProvider {
+export class RoutingDataProvider implements IDataProvider {
+  private kiteProvider: KiteDataProvider;
+  private tradierProvider: TradierDataProvider;
+
+  constructor(options?: { kite?: KiteDataProvider; tradier?: TradierDataProvider }) {
+    const kiteKey = process.env.ZERODHA_API_KEY || '';
+    this.kiteProvider = options?.kite || new KiteDataProvider(kiteKey, '');
+
+    const tradierToken = process.env.TRADIER_API_KEY || '';
+    const useSandbox = process.env.TRADIER_ENV !== 'production';
+    this.tradierProvider = options?.tradier || new TradierDataProvider(tradierToken, useSandbox);
+  }
+
+  private getProviderForSymbol(symbol: string): IDataProvider {
+    const sym = symbol.toUpperCase().trim();
+    // Indian stock / index detection
+    const isIndia =
+      sym.startsWith("NIFTY") ||
+      sym.startsWith("BANKNIFTY") ||
+      sym.startsWith("^NSE") ||
+      sym.endsWith(".NS") ||
+      sym.includes("NSEI") ||
+      sym.includes("NSEBANK") ||
+      sym.startsWith("NSE:") ||
+      sym.startsWith("NFO:") ||
+      ["SBIN", "RELIANCE", "TCS", "INFY", "HDFCBANK", "ICICIBANK"].includes(sym);
+
+    if (isIndia) {
+      return this.kiteProvider;
+    }
+    // Default to Tradier for US/other equities
+    return this.tradierProvider;
+  }
+
+  async getHistoricalData(
+    symbol: string,
+    start: Date,
+    end: Date,
+    interval?: string
+  ): Promise<HistoricalPriceData[]> {
+    return this.getProviderForSymbol(symbol).getHistoricalData(symbol, start, end, interval);
+  }
+
+  async getFundamentals(symbol: string): Promise<FundamentalData> {
+    return this.getProviderForSymbol(symbol).getFundamentals(symbol);
+  }
+
   async getQuotes(symbols: string[]): Promise<Map<string, QuoteData>> {
-    const quotesMap = new Map<string, QuoteData>();
-    if (symbols.length === 0) return quotesMap;
+    const res = new Map<string, QuoteData>();
+    const kiteSyms: string[] = [];
+    const tradierSyms: string[] = [];
 
-    const usSymbols = symbols.filter(sym => {
-      const upper = sym.toUpperCase();
-      const cryptoAssets = ['BTC', 'ETH', 'SOL', 'ADA', 'DOT', 'DOGE', 'XRP'];
-      const isCrypto = cryptoAssets.some(c => upper.startsWith(c) || upper.endsWith(c) || upper.includes('/USD') || upper.includes('-USD'));
-      const isIndia = upper.startsWith('NIFTY') || upper.startsWith('BANKNIFTY') || upper === 'SBIN' || upper === 'RELIANCE';
-      return !isCrypto && !isIndia;
-    });
+    for (const sym of symbols) {
+      if (this.getProviderForSymbol(sym) === this.kiteProvider) {
+        kiteSyms.push(sym);
+      } else {
+        tradierSyms.push(sym);
+      }
+    }
 
-    const nonUsSymbols = symbols.filter(sym => !usSymbols.includes(sym));
-
-    if (nonUsSymbols.length > 0) {
+    if (kiteSyms.length > 0) {
       try {
-        const nonUsQuotes = await super.getQuotes(nonUsSymbols);
-        for (const [sym, quote] of nonUsQuotes.entries()) {
-          quotesMap.set(sym, quote);
-        }
+        const kq = await this.kiteProvider.getQuotes(kiteSyms);
+        for (const [k, v] of kq.entries()) res.set(k, v);
       } catch (err: any) {
-        console.error('[RoutingDataProvider] Failed to fetch non-US quotes from Yahoo:', err.message);
+        console.error('[RoutingDataProvider] Kite getQuotes failed:', err.message);
       }
     }
 
-    if (usSymbols.length > 0) {
-      const token = process.env.TRADIER_API_KEY;
-      if (token) {
-        try {
-          const sandbox = process.env.TRADIER_ENV !== 'production';
-          const baseUrl = sandbox ? 'https://sandbox.tradier.com/v1' : 'https://api.tradier.com/v1';
-          const url = `${baseUrl}/markets/quotes?symbols=${usSymbols.map(encodeURIComponent).join(',')}`;
-          
-          const response = await fetch(url, {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Accept': 'application/json',
-            },
-          });
-
-          if (response.ok) {
-            const data = (await response.json()) as any;
-            const rawQuotes = data.quotes?.quote;
-            if (rawQuotes) {
-              const quotesList = Array.isArray(rawQuotes) ? rawQuotes : [rawQuotes];
-              for (const q of quotesList) {
-                if (!q || !q.symbol) continue;
-                quotesMap.set(q.symbol, {
-                  symbol: q.symbol,
-                  regularMarketPrice: q.last,
-                  bid: q.bid,
-                  ask: q.ask,
-                  bidSize: q.bidsize,
-                  askSize: q.asksize,
-                  regularMarketVolume: q.volume,
-                  regularMarketPreviousClose: q.prevclose,
-                  displayName: q.description,
-                  shortName: q.description,
-                  longName: q.description,
-                });
-              }
-            }
-          } else {
-            console.error(`[RoutingDataProvider] Failed to fetch quotes from Tradier: ${response.statusText}`);
-          }
-        } catch (err: any) {
-          console.error(`[RoutingDataProvider] Error fetching quotes from Tradier:`, err.message);
-        }
-      }
-
-      // Fallback to Yahoo Finance for any missing US symbols
-      const missingUsSymbols = usSymbols.filter(sym => !quotesMap.has(sym));
-      if (missingUsSymbols.length > 0) {
-        try {
-          const fallbackQuotes = await super.getQuotes(missingUsSymbols);
-          for (const [sym, quote] of fallbackQuotes.entries()) {
-            quotesMap.set(sym, quote);
-          }
-        } catch (err: any) {
-          console.warn(`[RoutingDataProvider] Fallback quote fetch failed for ${missingUsSymbols.join(', ')}:`, err.message);
-        }
+    if (tradierSyms.length > 0) {
+      try {
+        const tq = await this.tradierProvider.getQuotes(tradierSyms);
+        for (const [k, v] of tq.entries()) res.set(k, v);
+      } catch (err: any) {
+        console.error('[RoutingDataProvider] Tradier getQuotes failed:', err.message);
       }
     }
 
-    return quotesMap;
+    return res;
+  }
+
+  async getSummaries(symbols: string[]): Promise<Map<string, StockSummaryData>> {
+    return new Map();
+  }
+
+  async getPeers(symbol: string): Promise<string[]> {
+    return [];
+  }
+
+  async getEarnings(symbol: string): Promise<EarningsData | null> {
+    return null;
+  }
+
+  async getScreener(scrId: string, count?: number): Promise<ScreenerResult | null> {
+    return null;
+  }
+
+  async search(query: string): Promise<any> {
+    const kRes = await this.kiteProvider.search(query);
+    const tRes = await this.tradierProvider.search(query);
+    return [...kRes, ...tRes];
   }
 }

@@ -8,8 +8,5 @@ export * from './ohiain/ohiain';
 export * from './strongPullback/strongPullback';
 export * from './indexOptionMomentum/indexOptionMomentum';
 export * from './indexOptionRsiReversion/indexOptionRsiReversion';
-export * from './options/CoveredCallStrategy';
-export * from './options/BullCallSpreadStrategy';
-export * from './options/BearPutSpreadStrategy';
-export * from './options/LongStraddleStrategy';
-export * from './options/LongStrangleStrategy';
+export * from './options';
+

@@ -24,6 +24,10 @@ import {
   IndexOptionMomentumStrategy,
   IndexOptionRsiReversionStrategy,
   PivotTrendStrategy,
+  VwapRvolOptionStrategy,
+  VsaClimacticOptionStrategy,
+  WeeklyAvwapOptionStrategy,
+  ChandelierTrendOptionStrategy,
 } from "@quantomate/library";
 import { isMarketOpen } from "./utils/market-scheduler";
 import { IBroker, Strategy } from "@quantomate/core";
@@ -92,20 +96,27 @@ function getMarketForSymbol(symbol: string): string {
 interface Settings {
   tradingMode: "paper" | "live";
   enabledMarkets: string[];
+  candleInterval: string;
+  executionMode: "candle_close" | "tick";
 }
 
 async function getSystemSettings(): Promise<Settings> {
   const settings = await prisma.systemSetting.findMany();
   const modeSetting = settings.find((s) => s.key === "trading_mode");
   const marketsSetting = settings.find((s) => s.key === "enabled_markets");
+  const intervalSetting = settings.find((s) => s.key === "candle_interval");
+  const execModeSetting = settings.find((s) => s.key === "execution_mode");
 
   return {
     tradingMode: (modeSetting?.value as any) || "paper",
     enabledMarkets: marketsSetting
       ? JSON.parse(marketsSetting.value)
       : ["india"],
+    candleInterval: intervalSetting?.value || "1m",
+    executionMode: (execModeSetting?.value as any) || "candle_close",
   };
 }
+
 
 // Helper: Instantiates strategies with parameters
 function instantiateStrategy(
@@ -156,6 +167,33 @@ function instantiateStrategy(
     case "PivotTrendOption":
       strategy = new PivotTrendStrategy(name, {
         direction: params.direction ?? "both",
+      });
+      break;
+    case "VwapRvolOption":
+      strategy = new VwapRvolOptionStrategy(name, {
+        rvolThreshold: params.rvolThreshold ?? 2.0,
+        source: params.source ?? "close",
+      });
+      break;
+    case "VsaClimacticOption":
+      strategy = new VsaClimacticOptionStrategy(name, {
+        bbPeriod: params.bbPeriod ?? 20,
+        bbStdDev: params.bbStdDev ?? 2.0,
+        rvolThreshold: params.rvolThreshold ?? 2.0,
+        bodyMultiplier: params.bodyMultiplier ?? 0.8,
+        source: params.source ?? "close",
+      });
+      break;
+    case "WeeklyAvwapOption":
+      strategy = new WeeklyAvwapOptionStrategy(name, {
+        volumeSmaPeriod: params.volumeSmaPeriod ?? 20,
+      });
+      break;
+    case "ChandelierTrendOption":
+      strategy = new ChandelierTrendOptionStrategy(name, {
+        period: params.period ?? 22,
+        multiplier: params.multiplier ?? 3.0,
+        rvolThreshold: params.rvolThreshold ?? 2.0,
       });
       break;
     default:
@@ -257,6 +295,7 @@ async function reconcileEngine(): Promise<void> {
     const settings = await getSystemSettings();
     const activeBots = await prisma.tradingBot.findMany({
       where: { active: true },
+      include: { customStrategy: true }
     });
 
     // Load sessions in SessionManager
@@ -395,21 +434,37 @@ async function reconcileEngine(): Promise<void> {
       new Set(openBots.map((b) => b.symbol.toUpperCase())),
     );
     const strategies = openBots.map((bot) => {
-      return instantiateStrategy(
-        bot.strategy,
+      const stratType = bot.customStrategy?.baseType || bot.strategy;
+      const parameters = bot.customStrategy?.parameters || bot.parameters;
+      const interval = bot.customStrategy?.interval || settings.candleInterval;
+
+      const strategy = instantiateStrategy(
+        stratType,
         bot.name,
         bot.symbol,
-        bot.parameters,
+        parameters,
         bot.allocationSessionId,
       );
+
+      // Bind the custom intervals and symbol
+      strategy.symbol = bot.symbol;
+      strategy.intervals = [interval];
+      strategy.options.intervals = strategy.intervals;
+
+      return strategy;
     });
 
     // 8. Create LiveTradingEngine
     engine = new LiveTradingEngine(currentFeed, currentBroker, {
       symbols,
       strategies,
-      interval: "5m", // default interval for indicators
+      interval: settings.candleInterval,
+      executionMode: settings.executionMode,
       startDate: new Date().toISOString(),
+      kiteApiKey: apiKey || undefined,
+      kiteAccessToken: session?.accessToken || undefined,
+      tradierAccessToken: tradierApiKey || undefined,
+      tradierUseSandbox: process.env.TRADIER_ENV !== "production",
       resolveOptionSymbol: async (
         underlying,
         optionType,
@@ -457,6 +512,7 @@ setInterval(async () => {
     const settings = await getSystemSettings();
     const activeBots = await prisma.tradingBot.findMany({
       where: { active: true },
+      include: { customStrategy: true }
     });
 
     const currentlyOpenBots = activeBots.filter((bot) => {
@@ -469,10 +525,13 @@ setInterval(async () => {
       .sort()
       .join(",");
 
-    if (openBotsHash !== lastOpenBotsHash) {
+    const shouldBeRunning = currentlyOpenBots.length > 0;
+    const isEngineRunning = engine ? engine.running : false;
+
+    if (openBotsHash !== lastOpenBotsHash || (shouldBeRunning && !isEngineRunning)) {
       log.info(
         "Scheduler",
-        "Market schedules or bot states changed. Re-reconciling...",
+        `Market schedules, bot states, or engine status changed (engine running: ${isEngineRunning}). Re-reconciling...`,
       );
       lastOpenBotsHash = openBotsHash;
       await reconcileEngine();
@@ -487,6 +546,8 @@ async function init() {
     const defaultSettings = [
       { key: "trading_mode", value: "paper" },
       { key: "enabled_markets", value: JSON.stringify(["india", "us"]) },
+      { key: "candle_interval", value: "1m" },
+      { key: "execution_mode", value: "candle_close" },
     ];
 
     for (const s of defaultSettings) {
@@ -599,6 +660,59 @@ app.post("/reconcile", async (req, res) => {
     await reconcileEngine();
     res.json({ success: true, message: "Reconciliation complete." });
   } catch (err: any) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.post("/cleanup", async (req, res) => {
+  try {
+    const { symbols } = req.body;
+    if (!symbols || !Array.isArray(symbols) || symbols.length === 0) {
+      return res.json({ success: true, message: "No symbols to cleanup." });
+    }
+
+    log.info("Daemon", `Cleanup requested for symbols: ${symbols.join(", ")}`);
+
+    // 1. Cleanup in-memory Virtual Positions in SessionManager
+    SessionManager.getInstance().cleanupVirtualPositions(symbols);
+
+    // 2. Cleanup broker positions/orders
+    const broker = currentBroker || globalMemoryBroker;
+    if (broker && typeof broker.cleanupSymbols === "function") {
+      await broker.cleanupSymbols(symbols);
+    }
+
+    res.json({ success: true, message: "Cleanup complete." });
+  } catch (err: any) {
+    log.error("Daemon", "Error during cleanup:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.post("/reset", async (req, res) => {
+  try {
+    log.info("Daemon", "Resetting trading broker and sessions...");
+    
+    // 1. Reset brokers
+    if (globalMemoryBroker && typeof globalMemoryBroker.reset === "function") {
+      await globalMemoryBroker.reset();
+    }
+    if (currentBroker && currentBroker !== globalMemoryBroker && typeof currentBroker.reset === "function") {
+      await currentBroker.reset();
+    }
+    
+    // 2. Clear all trading database records (accounts, orders, positions, sessions, bots)
+    await prisma.tradingPosition.deleteMany({});
+    await prisma.tradingOrder.deleteMany({});
+    await prisma.tradingAccount.deleteMany({});
+    await prisma.allocationSession.deleteMany({});
+    
+    // 3. Re-load sessions to sync SessionManager caches
+    await SessionManager.getInstance().loadSessions();
+    
+    res.json({ success: true, message: "Trading control center reset completed." });
+  } catch (err: any) {
+    log.error("Daemon", "Error during reset:", err);
     res.status(500).json({ success: false, message: err.message });
   }
 });

@@ -1,5 +1,14 @@
-import { Strategy, LiveTradingEngine, ILiveFeed, TickCallback, OrderRequest } from '@quantomate/core';
-import { PaperBroker, KiteInstrumentMapper } from '@quantomate/data';
+import corePkg from '@quantomate/core';
+const { Strategy } = corePkg;
+
+import dataPkg from '@quantomate/data';
+const { PaperBroker, KiteInstrumentMapper } = dataPkg;
+import type { ILiveFeed, TickCallback } from '@quantomate/data';
+
+import tradePkg from '@quantomate/trade';
+const { LiveTradingEngine } = tradePkg;
+
+
 
 // 1. Define a Mock Feed that generates rapid ticks with spreads
 class SpreadMockFeed implements ILiveFeed {
@@ -51,12 +60,14 @@ class SpreadMockFeed implements ILiveFeed {
 const crossoverStrategy = new Strategy('SpreadCrossTest', {
   direction: 'long',
   entryWhen: (quote) => {
+    const price = typeof quote.value === 'object' && quote.value !== null ? (quote.value as any).close : quote.value;
     // Buy when price rises above 100
-    return quote.value > 100;
+    return price > 100;
   },
   exitWhen: (quote) => {
+    const price = typeof quote.value === 'object' && quote.value !== null ? (quote.value as any).close : quote.value;
     // Sell when price drops below 95
-    return quote.value < 95;
+    return price < 95;
   }
 });
 
@@ -83,6 +94,7 @@ async function main() {
   const engine = new LiveTradingEngine(feed, broker, {
     symbols: ['SBIN'],
     strategies: [crossoverStrategy],
+    executionMode: 'tick',
   });
 
   await engine.start();

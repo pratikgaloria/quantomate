@@ -29,6 +29,7 @@ export class Dataset<T = number> {
   protected _indicators: IndicatorMetadata<T>[];
   protected _strategies: StrategyMetadata<T>[];
   protected _options: DatasetOptions<T>;
+  protected indicatorRegistry = new Map<string, Indicator<unknown, T>>();
 
   /**
    * Creates a dataset after type-casting given data values.
@@ -95,6 +96,19 @@ export class Dataset<T = number> {
 
   get strategies(): StrategyMetadata<T>[] {
     return this._strategies;
+  }
+
+  getOrRegisterIndicator(
+    key: string,
+    createFn: () => Indicator<unknown, T>
+  ): Indicator<unknown, T> {
+    let indicator = this.indicatorRegistry.get(key);
+    if (!indicator) {
+      indicator = createFn();
+      this.indicatorRegistry.set(key, indicator);
+      this.apply(indicator);
+    }
+    return indicator;
   }
 
   setIndicator(metadata: IndicatorMetadata<T>): this {

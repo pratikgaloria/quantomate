@@ -50,6 +50,8 @@ export interface IBroker {
   cancelOrder(orderId: string): Promise<boolean>;
   getOrders(status?: OrderStatus): Promise<OrderResult[]>;
   setLastPrice?(symbol: string, price: number, bid?: number, ask?: number, timestamp?: number): void;
+  cleanupSymbols?(symbols: string[]): Promise<void>;
+  reset?(): Promise<void> | void;
 }
 
 

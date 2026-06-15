@@ -9,7 +9,7 @@
     "prepare": "npm run build",
     "daemon": "tsx src/daemon.ts",
     "cli": "tsx src/cli.ts",
-    "test": "echo 'No tests for Trade'"
+    "test": "jest --coverage --no-cache"
   },
   "dependencies": {
     "@quantomate/core": "file:../core",
@@ -23,9 +23,35 @@
   "devDependencies": {
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.11",
     "@types/node": "^20.11.14",
     "@types/npmlog": "^7.0.0",
+    "jest": "29.7.0",
+    "ts-jest": "29.1.1",
     "tsx": "^4.7.1",
     "typescript": "^5.3.3"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testRegex": "src/__tests__/.*\\.test\\.ts$",
+    "transform": {
+      "^.+\\.ts$": "ts-jest"
+    },
+    "collectCoverageFrom": [
+      "<rootDir>/src/**/*.ts"
+    ],
+    "coveragePathIgnorePatterns": [
+      "index.ts",
+      "cli.ts",
+      "daemon.ts"
+    ],
+    "modulePaths": [
+      "<rootDir>/src"
+    ],
+    "moduleNameMapper": {
+      "^@quantomate/core$": "<rootDir>/../core/src",
+      "^@quantomate/library$": "<rootDir>/../library/src",
+      "^@quantomate/data$": "<rootDir>/../data/src"
+    }
   }
 }

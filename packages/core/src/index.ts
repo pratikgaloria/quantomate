@@ -1,4 +1,4 @@
-export { Dataset, DatasetOptions } from './dataset';
+export { Dataset, DatasetOptions, IndicatorMetadata, StrategyMetadata } from './dataset';
 export { Quote } from './quote';
 export { Indicator } from './indicator';
 export { Strategy, StrategyValue, StrategyDirection, StrategyContext, OptionSelector } from './strategy';

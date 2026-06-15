@@ -13,6 +13,10 @@ export * from './providers/TradierLiveFeed';
 export * from './providers/TradierInstrumentMapper';
 export * from './providers/CompositeLiveFeed';
 export * from './providers/RoutingDataProvider';
+export * from './providers/KiteDataProvider';
+export * from './providers/TradierDataProvider';
+
+
 
 
 

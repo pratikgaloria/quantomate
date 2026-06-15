@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
 import { prisma } from "@quantomate/db";
-import { DataService, KiteInstrumentMapper } from "@quantomate/data";
+import { DataService, KiteInstrumentMapper, TradierDataProvider, YahooFinanceProvider } from "@quantomate/data";
 import dotenv from "dotenv";
 import path from "path";
 import * as Library from "@quantomate/library";
@@ -167,7 +167,16 @@ router.get("/search-symbols", async (req: Request, res: Response) => {
 
       return res.json({ success: true, data: matches });
     } else if (market === "us") {
-      const rawResults = await DataService.provider.search(q);
+      let rawResults: any[] = [];
+      const token = process.env.TRADIER_API_KEY;
+      if (token) {
+        const useSandbox = process.env.TRADIER_ENV !== "production";
+        const provider = new TradierDataProvider(token, useSandbox);
+        rawResults = await provider.search(q);
+      } else {
+        const provider = new YahooFinanceProvider();
+        rawResults = await provider.search(q);
+      }
       const matches = (rawResults || []).map((item: any) => ({
         symbol: item.symbol,
         name: item.shortname || item.longname || item.name || item.symbol,
@@ -327,6 +336,7 @@ router.get("/bots", async (req: Request, res: Response) => {
   try {
     const bots = await prisma.tradingBot.findMany({
       orderBy: { createdAt: "asc" },
+      include: { customStrategy: true }
     });
     res.json({ success: true, data: bots });
   } catch (error: any) {
@@ -368,23 +378,35 @@ router.post("/bots/toggle", async (req: Request, res: Response) => {
 // POST /api/trade/bots - Create a bot
 router.post("/bots", async (req: Request, res: Response) => {
   try {
-    const { name, strategy, symbol, parameters, active, allocationSessionId } =
+    const { name, customStrategyId, symbol, active, allocationSessionId } =
       req.body;
-    if (!name || !strategy || !symbol) {
+    if (!name || !customStrategyId || !symbol) {
       return res
         .status(400)
         .json({
           success: false,
-          message: "Missing required fields: name, strategy, symbol",
+          message: "Missing required fields: name, customStrategyId, symbol",
         });
+    }
+
+    const customStrategy = await prisma.customStrategy.findUnique({
+      where: { id: customStrategyId }
+    });
+
+    if (!customStrategy) {
+      return res.status(404).json({
+        success: false,
+        message: "Custom strategy not found"
+      });
     }
 
     const created = await prisma.tradingBot.create({
       data: {
         name,
-        strategy,
+        strategy: customStrategy.name,
+        customStrategyId,
         symbol,
-        parameters: parameters || {},
+        parameters: customStrategy.parameters || {},
         active: active ?? false,
         allocationSessionId: allocationSessionId || null,
       },
@@ -407,16 +429,37 @@ router.post("/bots", async (req: Request, res: Response) => {
 router.put("/bots/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { name, strategy, symbol, parameters, active, allocationSessionId } =
+    const { name, customStrategyId, symbol, active, allocationSessionId } =
       req.body;
+
+    if (!name || !customStrategyId || !symbol) {
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Missing required fields: name, customStrategyId, symbol",
+        });
+    }
+
+    const customStrategy = await prisma.customStrategy.findUnique({
+      where: { id: customStrategyId }
+    });
+
+    if (!customStrategy) {
+      return res.status(404).json({
+        success: false,
+        message: "Custom strategy not found"
+      });
+    }
 
     const updated = await prisma.tradingBot.update({
       where: { id },
       data: {
         name,
-        strategy,
+        strategy: customStrategy.name,
+        customStrategyId,
         symbol,
-        parameters,
+        parameters: customStrategy.parameters || {},
         active,
         allocationSessionId: allocationSessionId || null,
       },
@@ -440,9 +483,23 @@ router.delete("/bots/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
+    const bot = await prisma.tradingBot.findUnique({
+      where: { id },
+      select: { symbol: true },
+    });
+
     const deleted = await prisma.tradingBot.delete({
       where: { id },
     });
+
+    if (bot) {
+      // Clean up orders/positions for this bot's symbol
+      try {
+        await fetchFromDaemon("/cleanup", "POST", { symbols: [bot.symbol] });
+      } catch (err) {
+        // Ignore
+      }
+    }
 
     // Notify daemon
     try {
@@ -662,13 +719,45 @@ router.delete("/sessions/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
+    // Get symbols for bots inside this session to clean up their positions/orders
+    const bots = await prisma.tradingBot.findMany({
+      where: { allocationSessionId: id },
+      select: { symbol: true },
+    });
+    const symbols = Array.from(new Set(bots.map((b) => b.symbol)));
+
     const deleted = await prisma.allocationSession.delete({
       where: { id },
     });
 
+    if (symbols.length > 0) {
+      try {
+        await fetchFromDaemon("/cleanup", "POST", { symbols });
+      } catch (err) {
+        // Ignore
+      }
+    }
+
+    // Notify daemon
+    try {
+      await fetchFromDaemon("/reconcile", "POST");
+    } catch (err) {
+      // Ignore
+    }
+
     res.json({ success: true, data: deleted });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// POST /api/trade/reset
+router.post("/reset", async (req: Request, res: Response) => {
+  try {
+    const result = await fetchFromDaemon("/reset", "POST");
+    res.json(result);
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: `Failed to reset control center: ${error.message}` });
   }
 });
 

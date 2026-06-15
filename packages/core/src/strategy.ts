@@ -45,6 +45,8 @@ export type StrategyOptions<P, T> = {
   tradeOptions?: boolean;
   optionSelector?: OptionSelector;
   allocationSessionId?: string;
+  symbol?: string;
+  intervals?: string[];
 };
 
 /**
@@ -53,10 +55,14 @@ export type StrategyOptions<P, T> = {
 export class Strategy<P = unknown, T = number, O = unknown> {
   protected _name: string;
   protected _options: StrategyOptions<P, T>;
+  public symbol?: string;
+  public intervals?: string[];
 
   constructor(name: string, options: StrategyOptions<P, T>) {
     this._name = name;
     this._options = options;
+    this.symbol = options.symbol;
+    this.intervals = options.intervals;
   }
 
   get name() {

@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import './TradingPage.scss';
+import { usePageContext } from '../context/PageContext';
+
 
 interface Bot {
   id: string;
@@ -10,6 +12,14 @@ interface Bot {
   active: boolean;
   parameters: Record<string, any>;
   allocationSessionId?: string | null;
+  customStrategyId?: string | null;
+  customStrategy?: {
+    id: string;
+    name: string;
+    baseType: string;
+    interval: string;
+    parameters: Record<string, any>;
+  } | null;
 }
 
 interface AllocationSession {
@@ -43,6 +53,7 @@ interface Order {
   symbol?: string;
   side?: string;
   realizedPL?: number | null;
+  tradeType?: 'Long' | 'Short';
 }
 
 interface TradeStatus {
@@ -73,60 +84,10 @@ interface SystemSettings {
   enabledMarkets: string[];
 }
 
-const AVAILABLE_STRATEGIES = {
-  GoldenCross: {
-    name: 'Golden Cross',
-    defaultParams: { fastPeriod: 9, slowPeriod: 20 },
-    paramSchema: [
-      { name: 'fastPeriod', label: 'Fast SMA Period', type: 'number', default: 9 },
-      { name: 'slowPeriod', label: 'Slow SMA Period', type: 'number', default: 20 },
-    ]
-  },
-  RSIMeanReversion: {
-    name: 'RSI Mean Reversion',
-    defaultParams: { rsiPeriod: 14, oversoldThreshold: 30, overboughtThreshold: 70 },
-    paramSchema: [
-      { name: 'rsiPeriod', label: 'RSI Period', type: 'number', default: 14 },
-      { name: 'oversoldThreshold', label: 'Oversold Threshold', type: 'number', default: 30 },
-      { name: 'overboughtThreshold', label: 'Overbought Threshold', type: 'number', default: 70 },
-    ]
-  },
-  IndexOptionMomentum: {
-    name: 'Index Option Momentum',
-    defaultParams: { fastPeriod: 9, slowPeriod: 20, source: 'close' },
-    paramSchema: [
-      { name: 'fastPeriod', label: 'Fast Period', type: 'number', default: 9 },
-      { name: 'slowPeriod', label: 'Slow Period', type: 'number', default: 20 },
-      { name: 'source', label: 'Source Candle Value', type: 'select', options: ['close', 'open', 'high', 'low'], default: 'close' },
-    ]
-  },
-  IndexOptionRsiReversion: {
-    name: 'Index Option RSI Reversion',
-    defaultParams: { rsiPeriod: 14, oversoldThreshold: 30, overboughtThreshold: 70, source: 'close' },
-    paramSchema: [
-      { name: 'rsiPeriod', label: 'RSI Period', type: 'number', default: 14 },
-      { name: 'oversoldThreshold', label: 'Oversold Threshold', type: 'number', default: 30 },
-      { name: 'overboughtThreshold', label: 'Overbought Threshold', type: 'number', default: 70 },
-      { name: 'source', label: 'Source Candle Value', type: 'select', options: ['close', 'open', 'high', 'low'], default: 'close' },
-    ]
-  },
-  PivotTrend: {
-    name: 'Pivot Trend',
-    defaultParams: { direction: 'both' },
-    paramSchema: [
-      { name: 'direction', label: 'Direction', type: 'select', options: ['both', 'long', 'short'], default: 'both' },
-    ]
-  },
-  PivotTrendOption: {
-    name: 'Pivot Trend Option',
-    defaultParams: { direction: 'both' },
-    paramSchema: [
-      { name: 'direction', label: 'Direction', type: 'select', options: ['both', 'long', 'short'], default: 'both' },
-    ]
-  }
-};
+
 
 export function TradingPage() {
+  const { setPageTitle, setToolbar } = usePageContext();
   const [status, setStatus] = useState<TradeStatus>({
     zerodha: { authenticated: false, authenticatedAt: null },
     tradier: { authenticated: false },
@@ -163,6 +124,17 @@ export function TradingPage() {
     return 'us';
   };
 
+  const getOptionType = (symbol: string): 'Call' | 'Put' | '-' => {
+    const sym = symbol.toUpperCase().trim();
+    if (/P\d{8}$/i.test(sym) || sym.endsWith('PE')) {
+      return 'Put';
+    }
+    if (/C\d{8}$/i.test(sym) || sym.endsWith('CE')) {
+      return 'Call';
+    }
+    return '-';
+  };
+
   const formatPrice = (symbol: string, price: number | null | undefined) => {
     if (price === null || price === undefined) return 'Awaiting...';
     const market = getMarketForSymbol(symbol);
@@ -197,13 +169,13 @@ export function TradingPage() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingBotId, setEditingBotId] = useState<string | null>(null);
   const [botFormName, setBotFormName] = useState('');
-  const [botFormStrategy, setBotFormStrategy] = useState<keyof typeof AVAILABLE_STRATEGIES>('GoldenCross');
   const [botFormSymbol, setBotFormSymbol] = useState('NIFTY 50');
-  const [botFormParameters, setBotFormParameters] = useState<Record<string, any>>({});
   const [botFormSessionId, setBotFormSessionId] = useState('');
   const [symbolSuggestions, setSymbolSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const [customStrategies, setCustomStrategies] = useState<any[]>([]);
+  const [botFormCustomStrategyId, setBotFormCustomStrategyId] = useState('');
 
   const symbolMatchesBot = (tradeSymbol: string, botSym: string): boolean => {
     const tSym = tradeSymbol.toUpperCase();
@@ -286,16 +258,24 @@ export function TradingPage() {
     };
   };
 
-  const enrichOrdersWithPL = (ordersList: Order[]): (Order & { realizedPL?: number | null })[] => {
+  const enrichOrdersWithPL = (ordersList: Order[]): (Order & { realizedPL?: number | null; tradeType?: 'Long' | 'Short' })[] => {
     const sorted = [...ordersList].sort((a, b) => new Date(a.filledAt || '').getTime() - new Date(b.filledAt || '').getTime());
     
-    const symbolPositions = new Map<string, { qty: number; avgPrice: number }>();
+    const symbolPositions = new Map<string, { qty: number; avgPrice: number; tradeType: 'Long' | 'Short' }>();
     
     const enriched = sorted.map(ord => {
-      if (ord.status.toLowerCase() !== 'filled') return ord;
-      
       const symbol = ord.symbol || '';
       const isBuy = ord.side?.toLowerCase() === 'buy' || ord.side?.toLowerCase() === 'buy_to_open' || ord.side?.toLowerCase() === 'buy_to_close';
+      
+      let inferredType: 'Long' | 'Short' = isBuy ? 'Long' : 'Short';
+
+      if (ord.status.toLowerCase() !== 'filled') {
+        return {
+          ...ord,
+          tradeType: inferredType
+        };
+      }
+      
       const price = ord.avgFillPrice || 0;
       const qty = ord.filledQty || 0;
       const commission = ord.commissionPaid || 0;
@@ -304,9 +284,11 @@ export function TradingPage() {
       
       let pos = symbolPositions.get(symbol);
       if (!pos) {
-        pos = { qty: 0, avgPrice: 0 };
+        pos = { qty: 0, avgPrice: 0, tradeType: inferredType };
         symbolPositions.set(symbol, pos);
       }
+      
+      const currentTradeType = pos.tradeType;
       
       if (isBuy) {
         if (pos.qty >= 0) {
@@ -332,9 +314,14 @@ export function TradingPage() {
         }
       }
       
+      if (pos.qty === 0) {
+        symbolPositions.delete(symbol);
+      }
+      
       return {
         ...ord,
-        realizedPL
+        realizedPL,
+        tradeType: currentTradeType
       };
     });
     
@@ -369,6 +356,63 @@ export function TradingPage() {
 
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Register page title
+  useEffect(() => {
+    setPageTitle('Trading');
+    return () => setToolbar(null);
+  }, [setPageTitle, setToolbar]);
+
+  // Push toolbar (status badges + actions)
+  useEffect(() => {
+    let daemonClass = 'offline';
+    let daemonText = 'Offline';
+    if (!status.engine.offline) {
+      if (status.engine.running) { daemonClass = 'running'; daemonText = 'Running'; }
+      else { daemonClass = 'idle'; daemonText = 'Idle'; }
+    }
+    setToolbar(
+      <>
+        {/* Daemon status */}
+        <div className="tb-status-group">
+          <span className={`tb-dot ${daemonClass}`} />
+          <span className="tb-status">Daemon: {daemonText}</span>
+        </div>
+
+        <span className="tb-divider" />
+
+        {/* KiteConnect */}
+        <div className="tb-status-group">
+          <span className={`tb-dot ${status.zerodha.authenticated ? 'connected' : 'disconnected'}`} />
+          <span className="tb-status">KiteConnect</span>
+          {!status.zerodha.authenticated && (
+            <button className="tb-btn-outline" style={{ height: 20, fontSize: '0.7rem' }}
+              onClick={() => window.open('http://127.0.0.1:8082/auth/zerodha/login', '_blank', 'width=600,height=600')}
+            >Connect</button>
+          )}
+        </div>
+
+        {/* Tradier */}
+        <div className="tb-status-group">
+          <span className={`tb-dot ${status.tradier?.authenticated ? 'connected' : 'disconnected'}`} />
+          <span className="tb-status">Tradier</span>
+        </div>
+
+        <span className="tb-divider" />
+
+        {/* Reset */}
+        <button className="tb-btn-danger" onClick={handleResetControlCenter}>
+          <i className="la la-trash-alt" style={{ marginRight: 4 }} />
+          Reset
+        </button>
+
+        {/* Settings */}
+        <button className="tb-btn-outline" onClick={() => setShowSettingsModal(true)} title="System Settings">
+          <i className="la la-cog" />
+        </button>
+      </>
+    );
+  }, [status, setToolbar]);
+
   useEffect(() => {
     // Initial fetches
     fetchSettings();
@@ -378,6 +422,7 @@ export function TradingPage() {
     fetchOrders();
     fetchPrices();
     fetchSessions();
+    fetchCustomStrategies();
 
     // Start polling loop every 3 seconds
     pollIntervalRef.current = setInterval(() => {
@@ -386,6 +431,7 @@ export function TradingPage() {
       fetchOrders();
       fetchPrices();
       fetchSessions();
+      fetchCustomStrategies();
     }, 3000);
 
     return () => {
@@ -393,9 +439,21 @@ export function TradingPage() {
     };
   }, []);
 
+
   const showNotification = (text: string, type: 'success' | 'error' = 'success') => {
     setMessage({ text, type });
     setTimeout(() => setMessage(null), 4000);
+  };
+
+  const fetchCustomStrategies = async () => {
+    try {
+      const res = await axios.get('/api/strategies/custom');
+      if (res.data.success) {
+        setCustomStrategies(res.data.data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch custom strategies:', err);
+    }
   };
 
   const fetchSessions = async () => {
@@ -475,18 +533,12 @@ export function TradingPage() {
     }
   };
 
-  const handleStrategyChange = (strat: keyof typeof AVAILABLE_STRATEGIES) => {
-    setBotFormStrategy(strat);
-    setBotFormParameters(AVAILABLE_STRATEGIES[strat].defaultParams);
-  };
-
   const handleOpenCreate = () => {
     setIsEditMode(false);
     setEditingBotId(null);
     setBotFormName('');
-    setBotFormStrategy('GoldenCross');
+    setBotFormCustomStrategyId('');
     setBotFormSymbol('');
-    setBotFormParameters(AVAILABLE_STRATEGIES.GoldenCross.defaultParams);
     setBotFormSessionId('');
     setShowBotModal(true);
   };
@@ -495,26 +547,23 @@ export function TradingPage() {
     setIsEditMode(true);
     setEditingBotId(bot.id);
     setBotFormName(bot.name);
-    const strat = bot.strategy as keyof typeof AVAILABLE_STRATEGIES;
-    setBotFormStrategy(strat in AVAILABLE_STRATEGIES ? strat : 'GoldenCross');
+    setBotFormCustomStrategyId(bot.customStrategyId || '');
     setBotFormSymbol(bot.symbol);
-    setBotFormParameters(bot.parameters || {});
     setBotFormSessionId(bot.allocationSessionId || '');
     setShowBotModal(true);
   };
 
   const handleSaveBot = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!botFormName || !botFormSymbol) {
+    if (!botFormName || !botFormSymbol || !botFormCustomStrategyId) {
       showNotification('Please fill in all required fields.', 'error');
       return;
     }
 
     const payload = {
       name: botFormName,
-      strategy: botFormStrategy,
+      customStrategyId: botFormCustomStrategyId,
       symbol: botFormSymbol,
-      parameters: botFormParameters,
       allocationSessionId: botFormSessionId || null,
     };
 
@@ -682,68 +731,39 @@ export function TradingPage() {
     }
   };
 
+  const handleResetControlCenter = async () => {
+    if (!window.confirm("WARNING: Resetting the control center will permanently delete all strategy bots, active sessions, database orders, positions, and restore broker balances. Are you sure you want to proceed?")) {
+      return;
+    }
+
+    try {
+      showNotification("Resetting trading control center...", "success");
+      const res = await axios.post('/api/trade/reset');
+      if (res.data.success) {
+        showNotification("Trading control center reset completed successfully.", "success");
+        // Reload all data to clear views
+        fetchStatus();
+        fetchBots();
+        fetchPositions();
+        fetchOrders();
+        fetchPrices();
+        fetchSessions();
+      } else {
+        showNotification(res.data.message || "Reset failed.", "error");
+      }
+    } catch (err: any) {
+      showNotification(err.response?.data?.message || "Failed to reset trading control center.", "error");
+    }
+  };
+
   // Keep panicExitAll referenced to avoid unused local compilation errors
   if (typeof window !== 'undefined') {
     (window as any).panicExitAll = panicExitAll;
   }
 
-  const handleAuthRedirect = () => {
-    window.open('http://127.0.0.1:8082/auth/zerodha/login', '_blank', 'width=600,height=600');
-  };
-
-  // Determine daemon badge class
-  let daemonBadgeClass = 'offline';
-  let daemonBadgeText = 'Offline';
-  if (!status.engine.offline) {
-    if (status.engine.running) {
-      daemonBadgeClass = 'running';
-      daemonBadgeText = 'Running';
-    } else {
-      daemonBadgeClass = 'idle';
-      daemonBadgeText = 'Idle';
-    }
-  }
 
   return (
     <div className="trading-page">
-      {/* Top Header */}
-      <div className="trading-header-bar">
-        <div>
-          <h1>Live & Paper Trading Control Center</h1>
-          <div className="subtitle">Manage daemon, session settings, and active execution bots</div>
-        </div>
-        <div className="header-actions">
-          {/* Daemon status */}
-          <div className={`status-badge ${daemonBadgeClass}`}>
-            <span className="dot"></span>
-            <span>Daemon: {daemonBadgeText}</span>
-          </div>
-
-          {/* Zerodha connection */}
-          <div className="connection-status-item">
-            <span className={`status-dot ${status.zerodha.authenticated ? 'connected' : 'disconnected'}`}></span>
-            <span className="connection-label">KiteConnect</span>
-            {!status.zerodha.authenticated && (
-              <button className="btn-connect-sm" onClick={handleAuthRedirect}>Connect</button>
-            )}
-          </div>
-
-          {/* Tradier connection */}
-          <div className="connection-status-item">
-            <span className={`status-dot ${status.tradier?.authenticated ? 'connected' : 'disconnected'}`}></span>
-            <span className="connection-label">Tradier</span>
-            {!status.tradier?.authenticated && (
-              <button className="btn-connect-sm" onClick={() => showNotification('Please configure TRADIER_API_KEY in your root .env file and restart the daemon to connect.', 'error')}>Connect</button>
-            )}
-          </div>
-
-          {/* Settings Toggle Button */}
-          <button className="settings-toggle-btn" onClick={() => setShowSettingsModal(true)} title="System Settings">
-            <i className="la la-cog"></i>
-          </button>
-        </div>
-      </div>
-
       {/* Notifications Alert Banner */}
       {message && (
         <div className={`notification-banner ${message.type}`}>
@@ -883,7 +903,7 @@ export function TradingPage() {
                         <div style={{ minWidth: 0, flex: 1 }}>
                           <div className="bot-name" title={bot.name}>{bot.name}</div>
                           <div className="bot-sub">
-                            {bot.strategy} Strategy • {bot.symbol} • {sessions.find(s => s.id === bot.allocationSessionId)?.name || 'Unassigned'}
+                            {bot.customStrategy?.name || bot.strategy} ({bot.customStrategy?.interval || '1m'}) • {bot.symbol} • {sessions.find(s => s.id === bot.allocationSessionId)?.name || 'Unassigned'}
                           </div>
                         </div>
                         <div className="bot-card-price" style={{ textAlign: 'right', flexShrink: 0 }}>
@@ -980,6 +1000,7 @@ export function TradingPage() {
                 <thead>
                   <tr>
                     <th>Symbol</th>
+                    <th>Option Type</th>
                     <th>Qty</th>
                     <th>Avg. Entry</th>
                     <th>Market Price</th>
@@ -990,20 +1011,28 @@ export function TradingPage() {
                 <tbody>
                   {positions.length === 0 ? (
                     <tr>
-                      <td colSpan={6} style={{ textAlign: 'center', color: '#94a3b8', padding: '1.5rem' }}>
+                      <td colSpan={7} style={{ textAlign: 'center', color: '#94a3b8', padding: '1.5rem' }}>
                         No open positions.
                       </td>
                     </tr>
                   ) : (
-                    positions.map((pos) => (
-                      <tr key={pos.symbol}>
-                        <td style={{ fontWeight: 700 }}>{pos.symbol}</td>
-                        <td>{pos.qty}</td>
-                        <td>₹{pos.avgEntryPrice.toFixed(2)}</td>
-                        <td>₹{pos.marketPrice.toFixed(2)}</td>
-                        <td className={`pnl-badge ${pos.unrealizedPL >= 0 ? 'positive' : 'negative'}`}>
-                          {pos.unrealizedPL >= 0 ? '+' : ''}₹{pos.unrealizedPL.toFixed(2)}
-                        </td>
+                    positions.map((pos) => {
+                      const currencySymbol = getMarketForSymbol(pos.symbol) === 'india' ? '₹' : '$';
+                      const optType = getOptionType(pos.symbol);
+                      return (
+                        <tr key={pos.symbol}>
+                          <td style={{ fontWeight: 700 }}>{pos.symbol}</td>
+                          <td>
+                            <span className={`option-type-badge ${optType === '-' ? 'none' : optType.toLowerCase()}`}>
+                              {optType}
+                            </span>
+                          </td>
+                          <td>{pos.qty}</td>
+                          <td>{currencySymbol}{pos.avgEntryPrice.toFixed(2)}</td>
+                          <td>{currencySymbol}{pos.marketPrice.toFixed(2)}</td>
+                          <td className={`pnl-badge ${pos.unrealizedPL >= 0 ? 'positive' : 'negative'}`}>
+                            {pos.unrealizedPL >= 0 ? '+' : ''}{currencySymbol}{pos.unrealizedPL.toFixed(2)}
+                          </td>
                         <td style={{ textAlign: 'right' }}>
                           <button
                             onClick={() => exitPosition(pos.symbol)}
@@ -1021,8 +1050,9 @@ export function TradingPage() {
                           </button>
                         </td>
                       </tr>
-                    ))
-                  )}
+                    );
+                  })
+                )}
                 </tbody>
               </table>
             </div>
@@ -1040,6 +1070,8 @@ export function TradingPage() {
                   <tr>
                     <th>Order ID</th>
                     <th>Symbol</th>
+                    <th>Option Type</th>
+                    <th>Type</th>
                     <th>Side</th>
                     <th>Qty</th>
                     <th>Avg. Fill Price</th>
@@ -1051,17 +1083,28 @@ export function TradingPage() {
                 <tbody>
                   {orders.length === 0 ? (
                     <tr>
-                      <td colSpan={8} style={{ textAlign: 'center', color: '#94a3b8', padding: '1.5rem' }}>
+                      <td colSpan={10} style={{ textAlign: 'center', color: '#94a3b8', padding: '1.5rem' }}>
                         No orders executed yet.
                       </td>
                     </tr>
                   ) : (
                     enrichOrdersWithPL(orders).map((ord) => {
                       const currencySymbol = getMarketForSymbol(ord.symbol || '') === 'india' ? '₹' : '$';
+                      const optType = getOptionType(ord.symbol || '');
                       return (
                         <tr key={ord.id}>
                           <td style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#64748b' }}>{ord.id}</td>
                           <td style={{ fontWeight: 700 }}>{ord.symbol || 'SBIN'}</td>
+                          <td>
+                            <span className={`option-type-badge ${optType === '-' ? 'none' : optType.toLowerCase()}`}>
+                              {optType}
+                            </span>
+                          </td>
+                          <td>
+                            <span className={`type-badge ${(ord.tradeType || 'Long').toLowerCase()}`}>
+                              {ord.tradeType || 'Long'}
+                            </span>
+                          </td>
                           <td>
                             <span className={`side-badge ${(ord.side === 'buy' || ord.side === 'BUY' || ord.side === 'buy_to_open' || ord.side === 'buy_to_close') ? 'buy' : 'sell'}`}>
                               {ord.side}
@@ -1139,15 +1182,16 @@ export function TradingPage() {
               </div>
 
               <div className="form-group">
-                <label>Strategy Type</label>
+                <label>Custom Strategy</label>
                 <select
-                  disabled={isEditMode}
-                  value={botFormStrategy}
-                  onChange={(e) => handleStrategyChange(e.target.value as keyof typeof AVAILABLE_STRATEGIES)}
+                  required
+                  value={botFormCustomStrategyId}
+                  onChange={(e) => setBotFormCustomStrategyId(e.target.value)}
                 >
-                  {Object.entries(AVAILABLE_STRATEGIES).map(([key, strat]) => (
-                    <option key={key} value={key}>
-                      {strat.name}
+                  <option value="">Select a custom strategy...</option>
+                  {customStrategies.map(strat => (
+                    <option key={strat.id} value={strat.id}>
+                      {strat.name} ({strat.interval})
                     </option>
                   ))}
                 </select>
@@ -1235,48 +1279,7 @@ export function TradingPage() {
                 )}
               </div>
 
-              {/* Dynamic Strategy Parameters Form Section */}
-              <div style={{ marginTop: '1rem', borderTop: '1px solid #f1f5f9', paddingTop: '1rem' }}>
-                <h4 style={{ fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  Strategy Parameters
-                </h4>
-                {AVAILABLE_STRATEGIES[botFormStrategy]?.paramSchema.map((field: any) => (
-                  <div key={field.name} className="form-group">
-                    <label>{field.label}</label>
-                    {field.type === 'select' ? (
-                      <select
-                        value={botFormParameters[field.name] ?? field.default}
-                        onChange={(e) => setBotFormParameters({
-                          ...botFormParameters,
-                          [field.name]: e.target.value
-                        })}
-                      >
-                        {field.options?.map((opt: string) => (
-                          <option key={opt} value={opt}>{opt}</option>
-                        ))}
-                      </select>
-                    ) : (
-                      <input
-                        type="number"
-                        required
-                        value={botFormParameters[field.name] ?? field.default}
-                        onChange={(e) => setBotFormParameters({
-                          ...botFormParameters,
-                          [field.name]: parseFloat(e.target.value) || 0
-                        })}
-                        style={{
-                          width: '100%',
-                          padding: '0.6rem',
-                          border: '1px solid #cbd5e1',
-                          borderRadius: '4px',
-                          fontSize: '0.9rem',
-                          boxSizing: 'border-box'
-                        }}
-                      />
-                    )}
-                  </div>
-                ))}
-              </div>
+              {/* Predefined parameters from custom strategy are used */}
 
               <div className="modal-actions">
                 <button type="button" className="btn-cancel" onClick={() => setShowBotModal(false)}>

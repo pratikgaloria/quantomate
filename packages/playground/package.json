@@ -39,6 +39,7 @@
         "@quantomate/core": "^0.1.0",
         "@quantomate/data": "^0.1.0",
         "@quantomate/library": "^0.1.0",
+        "@quantomate/trade": "file:../trade",
         "dotenv": "^17.4.2"
     },
     "jest": {
@@ -59,7 +60,8 @@
         "moduleNameMapper": {
             "^@quantomate/core$": "<rootDir>/../core/src",
             "^@quantomate/library$": "<rootDir>/../library/src",
-            "^@quantomate/data$": "<rootDir>/../data/src"
+            "^@quantomate/data$": "<rootDir>/../data/src",
+            "^@quantomate/trade$": "<rootDir>/../trade/src"
         }
     },
     "lint-staged": {

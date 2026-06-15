@@ -30,6 +30,14 @@ export class SessionManager {
    */
   async loadSessions(): Promise<void> {
     const sessions = await prisma.allocationSession.findMany();
+    const activeIds = new Set(sessions.map(s => s.id));
+    
+    for (const id of Array.from(this.cashMap.keys())) {
+      if (!activeIds.has(id)) {
+        this.clearSessionState(id);
+      }
+    }
+    
     for (const session of sessions) {
       this.cashMap.set(session.id, session.virtualCash);
       this.capitalMap.set(session.id, session.capital);
@@ -154,27 +162,46 @@ export class SessionManager {
     }
 
     const existingPos = sessionPositions.get(symbolKey);
-    let newQty = existingPos ? existingPos.qty : 0;
+    let prevQty = existingPos ? existingPos.qty : 0;
     let entryPrice = existingPos ? existingPos.entryPrice : 0;
 
+    let orderCost = qty * price;
+    let newQty = prevQty;
+
     if (side === 'buy') {
-      cash -= (qty * price + commission);
-      
-      // Calculate weighted average entry price
-      if (newQty > 0) {
-        entryPrice = (newQty * entryPrice + qty * price) / (newQty + qty);
-      } else {
-        entryPrice = price;
-      }
+      cash -= (orderCost + commission);
       newQty += qty;
+
+      // If we are opening or adding to a Long position:
+      if (prevQty >= 0) {
+        if (newQty > 0) {
+          entryPrice = (prevQty * entryPrice + qty * price) / newQty;
+        } else {
+          entryPrice = 0;
+        }
+      }
+      // If we are covering/closing a Short position (prevQty < 0):
+      // entryPrice remains the same short entry price.
     } else {
-      cash += (qty * price - commission);
+      // side === 'sell'
+      cash += (orderCost - commission);
       newQty -= qty;
+
+      // If we are opening or adding to a Short position:
+      if (prevQty <= 0) {
+        if (newQty < 0) {
+          entryPrice = (Math.abs(prevQty) * entryPrice + qty * price) / Math.abs(newQty);
+        } else {
+          entryPrice = 0;
+        }
+      }
+      // If we are closing a Long position (prevQty > 0):
+      // entryPrice remains the same long entry price.
     }
 
     // Update in-memory state
     this.cashMap.set(sessionId, cash);
-    if (newQty <= 0) {
+    if (Math.abs(newQty) < 0.0001) {
       sessionPositions.delete(symbolKey);
     } else {
       sessionPositions.set(symbolKey, { symbol, qty: newQty, entryPrice });
@@ -188,6 +215,31 @@ export class SessionManager {
       });
     } catch (err: any) {
       console.error(`[SessionManager] Failed to persist virtual cash to DB: ${err.message}`);
+    }
+  }
+
+  /**
+   * Cleanup virtual positions matching symbols
+   */
+  cleanupVirtualPositions(symbols: string[]): void {
+    const symbolMatchesAny = (tradeSymbol: string): boolean => {
+      const tSym = tradeSymbol.toUpperCase();
+      return symbols.some(botSymbol => {
+        const bSym = botSymbol.toUpperCase();
+        if (tSym === bSym) return true;
+        if (bSym === 'NIFTY 50' && tSym.startsWith('NIFTY')) return true;
+        if (bSym === 'NIFTY BANK' && tSym.startsWith('BANKNIFTY')) return true;
+        if (tSym.startsWith(bSym)) return true;
+        return false;
+      });
+    };
+
+    for (const [sessId, posMap] of this.positionsMap.entries()) {
+      for (const [sym] of Array.from(posMap.keys())) {
+        if (symbolMatchesAny(sym)) {
+          posMap.delete(sym);
+        }
+      }
     }
   }
 }

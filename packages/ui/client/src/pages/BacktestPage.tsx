@@ -6,8 +6,10 @@ import { EquityCurve } from '../components/Charts/EquityCurve';
 import { DrawdownChart } from '../components/Charts/DrawdownChart';
 import { TradeList } from '../components/TradeList';
 import { CollapsibleSection } from '../components/CollapsibleSection';
+import { usePageContext } from '../context/PageContext';
 
 export function BacktestPage() {
+  const { setPageTitle, setToolbar } = usePageContext();
   const [strategies, setStrategies] = useState<StrategyMetadata[]>([]);
   const [selectedStrategy, setSelectedStrategy] = useState<string>('');
   const [parameters, setParameters] = useState<Record<string, any>>({});
@@ -21,6 +23,12 @@ export function BacktestPage() {
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [periodRange, setPeriodRange] = useState<string>('custom');
+
+  // Register page title
+  useEffect(() => {
+    setPageTitle('Backtest');
+    return () => setToolbar(null);
+  }, [setPageTitle, setToolbar]);
 
   // Load strategies on mount
   useEffect(() => {
@@ -146,67 +154,102 @@ export function BacktestPage() {
 
   const selectedStrategyMeta = strategies.find(s => s.id === selectedStrategy);
 
+  // Push toolbar to app header area
+  useEffect(() => {
+    setToolbar(
+      <>
+        <span className="tb-label">Strategy</span>
+        <select
+          className="tb-select"
+          value={selectedStrategy}
+          onChange={(e) => handleStrategyChange(e.target.value)}
+        >
+          <option value="">Select...</option>
+          {strategies.map(s => (
+            <option key={s.id} value={s.id}>{s.name}</option>
+          ))}
+        </select>
+
+        <span className="tb-divider" />
+
+        <span className="tb-label">Symbol</span>
+        <input
+          className="tb-input"
+          type="text"
+          value={symbol}
+          onChange={(e) => setSymbol(e.target.value.toUpperCase())}
+          placeholder="AAPL"
+          style={{ width: 72 }}
+        />
+
+        <span className="tb-divider" />
+
+        <span className="tb-label">Period</span>
+        <select
+          className="tb-select"
+          value={periodRange}
+          onChange={(e) => handlePeriodRangeChange(e.target.value)}
+          style={{ minWidth: 110 }}
+        >
+          <option value="custom">Custom</option>
+          <option value="yesterday">Yesterday</option>
+          <option value="1w">1 Week</option>
+          <option value="1m">1 Month</option>
+          <option value="6m">6 Months</option>
+          <option value="1y">1 Year</option>
+          <option value="3y">3 Years</option>
+          <option value="5y">5 Years</option>
+        </select>
+
+        <span className="tb-label">Interval</span>
+        <select
+          className="tb-select"
+          value={interval}
+          onChange={(e) => setInterval(e.target.value)}
+          style={{ minWidth: 90 }}
+        >
+          <option value="1d">Daily</option>
+          <option value="1h">1 Hour</option>
+          <option value="15m">15 Min</option>
+          <option value="5m">5 Min</option>
+          <option value="1m">1 Min</option>
+        </select>
+
+        <span className="tb-divider" />
+
+        <button
+          className="tb-btn"
+          onClick={runBacktest}
+          disabled={loading || !selectedStrategy}
+        >
+          {loading ? 'Running...' : 'Run Backtest'}
+        </button>
+      </>
+    );
+  }, [strategies, selectedStrategy, symbol, periodRange, interval, loading, setToolbar]);
+
   return (
     <div className="backtest-page">
       <div className="controls-panel">
-        <h2>Configuration</h2>
-
-        {/* Strategy Selector - Always visible */}
-        <div className="form-group strategy-selector">
-          <label>Strategy</label>
-          <select
-            value={selectedStrategy}
-            onChange={(e) => handleStrategyChange(e.target.value)}
-          >
-            <option value="">Select a strategy...</option>
-            {strategies.map(strategy => (
-              <option key={strategy.id} value={strategy.id}>
-                {strategy.name}
-              </option>
-            ))}
-          </select>
-          {selectedStrategyMeta && (
-            <p className="description">{selectedStrategyMeta.description}</p>
-          )}
-          {selectedStrategyMeta && selectedStrategyMeta.parameters.length > 0 && (
-            <button
-              type="button"
-              className="adjust-params-button"
-              onClick={() => setIsModalOpen(true)}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-              Adjust Parameters
-            </button>
-          )}
-        </div>
-
-        {/* Stock Configuration */}
-        <CollapsibleSection title="Stock & Period" className="stock-section">
+        {/* Strategy description + params adjuster */}
+        {selectedStrategyMeta && (
           <div className="form-group">
-            <label>Symbol</label>
-            <input
-              type="text"
-              value={symbol}
-              onChange={(e) => setSymbol(e.target.value.toUpperCase())}
-              placeholder="AAPL"
-            />
+            <p className="description" style={{ marginTop: 0 }}>{selectedStrategyMeta.description}</p>
+            {selectedStrategyMeta.parameters.length > 0 && (
+              <button
+                type="button"
+                className="adjust-params-button"
+                onClick={() => setIsModalOpen(true)}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                Adjust Parameters
+              </button>
+            )}
           </div>
-          <div className="form-group">
-            <label>Period</label>
-            <select
-              value={periodRange}
-              onChange={(e) => handlePeriodRangeChange(e.target.value)}
-            >
-              <option value="custom">Custom Range</option>
-              <option value="yesterday">Yesterday</option>
-              <option value="1w">1 Week</option>
-              <option value="1m">1 Month</option>
-              <option value="6m">6 Months</option>
-              <option value="1y">1 Year</option>
-              <option value="3y">3 Years</option>
-              <option value="5y">5 Years</option>
-            </select>
-          </div>
+        )}
+
+        {/* Date range configuration */}
+        <CollapsibleSection title="Date Range" className="stock-section">
           <div className="form-group">
             <label>Start Date</label>
             <input
@@ -230,19 +273,6 @@ export function BacktestPage() {
             />
           </div>
           <div className="form-group">
-            <label>Interval</label>
-            <select
-              value={interval}
-              onChange={(e) => setInterval(e.target.value)}
-            >
-              <option value="1d">Daily</option>
-              <option value="1h">1 Hour</option>
-              <option value="15m">15 Minutes</option>
-              <option value="5m">5 Minutes</option>
-              <option value="1m">1 Minute</option>
-            </select>
-          </div>
-          <div className="form-group">
             <label>Initial Capital ($)</label>
             <input
               type="number"
@@ -253,16 +283,9 @@ export function BacktestPage() {
           </div>
         </CollapsibleSection>
 
-        <button
-          className="run-button"
-          onClick={runBacktest}
-          disabled={loading || !selectedStrategy}
-        >
-          {loading ? 'Running...' : 'Run Backtest'}
-        </button>
-
         {error && <div className="error-message">{error}</div>}
       </div>
+
 
       <div className="results-panel">
         <h2>Results</h2>

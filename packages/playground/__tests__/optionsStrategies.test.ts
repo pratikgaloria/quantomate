@@ -4,7 +4,11 @@ import {
   BullCallSpreadStrategy,
   BearPutSpreadStrategy,
   LongStraddleStrategy,
-  LongStrangleStrategy
+  LongStrangleStrategy,
+  VwapRvolOptionStrategy,
+  VsaClimacticOptionStrategy,
+  WeeklyAvwapOptionStrategy,
+  ChandelierTrendOptionStrategy
 } from '@quantomate/library';
 import { Dataset, Quote } from '@quantomate/core';
 
@@ -95,5 +99,33 @@ describe('Options Strategies Library Initialization Tests', () => {
     expect(strat.options.optionSelector?.strikeMode).toBe('offset');
     expect(strat.options.optionSelector?.strikeOffset).toBe(2);
     expect(strat.options.direction).toBe('long');
+  });
+
+  it('should initialize VwapRvolOptionStrategy with tradeOptions metadata', () => {
+    const strat = new VwapRvolOptionStrategy('VwapRvol_Test', { rvolThreshold: 2.5 });
+    expect(strat.name).toBe('VwapRvol_Test');
+    expect(strat.options.tradeOptions).toBe(true);
+    expect(strat.options.direction).toBe('both');
+  });
+
+  it('should initialize VsaClimacticOptionStrategy with tradeOptions metadata', () => {
+    const strat = new VsaClimacticOptionStrategy('VsaClimactic_Test', { rvolThreshold: 1.8 });
+    expect(strat.name).toBe('VsaClimactic_Test');
+    expect(strat.options.tradeOptions).toBe(true);
+    expect(strat.options.direction).toBe('both');
+  });
+
+  it('should initialize WeeklyAvwapOptionStrategy with tradeOptions metadata', () => {
+    const strat = new WeeklyAvwapOptionStrategy('WeeklyAvwap_Test', { volumeSmaPeriod: 15 });
+    expect(strat.name).toBe('WeeklyAvwap_Test');
+    expect(strat.options.tradeOptions).toBe(true);
+    expect(strat.options.direction).toBe('both');
+  });
+
+  it('should initialize ChandelierTrendOptionStrategy with tradeOptions metadata', () => {
+    const strat = new ChandelierTrendOptionStrategy('ChandelierTrend_Test', { rvolThreshold: 1.5 });
+    expect(strat.name).toBe('ChandelierTrend_Test');
+    expect(strat.options.tradeOptions).toBe(true);
+    expect(strat.options.direction).toBe('both');
   });
 });

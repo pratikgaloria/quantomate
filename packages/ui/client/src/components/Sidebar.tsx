@@ -1,30 +1,37 @@
 import { NavLink } from 'react-router-dom';
 import './Sidebar.scss';
 
+const NAV_ITEMS = [
+  { to: '/backtest',   icon: 'la-chart-area',    label: 'Backtest'    },
+  { to: '/screener',   icon: 'la-filter',         label: 'Screener'    },
+  { to: '/strategies', icon: 'la-sliders-h',      label: 'Strategies'  },
+  { to: '/trade',      icon: 'la-exchange-alt',   label: 'Trading'     },
+  { to: '/indicators', icon: 'la-chart-bar',      label: 'Indicators'  },
+];
+
 export function Sidebar() {
   return (
-    <div className="sidebar">
-      <div className="sidebar-logo">
-        <i className="la la-layer-group"></i>
+    <aside className="sidebar">
+      {/* Logo mark */}
+      <div className="sidebar__logo" title="Quantomate">
+        <i className="la la-layer-group" />
       </div>
-      <nav className="sidebar-nav">
-        <NavLink to="/backtest" className={({ isActive }) => isActive ? 'active' : ''}>
-          <i className="la la-chart-area"></i>
-          <span>Backtest</span>
-        </NavLink>
-        <NavLink to="/screener" className={({ isActive }) => isActive ? 'active' : ''}>
-          <i className="la la-filter"></i>
-          <span>Screener</span>
-        </NavLink>
-        <NavLink to="/trade" className={({ isActive }) => isActive ? 'active' : ''}>
-          <i className="la la-exchange-alt"></i>
-          <span>Trading</span>
-        </NavLink>
-        <NavLink to="/indicators" className={({ isActive }) => isActive ? 'active' : ''}>
-          <i className="la la-chart-bar"></i>
-          <span>Indicators</span>
-        </NavLink>
+
+      {/* Navigation */}
+      <nav className="sidebar__nav">
+        {NAV_ITEMS.map(item => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            title={item.label}
+            className={({ isActive }) =>
+              `sidebar__link${isActive ? ' sidebar__link--active' : ''}`
+            }
+          >
+            <i className={`la ${item.icon}`} />
+          </NavLink>
+        ))}
       </nav>
-    </div>
+    </aside>
   );
 }

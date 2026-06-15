@@ -2,6 +2,7 @@ import { FC, useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 import { IndicatorChart } from '../components/Charts/IndicatorChart';
 import './IndicatorVisualizationPage.scss';
+import { usePageContext } from '../context/PageContext';
 
 interface IndicatorSchema {
   type: string;
@@ -213,6 +214,7 @@ interface ActiveIndicator {
 }
 
 export const IndicatorVisualizationPage: FC = () => {
+  const { setPageTitle, setToolbar } = usePageContext();
   const [market, setMarket] = useState<'us' | 'india'>('us');
   const [symbol, setSymbol] = useState('AAPL');
   const [symbolQuery, setSymbolQuery] = useState('');
@@ -222,6 +224,12 @@ export const IndicatorVisualizationPage: FC = () => {
   const [quotes, setQuotes] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Register page title
+  useEffect(() => {
+    setPageTitle('Indicators');
+    return () => setToolbar(null);
+  }, [setPageTitle, setToolbar]);
 
   // Active Indicators in workspace
   const [activeIndicators, setActiveIndicators] = useState<ActiveIndicator[]>([
@@ -371,97 +379,95 @@ export const IndicatorVisualizationPage: FC = () => {
     }));
   };
 
+  // Push toolbar: market, symbol search, period, interval
+  useEffect(() => {
+    setToolbar(
+      <>
+        <span className="tb-label">Market</span>
+        <button
+          className={market === 'us' ? 'tb-btn' : 'tb-btn-outline'}
+          onClick={() => handleMarketChange('us')}
+          style={{ minWidth: 'auto', padding: '0 0.6rem' }}
+        >US</button>
+        <button
+          className={market === 'india' ? 'tb-btn' : 'tb-btn-outline'}
+          onClick={() => handleMarketChange('india')}
+          style={{ minWidth: 'auto', padding: '0 0.6rem' }}
+        >India</button>
+
+        <span className="tb-divider" />
+
+        <span className="tb-label">Symbol</span>
+        <input
+          className="tb-input"
+          type="text"
+          value={symbolQuery || symbol}
+          onChange={(e) => handleSymbolSearch(e.target.value)}
+          placeholder="Search..."
+          style={{ width: 110 }}
+        />
+
+        <span className="tb-divider" />
+
+        <span className="tb-label">Period</span>
+        <select
+          className="tb-select"
+          value={period}
+          onChange={(e) => handlePeriodChange(e.target.value)}
+          style={{ minWidth: 90 }}
+        >
+          <option value="1d">1 Day</option>
+          <option value="1w">1 Week</option>
+          <option value="1m">1 Month</option>
+          <option value="1y">1 Year</option>
+          <option value="3y">3 Years</option>
+        </select>
+
+        <span className="tb-label">Interval</span>
+        <select
+          className="tb-select"
+          value={interval}
+          onChange={(e) => setInterval(e.target.value)}
+          disabled={period !== '1d' && period !== '1w'}
+          style={{ minWidth: 90 }}
+        >
+          {period === '1d' || period === '1w' ? (
+            <>
+              <option value="1m">1 Min</option>
+              <option value="5m">5 Min</option>
+              <option value="15m">15 Min</option>
+              <option value="1h">1 Hour</option>
+              {period === '1w' && <option value="1d">Daily</option>}
+            </>
+          ) : (
+            <option value="1d">Daily</option>
+          )}
+        </select>
+
+        {loading && <span style={{ fontSize: '0.72rem', color: '#888', marginLeft: 4 }}>Loading...</span>}
+      </>
+    );
+  }, [market, symbol, symbolQuery, period, interval, loading, setToolbar]);
+
   return (
     <div className="indicator-visualizer-page">
       {/* Left controls and configuration panel */}
       <div className="controls-panel">
-        <h2>
-          <i className="la la-tools"></i>
-          <span>Workspace Config</span>
-        </h2>
-
-        <div className="form-section">
-          {/* Market selector */}
-          <div className="form-group">
-            <label>Market Region</label>
-            <div className="visualize-market-toggle">
-              <button
-                className={market === 'us' ? 'active' : ''}
-                onClick={() => handleMarketChange('us')}
+        {/* Search results dropdown (from toolbar input) */}
+        {searchResults.length > 0 && (
+          <div className="autocomplete-results" style={{ position: 'static', marginBottom: '0.75rem', border: '1px solid #eee' }}>
+            {searchResults.map((item) => (
+              <div
+                key={item.symbol}
+                className="result-item"
+                onClick={() => handleSelectSymbol(item)}
               >
-                United States
-              </button>
-              <button
-                className={market === 'india' ? 'active' : ''}
-                onClick={() => handleMarketChange('india')}
-              >
-                India
-              </button>
-            </div>
-          </div>
-
-          {/* Symbol search autocomplete */}
-          <div className="form-group autocomplete-container">
-            <label>Symbol Search</label>
-            <input
-              type="text"
-              value={symbolQuery}
-              onChange={(e) => handleSymbolSearch(e.target.value)}
-              placeholder={`Search asset (current: ${symbol})`}
-            />
-            {searchResults.length > 0 && (
-              <div className="autocomplete-results">
-                {searchResults.map((item) => (
-                  <div
-                    key={item.symbol}
-                    className="result-item"
-                    onClick={() => handleSelectSymbol(item)}
-                  >
-                    <span className="symbol-name">{item.symbol}</span>
-                    <span className="exchange-tag">{item.exchange}</span>
-                  </div>
-                ))}
+                <span className="symbol-name">{item.symbol}</span>
+                <span className="exchange-tag">{item.exchange}</span>
               </div>
-            )}
+            ))}
           </div>
-
-          {/* Period dropdown */}
-          <div className="form-group">
-            <label>Period</label>
-            <select
-              value={period}
-              onChange={(e) => handlePeriodChange(e.target.value)}
-            >
-              <option value="1d">1 Day</option>
-              <option value="1w">1 Week</option>
-              <option value="1m">1 Month</option>
-              <option value="1y">1 Year</option>
-              <option value="3y">3 Years</option>
-            </select>
-          </div>
-
-          {/* Interval dropdown */}
-          <div className="form-group">
-            <label>Interval</label>
-            <select
-              value={interval}
-              onChange={(e) => setInterval(e.target.value)}
-              disabled={period !== '1d' && period !== '1w'}
-            >
-              {period === '1d' || period === '1w' ? (
-                <>
-                  <option value="1m">1 Min</option>
-                  <option value="5m">5 Min</option>
-                  <option value="15m">15 Min</option>
-                  <option value="1h">1 Hour</option>
-                  {period === '1w' && <option value="1d">1 Day (Daily)</option>}
-                </>
-              ) : (
-                <option value="1d">1 Day (Daily)</option>
-              )}
-            </select>
-          </div>
-        </div>
+        )}
 
         {/* Indicators Library */}
         <h3>Indicator Library</h3>

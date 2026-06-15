@@ -32,6 +32,9 @@ async function main() {
     case 'logs':
       await showLogs();
       break;
+    case 'clear-logs':
+      await clearLogs();
+      break;
     case 'config':
       if (args[1] === 'set') {
         await setConfig(args[2], args[3]);
@@ -53,6 +56,7 @@ Usage:
   npm run cli stop               - Stop the running trading daemon
   npm run cli status             - Display the status of the trading daemon
   npm run cli logs               - Stream live logs from the trading daemon
+  npm run cli clear-logs         - Truncate and clear the daemon log file
   npm run cli config set <k> <v> - Update settings in the database (e.g. trading_mode, enabled_markets)
 `);
 }
@@ -278,6 +282,15 @@ async function showLogs() {
 
   // Keep process open
   await new Promise(() => {});
+}
+
+async function clearLogs() {
+  if (fs.existsSync(logFile)) {
+    fs.writeFileSync(logFile, '');
+    console.log('Daemon log file cleared successfully.');
+  } else {
+    console.log('No log file found.');
+  }
 }
 
 main().catch(err => {

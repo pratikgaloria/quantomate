@@ -135,11 +135,27 @@ model SystemSetting {
   @@map("system_settings")
 }
 
+model CustomStrategy {
+  id         String   @id @default(uuid())
+  name       String   @unique
+  baseType   String // "GoldenCross", "RSIMeanReversion", etc.
+  parameters Json // Tuned parameters
+  interval   String // E.g., "1m", "5m", "15m", "1d"
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  bots TradingBot[]
+
+  @@map("custom_strategies")
+}
+
 model TradingBot {
   id                  String             @id @default(uuid())
   name                String             @unique
-  strategy            String // "GoldenCross", "RSIMeanReversion", "IndexOptionMomentum", "IndexOptionRsiReversion"
-  parameters          Json // Stores strategy parameters as JSON object
+  strategy            String // E.g., custom strategy name
+  customStrategyId    String?            @map("custom_strategy_id")
+  customStrategy      CustomStrategy?    @relation(fields: [customStrategyId], references: [id], onDelete: Cascade)
+  parameters          Json // Stores strategy parameters
   symbol              String // E.g., "SBIN", "RELIANCE"
   active              Boolean            @default(false)
   allocationSessionId String?            @map("allocation_session_id")

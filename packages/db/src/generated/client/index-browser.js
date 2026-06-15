@@ -212,10 +212,21 @@ exports.Prisma.SystemSettingScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.CustomStrategyScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  baseType: 'baseType',
+  parameters: 'parameters',
+  interval: 'interval',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.TradingBotScalarFieldEnum = {
   id: 'id',
   name: 'name',
   strategy: 'strategy',
+  customStrategyId: 'customStrategyId',
   parameters: 'parameters',
   symbol: 'symbol',
   active: 'active',
@@ -273,6 +284,7 @@ exports.Prisma.ModelName = {
   TradingOrder: 'TradingOrder',
   TradingPosition: 'TradingPosition',
   SystemSetting: 'SystemSetting',
+  CustomStrategy: 'CustomStrategy',
   TradingBot: 'TradingBot',
   AllocationSession: 'AllocationSession'
 };

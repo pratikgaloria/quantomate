@@ -1,88 +1,66 @@
 .sidebar {
-  width: 220px;
-  background-color: #1a1a1a;
-  color: #a0a0a0;
+  width: var(--sidebar-w);
+  min-height: 100vh;
+  background: #fff;
+  border-right: 1px solid #d0d0d0;
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  align-items: center;
+  flex-shrink: 0;
   position: sticky;
   top: 0;
-  border-right: 1px solid #333;
-  flex-shrink: 0;
+  height: 100vh;
+  overflow: hidden;
 
-  .sidebar-logo {
-    height: 60px;
+  &__logo {
+    width: 100%;
+    height: var(--header-h);
     display: flex;
     align-items: center;
-    padding: 0 1.5rem;
-    font-size: 1.5rem;
-    color: #fff;
-    border-bottom: 1px solid #333;
-    margin-bottom: 1rem;
+    justify-content: center;
+    border-bottom: 1px solid #d0d0d0;
+    flex-shrink: 0;
 
     i {
-      color: #ccc;
+      font-size: 1.3rem;
+      color: #111;
     }
   }
 
-  .sidebar-nav {
+  &__nav {
     display: flex;
     flex-direction: column;
-
-    a {
-      display: flex;
-      align-items: center;
-      padding: 0.75rem 1.5rem;
-      color: inherit;
-      text-decoration: none;
-      transition: all 0.2s;
-      font-size: 0.9rem;
-      gap: 0.75rem;
-      font-weight: 500;
-
-      i {
-        font-size: 1.25rem;
-        opacity: 0.7;
-      }
-
-      &:hover {
-        color: #fff;
-        background-color: rgba(255, 255, 255, 0.05);
-        i { opacity: 1; }
-      }
-
-      &.active {
-        color: #fff;
-        background-color: rgba(255, 255, 255, 0.08);
-        border-right: 3px solid #ccc;
-        i { opacity: 1; }
-      }
-    }
+    align-items: center;
+    width: 100%;
+    padding-top: 0.25rem;
   }
-}
 
-// Media query for smaller screens (collapse to icons?)
-@media (max-width: 768px) {
-  .sidebar {
-    width: 60px;
+  &__link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 48px;
+    color: #999;
+    text-decoration: none;
+    transition: color 0.15s, background 0.15s;
+    border-left: 2px solid transparent;
+    position: relative;
 
-    .sidebar-logo {
-      justify-content: center;
-      padding: 0;
+    i {
+      font-size: 1.35rem;
+      line-height: 1;
     }
 
-    .sidebar-nav a {
-      justify-content: center;
-      padding: 0.75rem 0;
+    &:hover {
+      color: #111;
+      background: #f4f4f4;
+    }
 
-      span {
-        display: none;
-      }
-
-      i {
-        font-size: 1.5rem;
-        margin: 0;
-      }
+    &--active {
+      color: #111;
+      border-left-color: #111;
+      background: #f0f0f0;
     }
   }
 }

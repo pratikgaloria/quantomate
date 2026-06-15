@@ -1,0 +1,41 @@
+.app-header {
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1rem;
+  background: #fff;
+  border-bottom: 1px solid #d0d0d0;
+  flex-shrink: 0;
+
+  &__left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  &__app-name {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #111;
+    letter-spacing: 0;
+  }
+
+  &__divider {
+    font-size: 0.8rem;
+    color: #bbb;
+    font-weight: 300;
+  }
+
+  &__page-title {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #555;
+  }
+
+  &__right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+}

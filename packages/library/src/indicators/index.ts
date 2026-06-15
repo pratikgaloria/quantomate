@@ -17,3 +17,6 @@ export { AVWAP } from './avwap/avwap';
 export { RVOL } from './rvol/rvol';
 export { Slope } from './slope/slope';
 export { VWAP } from './vwap/vwap';
+export { ChandelierExit } from './chandelierExit/chandelierExit';
+export { WeeklyAVWAP } from './weeklyAvwap/weeklyAvwap';
+

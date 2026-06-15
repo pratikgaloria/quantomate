@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { StrategyMetadata, ScanResponse, ScanResult } from '../types';
 import { CollapsibleSection } from '../components/CollapsibleSection';
+import { usePageContext } from '../context/PageContext';
 
 export function ScreenerPage() {
+  const { setPageTitle, setToolbar } = usePageContext();
   const [strategies, setStrategies] = useState<StrategyMetadata[]>([]);
   const [selectedStrategy, setSelectedStrategy] = useState<string>('');
   const [parameters, setParameters] = useState<Record<string, any>>({});
@@ -13,8 +15,16 @@ export function ScreenerPage() {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
+  // Register page title
+  useEffect(() => {
+    setPageTitle('Screener');
+    return () => setToolbar(null);
+  }, [setPageTitle, setToolbar]);
+
+  // Load strategies on mount
   useEffect(() => {
     loadStrategies();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadStrategies = async () => {
@@ -67,29 +77,40 @@ export function ScreenerPage() {
 
   const selectedStrategyMeta = strategies.find(s => s.id === selectedStrategy);
 
+  // Push toolbar
+  useEffect(() => {
+    setToolbar(
+      <>
+        <span className="tb-label">Strategy</span>
+        <select
+          className="tb-select"
+          value={selectedStrategy}
+          onChange={(e) => handleStrategyChange(e.target.value)}
+          style={{ minWidth: 160 }}
+        >
+          <option value="">Select strategy...</option>
+          {strategies.map(s => (
+            <option key={s.id} value={s.id}>{s.name}</option>
+          ))}
+        </select>
+        <span className="tb-divider" />
+        <button
+          className="tb-btn"
+          onClick={runScan}
+          disabled={loading || !selectedStrategy}
+        >
+          {loading ? 'Scanning...' : 'Run Scan'}
+        </button>
+      </>
+    );
+  }, [strategies, selectedStrategy, loading, setToolbar]);
+
   return (
     <div className="screener-page">
       <div className="controls-panel">
-        <h2>Stock Scanner</h2>
-        <p className="subtitle">Scan for recent buy signals across your watchlists</p>
-
-        <div className="form-group strategy-selector">
-          <label>Strategy</label>
-          <select
-            value={selectedStrategy}
-            onChange={(e) => handleStrategyChange(e.target.value)}
-          >
-            <option value="">Select a strategy...</option>
-            {strategies.map(strategy => (
-              <option key={strategy.id} value={strategy.id}>
-                {strategy.name}
-              </option>
-            ))}
-          </select>
-          {selectedStrategyMeta && (
-            <p className="description">{selectedStrategyMeta.description}</p>
-          )}
-        </div>
+        {selectedStrategyMeta && (
+          <p className="description" style={{ marginTop: 0 }}>{selectedStrategyMeta.description}</p>
+        )}
 
         {selectedStrategyMeta && selectedStrategyMeta.parameters.length > 0 && (
           <CollapsibleSection title="Parameters" className="parameters-section">
@@ -130,16 +151,9 @@ export function ScreenerPage() {
           </CollapsibleSection>
         )}
 
-        <button
-          className="run-button"
-          onClick={runScan}
-          disabled={loading || !selectedStrategy}
-        >
-          {loading ? 'Scanning...' : 'Run Scan'}
-        </button>
-
         {error && <div className="error-message">{error}</div>}
       </div>
+
 
       <div className="results-panel">
         <h2>Scan Results</h2>

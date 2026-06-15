@@ -175,11 +175,20 @@ export class PaperBroker implements IBroker {
 
       if (existingPos) {
         const newQty = existingPos.qty + order.qty;
-        const newAvgPrice = (existingPos.qty * existingPos.entryPrice + order.qty * fillPrice) / newQty;
-        await prisma.tradingPosition.update({
-          where: { id: existingPos.id },
-          data: { qty: newQty, entryPrice: newAvgPrice },
-        });
+        if (Math.abs(newQty) < 0.0001) {
+          await prisma.tradingPosition.delete({
+            where: { id: existingPos.id },
+          });
+        } else {
+          let newAvgPrice = existingPos.entryPrice;
+          if (existingPos.qty > 0) {
+            newAvgPrice = (existingPos.qty * existingPos.entryPrice + order.qty * fillPrice) / newQty;
+          }
+          await prisma.tradingPosition.update({
+            where: { id: existingPos.id },
+            data: { qty: newQty, entryPrice: newAvgPrice },
+          });
+        }
       } else {
         await prisma.tradingPosition.create({
           data: {
@@ -197,8 +206,6 @@ export class PaperBroker implements IBroker {
         where: { accountId: account.id, symbol: order.symbol },
       });
 
-      const positionQty = existingPos ? existingPos.qty : 0;
-
       // Update balance
       await prisma.tradingAccount.update({
         where: { id: account.id },
@@ -208,14 +215,18 @@ export class PaperBroker implements IBroker {
       // Update or delete position
       if (existingPos) {
         const newQty = existingPos.qty - order.qty;
-        if (newQty <= 0) {
+        if (Math.abs(newQty) < 0.0001) {
           await prisma.tradingPosition.delete({
             where: { id: existingPos.id },
           });
         } else {
+          let newAvgPrice = existingPos.entryPrice;
+          if (existingPos.qty < 0) {
+            newAvgPrice = (Math.abs(existingPos.qty) * existingPos.entryPrice + order.qty * fillPrice) / Math.abs(newQty);
+          }
           await prisma.tradingPosition.update({
             where: { id: existingPos.id },
-            data: { qty: newQty },
+            data: { qty: newQty, entryPrice: newAvgPrice },
           });
         }
       } else {
@@ -297,5 +308,58 @@ export class PaperBroker implements IBroker {
       res[sym] = price;
     }
     return res;
+  }
+
+  async cleanupSymbols(symbols: string[]): Promise<void> {
+    const account = await this.getOrCreateAccount();
+    
+    const dbPositions = await prisma.tradingPosition.findMany({
+      where: { accountId: account.id }
+    });
+    
+    const dbOrders = await prisma.tradingOrder.findMany({
+      where: { accountId: account.id }
+    });
+    
+    const symbolMatchesAny = (tradeSymbol: string): boolean => {
+      const tSym = tradeSymbol.toUpperCase();
+      return symbols.some(botSymbol => {
+        const bSym = botSymbol.toUpperCase();
+        if (tSym === bSym) return true;
+        if (bSym === 'NIFTY 50' && tSym.startsWith('NIFTY')) return true;
+        if (bSym === 'NIFTY BANK' && tSym.startsWith('BANKNIFTY')) return true;
+        if (tSym.startsWith(bSym)) return true;
+        return false;
+      });
+    };
+    
+    const positionsToDelete = dbPositions.filter(pos => symbolMatchesAny(pos.symbol)).map(pos => pos.id);
+    const ordersToDelete = dbOrders.filter(ord => symbolMatchesAny(ord.symbol)).map(ord => ord.id);
+    
+    if (positionsToDelete.length > 0) {
+      await prisma.tradingPosition.deleteMany({
+        where: { id: { in: positionsToDelete } }
+      });
+    }
+    
+    if (ordersToDelete.length > 0) {
+      await prisma.tradingOrder.deleteMany({
+        where: { id: { in: ordersToDelete } }
+      });
+    }
+  }
+
+  async reset(): Promise<void> {
+    const account = await this.getOrCreateAccount();
+    await prisma.tradingPosition.deleteMany({
+      where: { accountId: account.id }
+    });
+    await prisma.tradingOrder.deleteMany({
+      where: { accountId: account.id }
+    });
+    await prisma.tradingAccount.update({
+      where: { id: account.id },
+      data: { balance: this.initialBalance }
+    });
   }
 }

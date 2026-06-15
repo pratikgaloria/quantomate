@@ -8,57 +8,12 @@ import {
   EarningsData,
   ScreenerResult
 } from './IDataProvider';
-import { KiteInstrumentMapper } from './KiteProvider';
 
 const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 
 export class YahooFinanceProvider implements IDataProvider {
   private toYahooTicker(symbol: string): string {
-    const sym = symbol.toUpperCase().trim();
-    if (sym === "NIFTY 50" || sym === "NSEI" || sym === "NIFTY" || sym === "^NSEI") {
-      return "^NSEI";
-    }
-    if (sym === "NIFTY BANK" || sym === "NSEBANK" || sym === "BANKNIFTY" || sym === "^NSEBANK") {
-      return "^NSEBANK";
-    }
-    if (sym.endsWith(".NS") || sym.startsWith("^")) {
-      return sym;
-    }
-    
-    // Check if it exists in Kite Instrument Mapper (indicates Indian market asset)
-    const hasKiteToken = KiteInstrumentMapper.getInstrumentToken(sym) !== undefined || 
-                         KiteInstrumentMapper.getInstrumentToken("NSE:" + sym) !== undefined;
-                         
-    if (hasKiteToken) {
-      const cleanSym = sym.replace("NSE:", "").replace("NFO:", "");
-      return `${cleanSym}.NS`;
-    }
-
-    // Fallback crypto
-    const cryptoAssets = ["BTC", "ETH", "SOL", "ADA", "DOT", "DOGE", "XRP"];
-    if (
-      cryptoAssets.some(
-        (c) =>
-          sym.startsWith(c) ||
-          sym.endsWith(c) ||
-          sym.includes("/USD") ||
-          sym.includes("-USD"),
-      )
-    ) {
-      return sym.replace("/", "-");
-    }
-    
-    // Fallback: Indian hardcoded list
-    if (
-      sym.startsWith("NSE:") ||
-      sym.startsWith("NFO:") ||
-      ["SBIN", "RELIANCE", "TCS", "INFY", "HDFCBANK", "ICICIBANK"].includes(sym)
-    ) {
-      const cleanSym = sym.replace("NSE:", "").replace("NFO:", "");
-      return `${cleanSym}.NS`;
-    }
-    
-    return sym;
+    return symbol.toUpperCase().trim();
   }
 
   async getHistoricalData(
