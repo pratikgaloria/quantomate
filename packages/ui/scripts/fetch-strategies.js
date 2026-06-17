@@ -154,52 +154,7 @@ async function fetchStrategies() {
                     }
                 ]
             },
-            {
-                id: 'ohiain',
-                name: 'Ohiain',
-                description: 'A trend-following strategy using EMA crossovers, ATR for extension checks, and dynamic risk management.',
-                parameters: [
-                    {
-                        name: 'periodEMA9',
-                        type: 'number',
-                        default: 9,
-                        min: 2,
-                        max: 50,
-                        description: 'Fast EMA period'
-                    },
-                    {
-                        name: 'periodEMA21',
-                        type: 'number',
-                        default: 21,
-                        min: 5,
-                        max: 100,
-                        description: 'Medium EMA period'
-                    },
-                    {
-                        name: 'periodEMA50',
-                        type: 'number',
-                        default: 50,
-                        min: 10,
-                        max: 300,
-                        description: 'Slow EMA period'
-                    },
-                    {
-                        name: 'periodATR',
-                        type: 'number',
-                        default: 14,
-                        min: 2,
-                        max: 100,
-                        description: 'ATR period'
-                    },
-                    {
-                        name: 'direction',
-                        type: 'select',
-                        default: 'both',
-                        options: ['long', 'short', 'both'],
-                        description: 'Trading direction'
-                    }
-                ]
-            },
+
             {
                 id: 'strong-pullback',
                 name: 'Strong Pullback',

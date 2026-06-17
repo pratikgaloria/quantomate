@@ -1,8 +1,8 @@
 import { Router, Request, Response } from "express";
 import { prisma } from "@quantomate/db";
 import { DataService, FundamentalService, PortfolioSignalService } from "@quantomate/data";
-import { Dataset } from "@quantomate/core";
-import { createStrategy } from "../services/backtestRunner";
+import { Bar, BarSeries } from "@quantomate/core";
+import { createStrategy, getIndicatorsForStrategy } from "../services/backtestRunner";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -123,40 +123,53 @@ router.get("/chart/:symbol", async (req: Request, res: Response) => {
       volume: Number(h.volume),
     }));
 
-    const dataset = new Dataset(stockData);
+    const bars: Bar[] = stockData.map((d) => ({
+      open: d.open,
+      high: d.high,
+      low: d.low,
+      close: d.close,
+      volume: d.volume,
+      timestamp: d.date.getTime(),
+    }));
+    const series = new BarSeries(bars);
     const signalMarkers: any[] = [];
 
     // 2. Scan historical quotes to collect all strategy execution markers
     for (const stratInfo of ACTIVE_STRATEGIES) {
       const strategy = createStrategy(stratInfo.id, stratInfo.params);
-      dataset.prepare(strategy);
+      const { indicatorSeriesMap, secondarySeriesMap } = getIndicatorsForStrategy(stratInfo.id, series, stratInfo.params);
+      const context = {
+        getIndicatorSeries: (name: string) => indicatorSeriesMap.get(name),
+        getSecondaryBarSeries: (id: string) => secondarySeriesMap.get(id),
+      };
 
-      let lastPositionValue: string | null = null;
+      let status: 'idle' | 'long' | 'short' = 'idle';
 
-      for (let i = 0; i < dataset.length; i++) {
-        const quote = dataset.at(i)!;
-        const val = quote.value as any;
-        const strategyValue = quote.getStrategy(strategy.name);
+      for (let i = 0; i < series.length; i++) {
+        const bar = series.at(i)!;
+        const signal = strategy.evaluate(series, i, context);
 
-        if (strategyValue) {
-          const currentPositionValue = strategyValue.position.value; // 'idle' | 'entry' | 'hold' | 'exit'
-          if (currentPositionValue !== lastPositionValue) {
-            if (currentPositionValue === "entry") {
-              signalMarkers.push({
-                date: val.date,
-                strategyId: stratInfo.id,
-                type: strategyValue.position.options?.short ? "SHORT" : "BUY",
-                price: stratInfo.id === "pivot-trend" ? val.open : val.close,
-              });
-            } else if (currentPositionValue === "exit") {
-              signalMarkers.push({
-                date: val.date,
-                strategyId: stratInfo.id,
-                type: strategyValue.position.options?.short ? "COVER" : "SELL",
-                price: stratInfo.id === "pivot-trend" ? val.open : val.close,
-              });
-            }
-            lastPositionValue = currentPositionValue;
+        if (status === 'idle') {
+          if (signal.action === 'entry') {
+            const isShort = signal.direction === 'short';
+            status = isShort ? 'short' : 'long';
+            signalMarkers.push({
+              date: new Date(bar.timestamp),
+              strategyId: stratInfo.id,
+              type: isShort ? "SHORT" : "BUY",
+              price: stratInfo.id === "pivot-trend" ? bar.open : bar.close,
+            });
+          }
+        } else {
+          if (signal.action === 'exit') {
+            const isShort = status === 'short';
+            status = 'idle';
+            signalMarkers.push({
+              date: new Date(bar.timestamp),
+              strategyId: stratInfo.id,
+              type: isShort ? "COVER" : "SELL",
+              price: stratInfo.id === "pivot-trend" ? bar.open : bar.close,
+            });
           }
         }
       }

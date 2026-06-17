@@ -10,7 +10,7 @@
   "scripts": {
     "build": "tsc",
     "prepare": "npm run build",
-    "test": "jest --coverage --no-cache"
+    "test": "jest --coverage --no-cache --passWithNoTests"
   },
   "keywords": [
     "stocks",
@@ -29,8 +29,7 @@
     "typescript": "5.3.3"
   },
   "dependencies": {
-    "@quantomate/core": "^0.1.0",
-    "lodash": "^4.17.21"
+    "@quantomate/core": "^0.1.0"
   },
   "jest": {
     "testEnvironment": "node",

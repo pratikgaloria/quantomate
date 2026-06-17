@@ -26,7 +26,6 @@
   "exclude": [
     "node_modules",
     "dist",
-    "__tests__",
-    "benchmark"
+    "__tests__"
   ]
 }

@@ -15,7 +15,7 @@ import { StrategyId } from "./catalogues.js";
 export function createStrategy(
   id: StrategyId,
   params: Record<string, any> = {}
-): Strategy<any, any, any> {
+): Strategy {
   const name = `${id}_mcp`;
 
   switch (id) {
@@ -24,7 +24,6 @@ export function createStrategy(
         fastPeriod: params.fastPeriod ?? 50,
         slowPeriod: params.slowPeriod ?? 200,
         direction: params.direction ?? "long",
-        source: params.source ?? "close",
       });
 
     case "rsi-mean-reversion":

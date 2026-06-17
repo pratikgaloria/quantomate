@@ -1,12 +1,15 @@
-export const VERSION = '0.1.0';
-export * from './goldenCross/goldenCross';
-export * from './rsiMeanReversion/rsiMeanReversion';
-export * from './pivotTrend/pivotTrend';
-export * from './bollingerBands/bollingerBands';
-export * from './macd/macd';
-export * from './ohiain/ohiain';
-export * from './strongPullback/strongPullback';
-export * from './indexOptionMomentum/indexOptionMomentum';
-export * from './indexOptionRsiReversion/indexOptionRsiReversion';
-export * from './options';
-
+export * from './weeklyAvwapOptionStrategy';
+export * from './vwapRvolOptionStrategy';
+export * from './vsaClimacticOptionStrategy';
+export * from './chandelierTrendOptionStrategy';
+export * from './bollingerBandsStrategy';
+export * from './goldenCrossStrategy';
+export * from './macdStrategy';
+export * from './pivotTrendStrategy';
+export * from './rsiMeanReversionStrategy';
+export * from './strongPullbackStrategy';
+export * from './bearPutSpreadStrategy';
+export * from './longStraddleStrategy';
+export * from './longStrangleStrategy';
+export * from './indexOptionMomentumStrategy';
+export * from './indexOptionRsiReversionStrategy';

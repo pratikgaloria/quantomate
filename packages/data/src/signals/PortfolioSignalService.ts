@@ -1,13 +1,23 @@
 import { prisma } from "@quantomate/db";
 import { DataService } from "../DataService";
 import { FundamentalService } from "../fundamentals/FundamentalService";
-import { Dataset } from "@quantomate/core";
+import { 
+  Bar, 
+  BarSeries, 
+  Series
+} from "@quantomate/core";
 import {
+  SMA, 
+  RSI, 
+  BB, 
+  MACD, 
+  MACDSignal, 
+  PivotTrend,
   GoldenCrossStrategy,
+  PivotTrendStrategy,
   RSIMeanReversionStrategy,
   BollingerBandsStrategy,
-  MACDStrategy,
-  PivotTrendStrategy
+  MACDStrategy
 } from "@quantomate/library";
 
 export const ACTIVE_STRATEGIES = [
@@ -65,14 +75,7 @@ function getStrategyLookback(strategyId: string, params: Record<string, any>): n
 function createStrategy(strategyId: string, parameters: Record<string, any>) {
   switch (strategyId) {
     case "golden-cross": {
-      const fastPeriod = parameters.fastPeriod || 50;
-      const slowPeriod = parameters.slowPeriod || 200;
-      return new GoldenCrossStrategy("Golden Cross", {
-        fastPeriod,
-        slowPeriod,
-        source: "close",
-        ...parameters
-      });
+      return new GoldenCrossStrategy("Golden Cross", parameters);
     }
     case "pivot-trend": {
       return new PivotTrendStrategy("Pivot Trend", parameters);
@@ -89,6 +92,55 @@ function createStrategy(strategyId: string, parameters: Record<string, any>) {
     default:
       throw new Error(`Unknown strategy: ${strategyId}`);
   }
+}
+
+function getIndicatorsForStrategy(
+  strategyId: string,
+  series: BarSeries,
+  parameters: Record<string, any>
+): { indicatorSeriesMap: Map<string, Series<number>>; secondarySeriesMap: Map<string, BarSeries> } {
+  const indicatorSeriesMap = new Map<string, Series<number>>();
+  const secondarySeriesMap = new Map<string, BarSeries>();
+
+  switch (strategyId) {
+    case "golden-cross": {
+      const fastPeriod = parameters.fastPeriod || 50;
+      const slowPeriod = parameters.slowPeriod || 200;
+      indicatorSeriesMap.set("fastSma", new SMA("fastSma", { period: fastPeriod, field: "close" }).calculate(series));
+      indicatorSeriesMap.set("slowSma", new SMA("slowSma", { period: slowPeriod, field: "close" }).calculate(series));
+      break;
+    }
+    case "pivot-trend": {
+      indicatorSeriesMap.set("pivotTrend", new PivotTrend("pivotTrend").calculate(series));
+      break;
+    }
+    case "rsi-mean-reversion": {
+      const rsiPeriod = parameters.rsiPeriod || 14;
+      indicatorSeriesMap.set("rsi", new RSI("rsi", { period: rsiPeriod, field: "close" }).calculate(series));
+      if (parameters.useTrendFilter) {
+        const smaPeriod = parameters.smaPeriod || 50;
+        indicatorSeriesMap.set("sma", new SMA("sma", { period: smaPeriod, field: "close" }).calculate(series));
+      }
+      break;
+    }
+    case "bollinger-bands": {
+      const period = parameters.period || 20;
+      const multiplier = parameters.multiplier || 2.0;
+      indicatorSeriesMap.set("bbUpper", new BB("bbUpper", { period, multiplier, band: "upper" }).calculate(series));
+      indicatorSeriesMap.set("bbLower", new BB("bbLower", { period, multiplier, band: "lower" }).calculate(series));
+      break;
+    }
+    case "macd": {
+      const fastPeriod = parameters.fastPeriod || 12;
+      const slowPeriod = parameters.slowPeriod || 26;
+      const signalPeriod = parameters.signalPeriod || 9;
+      indicatorSeriesMap.set("macd", new MACD("macd", { fastPeriod, slowPeriod, field: "close" }).calculate(series));
+      indicatorSeriesMap.set("macdSignal", new MACDSignal("macdSignal", { fastPeriod, slowPeriod, signalPeriod, field: "close" }).calculate(series));
+      break;
+    }
+  }
+
+  return { indicatorSeriesMap, secondarySeriesMap };
 }
 
 export class PortfolioSignalService {
@@ -198,12 +250,24 @@ export class PortfolioSignalService {
           volume: Number(h.volume),
         }));
 
-        const dataset = new Dataset(stockData);
+        const bars: Bar[] = stockData.map((d) => ({
+          open: d.open,
+          high: d.high,
+          low: d.low,
+          close: d.close,
+          volume: d.volume,
+          timestamp: d.date.getTime(),
+        }));
+        const series = new BarSeries(bars);
         const technicals: any[] = [];
 
         for (const stratInfo of ACTIVE_STRATEGIES) {
           const strategy = createStrategy(stratInfo.id, stratInfo.params);
-          dataset.prepare(strategy);
+          const { indicatorSeriesMap, secondarySeriesMap } = getIndicatorsForStrategy(stratInfo.id, series, stratInfo.params);
+          const context = {
+            getIndicatorSeries: (name: string) => indicatorSeriesMap.get(name),
+            getSecondaryBarSeries: (id: string) => secondarySeriesMap.get(id),
+          };
 
           const cached = symbolCachedMap?.get(stratInfo.id);
 
@@ -211,26 +275,39 @@ export class PortfolioSignalService {
           let latestSignalPrice = cached?.price !== undefined ? Number(cached.price) : stockData[stockData.length - 1].close;
           let latestSignalDate = cached?.triggeredAt || stockData[stockData.length - 1].date;
 
-          for (let i = dataset.length - 1; i >= 0; i--) {
-            const quote = dataset.at(i)!;
-            const val = quote.value as any;
-            const strategyValue = quote.getStrategy(strategy.name);
+          let status: 'idle' | 'long' | 'short' = 'idle';
 
-            if (strategyValue) {
-              const posVal = strategyValue.position.value;
-              if (posVal === "entry" || posVal === "exit") {
-                const signalVal = posVal === "entry"
-                  ? (strategyValue.position.options?.short ? "SHORT" : "BUY")
-                  : (strategyValue.position.options?.short ? "COVER" : "SELL");
-                const price = stratInfo.id === "pivot-trend" ? val.open : val.close;
-                const date = val.date;
+          for (let i = 0; i < series.length; i++) {
+            const bar = series.at(i)!;
+            const signal = strategy.evaluate(series, i, context);
+
+            if (status === 'idle') {
+              if (signal.action === 'entry') {
+                const isShort = signal.direction === 'short';
+                status = isShort ? 'short' : 'long';
+                const signalVal = isShort ? "SHORT" : "BUY";
+                const price = stratInfo.id === "pivot-trend" ? bar.open : bar.close;
+                const date = new Date(bar.timestamp);
 
                 if (!cached || date.getTime() >= cached.triggeredAt.getTime()) {
                   latestSignalValue = signalVal;
                   latestSignalPrice = price;
                   latestSignalDate = date;
                 }
-                break;
+              }
+            } else {
+              if (signal.action === 'exit') {
+                const isShort = status === 'short';
+                status = 'idle';
+                const signalVal = isShort ? "COVER" : "SELL";
+                const price = stratInfo.id === "pivot-trend" ? bar.open : bar.close;
+                const date = new Date(bar.timestamp);
+
+                if (!cached || date.getTime() >= cached.triggeredAt.getTime()) {
+                  latestSignalValue = signalVal;
+                  latestSignalPrice = price;
+                  latestSignalDate = date;
+                }
               }
             }
           }
@@ -299,39 +376,52 @@ export class PortfolioSignalService {
       volume: Number(h.volume),
     }));
 
-    const dataset = new Dataset(stockData);
+    const bars: Bar[] = stockData.map((d) => ({
+      open: d.open,
+      high: d.high,
+      low: d.low,
+      close: d.close,
+      volume: d.volume,
+      timestamp: d.date.getTime(),
+    }));
+    const series = new BarSeries(bars);
     const signalMarkers: any[] = [];
 
     for (const stratInfo of ACTIVE_STRATEGIES) {
       const strategy = createStrategy(stratInfo.id, stratInfo.params);
-      dataset.prepare(strategy);
+      const { indicatorSeriesMap, secondarySeriesMap } = getIndicatorsForStrategy(stratInfo.id, series, stratInfo.params);
+      const context = {
+        getIndicatorSeries: (name: string) => indicatorSeriesMap.get(name),
+        getSecondaryBarSeries: (id: string) => secondarySeriesMap.get(id),
+      };
 
-      let lastPositionValue: string | null = null;
+      let status: 'idle' | 'long' | 'short' = 'idle';
 
-      for (let i = 0; i < dataset.length; i++) {
-        const quote = dataset.at(i)!;
-        const val = quote.value as any;
-        const strategyValue = quote.getStrategy(strategy.name);
+      for (let i = 0; i < series.length; i++) {
+        const bar = series.at(i)!;
+        const signal = strategy.evaluate(series, i, context);
 
-        if (strategyValue) {
-          const currentPositionValue = strategyValue.position.value;
-          if (currentPositionValue !== lastPositionValue) {
-            if (currentPositionValue === "entry") {
-              signalMarkers.push({
-                date: val.date,
-                strategyId: stratInfo.id,
-                type: strategyValue.position.options?.short ? "SHORT" : "BUY",
-                price: stratInfo.id === "pivot-trend" ? val.open : val.close,
-              });
-            } else if (currentPositionValue === "exit") {
-              signalMarkers.push({
-                date: val.date,
-                strategyId: stratInfo.id,
-                type: strategyValue.position.options?.short ? "COVER" : "SELL",
-                price: stratInfo.id === "pivot-trend" ? val.open : val.close,
-              });
-            }
-            lastPositionValue = currentPositionValue;
+        if (status === 'idle') {
+          if (signal.action === 'entry') {
+            const isShort = signal.direction === 'short';
+            status = isShort ? 'short' : 'long';
+            signalMarkers.push({
+              date: new Date(bar.timestamp),
+              strategyId: stratInfo.id,
+              type: isShort ? "SHORT" : "BUY",
+              price: stratInfo.id === "pivot-trend" ? bar.open : bar.close,
+            });
+          }
+        } else {
+          if (signal.action === 'exit') {
+            const isShort = status === 'short';
+            status = 'idle';
+            signalMarkers.push({
+              date: new Date(bar.timestamp),
+              strategyId: stratInfo.id,
+              type: isShort ? "COVER" : "SELL",
+              price: stratInfo.id === "pivot-trend" ? bar.open : bar.close,
+            });
           }
         }
       }
@@ -346,3 +436,4 @@ export class PortfolioSignalService {
     };
   }
 }
+

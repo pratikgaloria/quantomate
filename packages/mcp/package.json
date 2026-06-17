@@ -14,10 +14,10 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",
-    "@quantomate/core": "*",
-    "@quantomate/data": "*",
-    "@quantomate/library": "*",
-    "@quantomate/db": "*",
+    "@quantomate/core": "file:../core",
+    "@quantomate/data": "file:../data",
+    "@quantomate/library": "file:../library",
+    "@quantomate/db": "file:../db",
     "dotenv": "^16.0.0",
     "zod": "^3.23.8"
   },

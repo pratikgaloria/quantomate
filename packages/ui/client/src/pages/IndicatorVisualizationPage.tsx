@@ -240,16 +240,28 @@ export const IndicatorVisualizationPage: FC = () => {
 
   const searchTimeout = useRef<any>(null);
 
-  // Load quotes
-  const loadQuotes = useCallback(async (targetSymbol: string, targetPeriod: string, targetInterval: string) => {
+  // Perform unified fetch of quotes and calculate indicators
+  const handleRefresh = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const res = await axios.get('/api/trade/historical-prices', {
-        params: { symbol: targetSymbol, period: targetPeriod, interval: targetInterval }
+        params: { symbol, period, interval }
       });
       if (res.data.success) {
-        setQuotes(res.data.data);
+        const newQuotes = res.data.data;
+        setQuotes(newQuotes);
+        if (newQuotes.length > 0 && activeIndicators.length > 0) {
+          const calcRes = await axios.post('/api/trade/calculate-indicators', {
+            quotes: newQuotes,
+            indicators: activeIndicators
+          });
+          if (calcRes.data.success) {
+            setIndicatorData(calcRes.data.data.indicators);
+          }
+        } else {
+          setIndicatorData({});
+        }
       } else {
         setError(res.data.message || 'Failed to fetch historical quotes.');
       }
@@ -258,32 +270,13 @@ export const IndicatorVisualizationPage: FC = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [symbol, period, interval, activeIndicators]);
 
-  // Calculate indicators on quotes change or indicators change
-  const calculateIndicators = useCallback(async (currentQuotes: any[], indicators: ActiveIndicator[]) => {
-    if (currentQuotes.length === 0 || indicators.length === 0) {
-      setIndicatorData({});
-      return;
-    }
-
-    try {
-      const res = await axios.post('/api/trade/calculate-indicators', {
-        quotes: currentQuotes,
-        indicators
-      });
-      if (res.data.success) {
-        setIndicatorData(res.data.data.indicators);
-      }
-    } catch (err: any) {
-      console.error('Failed to calculate indicators:', err.message);
-    }
-  }, []);
-
-  // Initial load
+  // Initial load on mount
   useEffect(() => {
-    loadQuotes(symbol, period, interval);
-  }, [symbol, period, interval, loadQuotes]);
+    handleRefresh();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handlePeriodChange = (newPeriod: string) => {
     setPeriod(newPeriod);
@@ -296,10 +289,7 @@ export const IndicatorVisualizationPage: FC = () => {
     }
   };
 
-  // Recalculate indicators when quotes or activeIndicators configuration updates
-  useEffect(() => {
-    calculateIndicators(quotes, activeIndicators);
-  }, [quotes, activeIndicators, calculateIndicators]);
+
 
   // Autocomplete symbol search
   const handleSymbolSearch = (val: string) => {
@@ -536,6 +526,15 @@ export const IndicatorVisualizationPage: FC = () => {
               );
             })
           )}
+        </div>
+        <div className="refresh-container">
+          <button
+            className="refresh-btn"
+            onClick={handleRefresh}
+            disabled={loading}
+          >
+            {loading ? 'Refreshing...' : 'Refresh Chart'}
+          </button>
         </div>
       </div>
 

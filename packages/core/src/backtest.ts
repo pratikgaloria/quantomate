@@ -1,114 +1,88 @@
-import { Dataset, Strategy, StrategyValue } from './';
-import { BacktestReport } from './backtestReport';
-import { Quote } from './quote';
-import { TradePosition } from './position';
+import { BarSeries } from './barSeries';
+import { Strategy, StrategyContext } from './strategy';
+import { PositionManager } from './position';
+import { Series } from './series';
+import { Bar } from './types';
 
-export interface BacktestConfiguration {
-  capital: number;
-  name?: string;
-  entryPriceField?: 'close' | 'open' | 'high' | 'low' | (<T>(quote: Quote<T>) => number);
-  commission?: number; // Cost per share
-  slippage?: number;   // Percentage (e.g. 0.0002 for 0.02%)
+export interface BacktestTrade {
+  type: 'long' | 'short';
+  entryPrice: number;
+  exitPrice: number;
+  entryTime: number;
+  exitTime: number;
+  profit: number;
+  profitPercent: number;
 }
 
-export type BacktestTrigger<T> = (
-  quote: Quote<T>,
-  index: number,
-  quotes: Quote<T>[]
-) => number;
-export type BacktestRunner<T> = {
-  config: BacktestConfiguration;
-  onEntry: BacktestTrigger<T>;
-  onExit: BacktestTrigger<T>;
-};
+export class Backtester {
+  constructor(
+    private readonly strategy: Strategy,
+    private readonly indicatorSeriesMap = new Map<string, Series<any>>(),
+    private readonly secondarySeriesMap = new Map<string, BarSeries>()
+  ) {}
 
-/**
- * Back-tests the strategy over a given dataset.
- */
-export class Backtest<P = unknown, T = number, O = unknown> {
-  protected _dataset: Dataset<T>;
-  protected _strategy: Strategy<P, T, O>;
-  protected _secondaryDatasets: Dataset<any>[];
+  run(series: BarSeries): BacktestTrade[] {
+    const manager = new PositionManager();
+    const trades: BacktestTrade[] = [];
+    let activeTrade: Partial<BacktestTrade> | null = null;
 
-  /**
-   * Runs a back-test over a dataset for a given strategy.
-   * @param dataset - `Dataset` over which strategy should be back-tested.
-   * @param strategy - `Strategy` that should be back-tested.
-   * @param secondaryDatasets - Optional array of additional datasets for multi-timeframe rules.
-   */
-  constructor(dataset: Dataset<T>, strategy: Strategy<P, T, O>, secondaryDatasets: Dataset<any>[] = []) {
-    this._strategy = strategy;
-    this._dataset = dataset;
-    this._secondaryDatasets = secondaryDatasets;
+    const context: StrategyContext = {
+      getIndicatorSeries: (name) => this.indicatorSeriesMap.get(name),
+      getSecondaryBarSeries: (id) => this.secondarySeriesMap.get(id),
+    };
 
-    this._dataset.prepare(strategy, secondaryDatasets);
-  }
+    // Simulate bar-by-bar processing
+    for (let i = 0; i < series.length; i++) {
+      const bar = series.at(i)!;
+      const signal = this.strategy.evaluate(series, i, context);
+      const transition = manager.processSignal(signal, bar);
 
-  get strategy() {
-    return this._strategy;
-  }
+      if (transition) {
+        if (transition.type === 'entry') {
+          activeTrade = {
+            type: transition.direction,
+            entryPrice: transition.price,
+            entryTime: transition.time,
+          };
+        } else if (transition.type === 'exit' && activeTrade) {
+          const entryPrice = activeTrade.entryPrice!;
+          const exitPrice = transition.price;
+          const profit = transition.direction === 'long' 
+            ? exitPrice - entryPrice 
+            : entryPrice - exitPrice;
+          const profitPercent = (profit / entryPrice) * 100;
 
-  get dataset() {
-    return this._dataset;
-  }
-
-  /**
-   * Runs the back-test over a dataset with the given configuration and returns report.
-   * @param configuration - `BacktestConfiguration` with trading quantity and capital.
-   * @returns `BacktestReport`.
-   */
-  run({ config, onEntry, onExit }: BacktestRunner<T>) {
-    const report = new BacktestReport<T>(config.capital, config);
-
-    for (let i = 0; i < this._dataset.length; i++) {
-      const quote = this._dataset.at(i)!;
-      const position = quote.getStrategy(this.strategy.name).position;
-
-      if (
-        i === this._dataset.length - 1 &&
-        (position.value === 'entry' || position.value === 'hold')
-      ) {
-        report.markExit(onExit(quote, i, this._dataset.quotes), quote, this.strategy.name);
-      } else {
-        if (position.value === 'entry') {
-          const entryPrice = this.getEntryPrice(quote, config);
-          const positionWithEntry = new TradePosition(position.value, {
-            ...position.options,
-            entryPrice,
-            entryDate: new Date(),
+          trades.push({
+            ...(activeTrade as BacktestTrade),
+            exitPrice,
+            exitTime: transition.time,
+            profit,
+            profitPercent,
           });
-
-          quote.setStrategy(
-            this.strategy.name,
-            new StrategyValue(positionWithEntry)
-          );
-
-          report.markEntry(onEntry(quote, i, this._dataset.quotes), quote, this.strategy.name);
-        } else if (position.value === 'exit') {
-          report.markExit(onExit(quote, i, this._dataset.quotes), quote, this.strategy.name);
+          activeTrade = null;
         }
       }
     }
 
-    return report;
-  }
+    // Close any open trade at the end of the series
+    if (activeTrade && series.length > 0) {
+      const lastBar = series.at(-1)!;
+      const entryPrice = activeTrade.entryPrice!;
+      const exitPrice = lastBar.close;
+      const profit = activeTrade.type === 'long'
+        ? exitPrice - entryPrice
+        : entryPrice - exitPrice;
+      const profitPercent = (profit / entryPrice) * 100;
 
-  private getEntryPrice(quote: Quote<T>, config: BacktestConfiguration): number {
-    if (typeof config.entryPriceField === 'function') {
-      return config.entryPriceField(quote);
+      trades.push({
+        ...(activeTrade as BacktestTrade),
+        exitPrice,
+        exitTime: lastBar.timestamp,
+        profit,
+        profitPercent,
+      });
     }
 
-    if (typeof quote.value === 'number') {
-      return quote.value;
-    }
-
-    if (typeof quote.value === 'object' && quote.value !== null) {
-      const field = config.entryPriceField || 'close';
-      if (field in quote.value) {
-        return quote.value[field] as number;
-      }
-    }
-
-    throw new Error('Cannot determine entry price from quote');
+    return trades;
   }
 }

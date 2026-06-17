@@ -1,76 +1,63 @@
-export type TradePositionType = 'idle' | 'entry' | 'exit' | 'hold';
+import { TradeSignal, Bar } from './types';
 
-export const newTradingPositionMap: {
-  [currentTradingPosition in TradePositionType]: {
-    [newTradingPosition in TradePositionType]: TradePositionType;
-  };
-} = {
-  idle: {
-    idle: 'idle',
-    entry: 'entry',
-    exit: 'idle',
-    hold: 'idle',
-  },
-  entry: {
-    idle: 'hold',
-    entry: 'hold',
-    exit: 'exit',
-    hold: 'hold',
-  },
-  exit: {
-    idle: 'idle',
-    entry: 'entry',
-    exit: 'idle',
-    hold: 'idle',
-  },
-  hold: {
-    idle: 'hold',
-    entry: 'hold',
-    exit: 'exit',
-    hold: 'hold',
-  },
-};
+export type PositionStatus = 'idle' | 'long' | 'short';
 
-type TradePositionOptions<O> = O & {
-  short?: boolean;
+export interface PositionState {
+  status: PositionStatus;
   entryPrice?: number;
-  entryDate?: Date;
-  exitReason?: 'stop-loss' | 'take-profit' | 'strategy';
-  exitRatio?: number; // 0 to 1, default is 1 (100%)
-};
+  entryTime?: number;
+  metadata?: Record<string, any>;
+}
 
-export class TradePosition<O = unknown> {
-  private _value: TradePositionType;
-  private _options?: TradePositionOptions<O>;
+export interface PositionTransition {
+  type: 'entry' | 'exit';
+  direction: 'long' | 'short';
+  price: number;
+  time: number;
+}
 
-  constructor(value: TradePositionType, options?: TradePositionOptions<O>) {
-    this._value = value;
-    this._options = options;
+export class PositionManager {
+  private state: PositionState;
+
+  constructor(initialState?: PositionState) {
+    this.state = initialState || { status: 'idle' };
   }
 
-  get value() {
-    return this._value;
+  getState(): PositionState {
+    return { ...this.state };
   }
 
-  get options() {
-    return this._options;
-  }
+  processSignal(signal: TradeSignal, bar: Bar): PositionTransition | null {
+    const currentStatus = this.state.status;
 
-  static update<O = unknown>(oldPosition: TradePosition<O>, newPosition: TradePosition<O>) {
-    const mergedOptions = {
-      ...oldPosition._options,
-      ...newPosition.options,
-    } as TradePositionOptions<O>;
-
-    let nextValue = newTradingPositionMap[oldPosition.value][newPosition.value];
-
-    // Support partial exits: if we just exited partially, we should remain in 'hold' state
-    if (oldPosition.value === 'exit' && (oldPosition.options?.exitRatio ?? 1.0) < 1.0) {
-      if (newPosition.value === 'hold' || newPosition.value === 'idle') {
-        nextValue = 'hold';
+    if (currentStatus === 'idle') {
+      if (signal.action === 'entry') {
+        const nextStatus: PositionStatus = signal.direction === 'short' ? 'short' : 'long';
+        this.state = {
+          status: nextStatus,
+          entryPrice: bar.close,
+          entryTime: bar.timestamp,
+        };
+        return {
+          type: 'entry',
+          direction: signal.direction || 'long',
+          price: bar.close,
+          time: bar.timestamp,
+        };
+      }
+    } else {
+      if (signal.action === 'exit') {
+        const transition: PositionTransition = {
+          type: 'exit',
+          direction: currentStatus === 'long' ? 'long' : 'short',
+          price: bar.close,
+          time: bar.timestamp,
+        };
+        this.state = { status: 'idle' };
+        return transition;
       }
     }
 
-    return new TradePosition<O>(nextValue, mergedOptions);
+    return null;
   }
 }

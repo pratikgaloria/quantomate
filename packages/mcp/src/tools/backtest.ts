@@ -1,6 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { Dataset } from "@quantomate/core";
-import { Backtest } from "@quantomate/core";
+import { Bar, BarSeries, Series, StrategyContext } from "@quantomate/core";
+import { SMA, EMA, RSI, MACD, MACDSignal, BB, PivotTrend } from "@quantomate/library";
 import { DataService } from "@quantomate/data";
 import {
   BacktestInputSchema,
@@ -22,6 +22,70 @@ interface BacktestRunOptions {
   limit?: number;
   /** Called for each progress step with a human-readable message */
   onProgress?: (step: number, total: number, message: string) => void;
+}
+
+interface SimTradeEvent {
+  type: 'entry' | 'exit';
+  date: string;
+  price: number;
+  shares: number;
+  short: boolean;
+  currentCapital: number;
+  exitReason?: string | null;
+  exitContext?: {
+    entryPrice: number;
+    exitPrice: number;
+    holdDays: number;
+    priceChange: number;
+    priceChangePercent: number;
+  } | null;
+  commission: number;
+  slippage: number;
+}
+
+function getIndicatorsForStrategy(
+  strategyId: string,
+  series: BarSeries,
+  parameters: Record<string, any>
+): Map<string, Series<any>> {
+  const indicatorSeriesMap = new Map<string, Series<any>>();
+
+  switch (strategyId) {
+    case 'golden-cross': {
+      const fastPeriod = parameters.fastPeriod || 50;
+      const slowPeriod = parameters.slowPeriod || 200;
+      const field = parameters.source || 'close';
+      indicatorSeriesMap.set('fastSMA', new SMA('fastSMA', { period: fastPeriod, field }).calculate(series));
+      indicatorSeriesMap.set('slowSMA', new SMA('slowSMA', { period: slowPeriod, field }).calculate(series));
+      break;
+    }
+    case 'pivot-trend': {
+      indicatorSeriesMap.set('pivotTrend', new PivotTrend('pivotTrend').calculate(series));
+      break;
+    }
+    case 'rsi-mean-reversion': {
+      const rsiPeriod = parameters.rsiPeriod || 14;
+      indicatorSeriesMap.set('rsi', new RSI('rsi', { period: rsiPeriod, field: 'close' }).calculate(series));
+      break;
+    }
+    case 'bollinger-bands': {
+      const period = parameters.period || 20;
+      const multiplier = parameters.multiplier || 2.0;
+      indicatorSeriesMap.set('bbUpper', new BB('bbUpper', { period, multiplier, band: 'upper' }).calculate(series));
+      indicatorSeriesMap.set('bbLower', new BB('bbLower', { period, multiplier, band: 'lower' }).calculate(series));
+      break;
+    }
+    case 'macd': {
+      const fastPeriod = parameters.fastPeriod || 12;
+      const slowPeriod = parameters.slowPeriod || 26;
+      const signalPeriod = parameters.signalPeriod || 9;
+      indicatorSeriesMap.set('macd', new MACD('macd', { fastPeriod, slowPeriod, field: 'close' }).calculate(series));
+      indicatorSeriesMap.set('macdSignal', new MACDSignal('macdSignal', { fastPeriod, slowPeriod, signalPeriod, field: 'close' }).calculate(series));
+      break;
+    }
+  }
+
+  return indicatorSeriesMap;
 }
 
 async function runBacktestInternal(opts: BacktestRunOptions) {
@@ -51,106 +115,206 @@ async function runBacktestInternal(opts: BacktestRunOptions) {
     throw new Error(`No historical data found for ${symbol} (${interval})`);
   }
 
-  const stockData = rawData.map((d: any) => ({
-    date: d.date instanceof Date ? d.date : new Date(d.date),
+  const bars: Bar[] = rawData.map((d: any) => ({
     open: Number(d.open),
     high: Number(d.high),
     low: Number(d.low),
     close: Number(d.close),
     volume: Number(d.volume),
+    timestamp: d.date instanceof Date ? d.date.getTime() : new Date(d.date).getTime(),
   }));
 
   // Step 2 — Prepare dataset + strategy
   onProgress?.(
     2,
     TOTAL_STEPS,
-    `Preparing dataset (${stockData.length} bars) and computing strategy indicators…`
+    `Preparing dataset (${bars.length} bars) and computing strategy indicators…`
   );
-  const dataset = new Dataset(stockData);
+  const series = new BarSeries(bars);
   const strategy = createStrategy(strategyId as any, strategyParams);
-  dataset.prepare(strategy);
+  const indicatorSeriesMap = getIndicatorsForStrategy(strategyId, series, strategyParams);
+
+  const context: StrategyContext = {
+    getIndicatorSeries: (name) => indicatorSeriesMap.get(name),
+    getSecondaryBarSeries: () => undefined,
+  };
 
   // Step 3 — Run backtest engine
-  onProgress?.(3, TOTAL_STEPS, `Running backtest engine (${dataset.length} bars)…`);
-  const bt = new Backtest(dataset, strategy);
-  const report = bt.run({
-    config: {
-      capital,
-      commission,
-      slippage,
-      entryPriceField: "close",
-    },
-    onEntry: (quote) => {
-      const val = quote.value as any;
-      return typeof val === "object" ? val.close : val;
-    },
-    onExit: (quote) => {
-      const val = quote.value as any;
-      return typeof val === "object" ? val.close : val;
-    },
-  });
+  onProgress?.(3, TOTAL_STEPS, `Running backtest engine (${series.length} bars)…`);
+
+  let currentCapital = capital;
+  let sharesOwned = 0;
+  let isShort = false;
+  let entryTradedValue = 0;
+  let activeEntryDate: number | null = null;
+
+  let stopLossExits = 0;
+  let takeProfitExits = 0;
+  let strategyExits = 0;
+  let totalCommissions = 0;
+  let totalSlippage = 0;
+  let winningTradesCount = 0;
+  let losingTradesCount = 0;
+
+  const trades: SimTradeEvent[] = [];
+  let status: 'idle' | 'long' | 'short' = 'idle';
+
+  for (let i = 0; i < series.length; i++) {
+    const bar = series.at(i)!;
+    const signal = strategy.evaluate(series, i, context);
+
+    if (status === 'idle') {
+      if (signal.action === 'entry') {
+        const execBar = (i + 1 < series.length) ? series.at(i + 1)! : bar;
+        const tradedValue = execBar.open;
+        const date = new Date(execBar.timestamp).toISOString();
+
+        isShort = signal.direction === 'short';
+        status = isShort ? 'short' : 'long';
+        activeEntryDate = execBar.timestamp;
+
+        // Apply slippage to entry price
+        const slippageFactor = isShort ? (1 - slippage) : (1 + slippage);
+        const effectiveEntryPrice = tradedValue * slippageFactor;
+        const slippageCost = Math.abs(effectiveEntryPrice - tradedValue);
+
+        entryTradedValue = effectiveEntryPrice;
+
+        // Calculate shares with all available capital
+        const shares = currentCapital / effectiveEntryPrice;
+        sharesOwned = shares;
+
+        // Apply commission
+        const commissionCost = shares * commission;
+        totalCommissions += commissionCost;
+        totalSlippage += (shares * slippageCost);
+
+        if (isShort) {
+          currentCapital = currentCapital + (shares * effectiveEntryPrice) - commissionCost;
+        } else {
+          const totalCostPerShare = effectiveEntryPrice + commission;
+          const adjustedShares = currentCapital / totalCostPerShare;
+          sharesOwned = adjustedShares;
+          currentCapital = 0;
+        }
+
+        trades.push({
+          type: 'entry',
+          date,
+          price: effectiveEntryPrice,
+          shares: sharesOwned,
+          short: isShort,
+          currentCapital,
+          commission: commissionCost,
+          slippage: slippageCost * sharesOwned,
+        });
+      }
+    } else {
+      // In position: check for exit (either signal or end of series)
+      const shouldExit = signal.action === 'exit';
+      const isLastBar = i === series.length - 1;
+
+      if (shouldExit || isLastBar) {
+        const exitReason = 'strategy';
+        strategyExits++;
+
+        const execBar = (i + 1 < series.length) ? series.at(i + 1)! : bar;
+        const tradedValue = execBar.open;
+        const date = new Date(execBar.timestamp).toISOString();
+
+        // Apply slippage to exit price
+        const slippageFactor = isShort ? (1 + slippage) : (1 - slippage);
+        const effectiveExitPrice = tradedValue * slippageFactor;
+        const slippageCost = Math.abs(effectiveExitPrice - tradedValue);
+
+        // Apply commission
+        const commissionCost = sharesOwned * commission;
+        totalCommissions += commissionCost;
+        totalSlippage += (sharesOwned * slippageCost);
+
+        const holdDays = Math.round((execBar.timestamp - activeEntryDate!) / 86400000);
+        const priceChange = isShort ? entryTradedValue - effectiveExitPrice : effectiveExitPrice - entryTradedValue;
+        const priceChangePercent = (priceChange / entryTradedValue) * 100;
+
+        const exitContext = {
+          entryPrice: entryTradedValue,
+          exitPrice: effectiveExitPrice,
+          holdDays,
+          priceChange,
+          priceChangePercent: Number(priceChangePercent.toFixed(2)),
+        };
+
+        let tradePnL = 0;
+        if (isShort) {
+          const proceeds = (sharesOwned * effectiveExitPrice) + commissionCost;
+          currentCapital = currentCapital - proceeds;
+          tradePnL = (entryTradedValue - effectiveExitPrice) * sharesOwned - commissionCost;
+        } else {
+          const saleProceeds = (sharesOwned * effectiveExitPrice) - commissionCost;
+          currentCapital += saleProceeds;
+          tradePnL = (effectiveExitPrice - entryTradedValue) * sharesOwned - commissionCost;
+        }
+
+        if (tradePnL > 0) {
+          winningTradesCount++;
+        } else {
+          losingTradesCount++;
+        }
+
+        trades.push({
+          type: 'exit',
+          date,
+          price: effectiveExitPrice,
+          shares: sharesOwned,
+          short: isShort,
+          currentCapital,
+          exitReason,
+          exitContext,
+          commission: commissionCost,
+          slippage: slippageCost * sharesOwned,
+        });
+
+        sharesOwned = 0;
+        status = 'idle';
+      }
+    }
+  }
 
   // Step 4 — Build report
   onProgress?.(4, TOTAL_STEPS, "Generating report…");
 
-  const summary = report.summary();
-  const riskMetrics = report.getRiskMetrics();
-
-  // Build trade log with context
-  const trades = report.trades.map((t) => {
-    const val = t.quote.value as any;
-    return {
-      type: t.type,
-      date:
-        val?.date instanceof Date
-          ? val.date.toISOString()
-          : val?.date ?? null,
-      price: t.tradedValue,
-      shares: t.shares,
-      short: t.short ?? false,
-      currentCapital: t.currentCapital,
-      exitReason: t.exitReason ?? null,
-      exitContext: t.exitContext
-        ? {
-            entryPrice: t.exitContext.entryPrice,
-            exitPrice: t.exitContext.exitPrice,
-            holdDays: Math.round(t.exitContext.holdDuration / 86400000),
-            priceChange: t.exitContext.priceChange,
-            priceChangePercent: Number(t.exitContext.priceChangePercent.toFixed(2)),
-          }
-        : null,
-      commission: t.commission ?? 0,
-      slippage: t.slippage ?? 0,
-    };
-  });
+  const totalTrades = winningTradesCount + losingTradesCount;
+  const winningRate = totalTrades > 0 ? winningTradesCount / totalTrades : 0;
+  const absoluteReturn = currentCapital - capital;
+  const returnPercent = (absoluteReturn / capital) * 100;
 
   return {
     symbol: symbol.toUpperCase(),
     strategy: strategyId,
     strategyParams,
     interval,
-    barsUsed: stockData.length,
+    barsUsed: bars.length,
     dateRange: {
-      from: stockData[0]?.date?.toISOString(),
-      to: stockData[stockData.length - 1]?.date?.toISOString(),
+      from: new Date(bars[0].timestamp).toISOString(),
+      to: new Date(bars[bars.length - 1].timestamp).toISOString(),
     },
     config: { capital, commission, slippage },
     summary: {
-      initialCapital: Number(summary.initialCapital.toFixed(2)),
-      finalCapital: Number(summary.finalCapital.toFixed(2)),
-      absoluteReturn: Number((summary.finalCapital - summary.initialCapital).toFixed(2)),
-      returnPercent: Number(summary.returnsPercentage.toFixed(2)),
-      totalTrades: summary.totalTrades,
-      winningRate: Number((summary.winningRate * 100).toFixed(1)),
-      totalCommissions: Number(summary.totalCommissions.toFixed(2)),
-      totalSlippage: Number(summary.totalSlippage.toFixed(2)),
+      initialCapital: Number(capital.toFixed(2)),
+      finalCapital: Number(currentCapital.toFixed(2)),
+      absoluteReturn: Number(absoluteReturn.toFixed(2)),
+      returnPercent: Number(returnPercent.toFixed(2)),
+      totalTrades,
+      winningRate: Number((winningRate * 100).toFixed(1)),
+      totalCommissions: Number(totalCommissions.toFixed(2)),
+      totalSlippage: Number(totalSlippage.toFixed(2)),
     },
     riskMetrics: {
-      stopLossExits: riskMetrics.stopLossExits,
-      takeProfitExits: riskMetrics.takeProfitExits,
-      strategyExits: riskMetrics.strategyExits,
-      stopLossRate: Number((riskMetrics.stopLossRate * 100).toFixed(1)),
-      takeProfitRate: Number((riskMetrics.takeProfitRate * 100).toFixed(1)),
+      stopLossExits,
+      takeProfitExits,
+      strategyExits,
+      stopLossRate: 0,
+      takeProfitRate: 0,
     },
     trades,
   };
@@ -213,11 +377,10 @@ export function registerBacktestTools(server: McpServer) {
           onProgress: (step, total, message) => {
             const msg = `[${step}/${total}] ${message}`;
             progressMessages.push(msg);
-            // Emit MCP progress notification
             try {
-              (extra?.signal as any)?.dispatchEvent; // no-op check
+              (extra?.signal as any)?.dispatchEvent;
             } catch {
-              // Notifications not supported in this transport — silent
+              // Notifications not supported
             }
           },
         });
@@ -309,7 +472,6 @@ export function registerBacktestTools(server: McpServer) {
         }
       }
 
-      // Rank by return (nulls last)
       const ranked = [...results].sort((a, b) => {
         if (a.returnPercent === null) return 1;
         if (b.returnPercent === null) return -1;

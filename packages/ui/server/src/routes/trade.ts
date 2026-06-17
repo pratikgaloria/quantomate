@@ -3,8 +3,27 @@ import { prisma } from "@quantomate/db";
 import { DataService, KiteInstrumentMapper, TradierDataProvider, YahooFinanceProvider } from "@quantomate/data";
 import dotenv from "dotenv";
 import path from "path";
-import * as Library from "@quantomate/library";
-import { Dataset } from "@quantomate/core";
+import { 
+  Bar, 
+  BarSeries
+} from "@quantomate/core";
+import {
+  SMA, 
+  EMA, 
+  RSI, 
+  BB, 
+  MACD, 
+  MACDSignal, 
+  ATR, 
+  VWAP, 
+  RVOL, 
+  Slope, 
+  PivotTrend,
+  ChandelierExit,
+  WeeklyAVWAP 
+} from "@quantomate/library";
+
+
 
 // Load environment configurations
 dotenv.config();
@@ -809,42 +828,37 @@ router.post("/calculate-indicators", async (req: Request, res: Response) => {
       return res.status(400).json({ success: false, message: "Missing or invalid parameter: indicators" });
     }
 
-    // Build the core Dataset
-    const dataset = new Dataset(
-      quotes.map((q: any) => ({
-        ...q,
-        date: new Date(q.date),
-      })),
-      { timestampField: "date" }
-    );
+    const bars: Bar[] = quotes.map((q: any) => ({
+      open: q.open,
+      high: q.high,
+      low: q.low,
+      close: q.close,
+      volume: q.volume,
+      timestamp: new Date(q.date).getTime(),
+    }));
+    const series = new BarSeries(bars);
 
     const results: Record<string, number[]> = {};
 
     for (const indConfig of indicators) {
       const { id, type, params } = indConfig;
-      const IndicatorClass = (Library as any)[type];
-      if (!IndicatorClass) {
-        return res.status(400).json({ success: false, message: `Indicator type ${type} not found in library` });
-      }
 
       if (type === "MACD") {
-        const macdInstance = new IndicatorClass(id, { attribute: params.attribute || "close" });
-        dataset.apply(macdInstance);
+        const field = params.attribute || "close";
+        const fastPeriod = params.fastPeriod || 12;
+        const slowPeriod = params.slowPeriod || 26;
+        const signalPeriod = params.signalPeriod || 9;
 
-        const signalInstance = new Library.EMA(id + "_signal", {
-          attribute: id,
-          period: params.signalPeriod || 9,
-        });
-        dataset.apply(signalInstance);
+        const macdSeries = new MACD(id, { fastPeriod, slowPeriod, field }).calculate(series);
+        const signalSeries = new MACDSignal(id + "_signal", { fastPeriod, slowPeriod, signalPeriod, field }).calculate(series);
 
         const macdValues: number[] = [];
         const signalValues: number[] = [];
         const histValues: number[] = [];
 
-        for (let i = 0; i < dataset.length; i++) {
-          const q = dataset.at(i);
-          const macdVal = q?.getIndicator(id) ?? NaN;
-          const sigVal = q?.getIndicator(id + "_signal") ?? NaN;
+        for (let i = 0; i < series.length; i++) {
+          const macdVal = macdSeries.at(i) ?? NaN;
+          const sigVal = signalSeries.at(i) ?? NaN;
           macdValues.push(macdVal);
           signalValues.push(sigVal);
           histValues.push(isNaN(macdVal) || isNaN(sigVal) ? NaN : macdVal - sigVal);
@@ -853,49 +867,58 @@ router.post("/calculate-indicators", async (req: Request, res: Response) => {
         results[id + "_signal"] = signalValues;
         results[id + "_hist"] = histValues;
       } else if (type === "BB") {
-        const upper = new IndicatorClass(id + "_upper", { ...params, band: "upper" });
-        const middle = new IndicatorClass(id + "_middle", { ...params, band: "middle" });
-        const lower = new IndicatorClass(id + "_lower", { ...params, band: "lower" });
+        const period = params.period || 20;
+        const multiplier = params.multiplier || 2.0;
+        const field = params.attribute || "close";
 
-        dataset.apply(upper, middle, lower);
+        const upperSeries = new BB(id + "_upper", { period, multiplier, band: "upper", field }).calculate(series);
+        const middleSeries = new BB(id + "_middle", { period, multiplier, band: "middle", field }).calculate(series);
+        const lowerSeries = new BB(id + "_lower", { period, multiplier, band: "lower", field }).calculate(series);
 
         const upperValues: number[] = [];
         const middleValues: number[] = [];
         const lowerValues: number[] = [];
 
-        for (let i = 0; i < dataset.length; i++) {
-          const q = dataset.at(i);
-          upperValues.push(q?.getIndicator(id + "_upper") ?? NaN);
-          middleValues.push(q?.getIndicator(id + "_middle") ?? NaN);
-          lowerValues.push(q?.getIndicator(id + "_lower") ?? NaN);
+        for (let i = 0; i < series.length; i++) {
+          upperValues.push(upperSeries.at(i) ?? NaN);
+          middleValues.push(middleSeries.at(i) ?? NaN);
+          lowerValues.push(lowerSeries.at(i) ?? NaN);
         }
         results[id + "_upper"] = upperValues;
         results[id + "_middle"] = middleValues;
         results[id + "_lower"] = lowerValues;
-      } else if (type === "Stochastic") {
-        const kInstance = new IndicatorClass(id + "_k", { ...params, type: "k" });
-        const dInstance = new IndicatorClass(id + "_d", { ...params, type: "d" });
-
-        dataset.apply(kInstance, dInstance);
-
-        const kValues: number[] = [];
-        const dValues: number[] = [];
-
-        for (let i = 0; i < dataset.length; i++) {
-          const q = dataset.at(i);
-          kValues.push(q?.getIndicator(id + "_k") ?? NaN);
-          dValues.push(q?.getIndicator(id + "_d") ?? NaN);
-        }
-        results[id + "_k"] = kValues;
-        results[id + "_d"] = dValues;
       } else {
-        const indicatorInstance = new IndicatorClass(id, params);
-        dataset.apply(indicatorInstance);
+        let indicatorInstance: any = null;
+        const field = params.attribute || "close";
 
+        if (type === "SMA") {
+          indicatorInstance = new SMA(id, { period: params.period, field });
+        } else if (type === "EMA") {
+          indicatorInstance = new EMA(id, { period: params.period, field });
+        } else if (type === "RSI") {
+          indicatorInstance = new RSI(id, { period: params.period, field });
+        } else if (type === "ATR") {
+          indicatorInstance = new ATR(id, { period: params.period });
+        } else if (type === "VWAP") {
+          indicatorInstance = new VWAP(id, { field });
+        } else if (type === "RVOL") {
+          indicatorInstance = new RVOL(id, { period: params.period });
+        } else if (type === "Slope") {
+          indicatorInstance = new Slope(id, { period: params.period, field });
+        } else if (type === "PivotTrend") {
+          indicatorInstance = new PivotTrend(id);
+        } else if (type === "ChandelierExit") {
+          indicatorInstance = new ChandelierExit(id, { period: params.period, multiplier: params.multiplier, line: params.line });
+        } else if (type === "WeeklyAVWAP") {
+          indicatorInstance = new WeeklyAVWAP(id);
+        } else {
+          return res.status(400).json({ success: false, message: `Indicator type ${type} is not supported in core` });
+        }
+
+        const calculatedSeries = indicatorInstance.calculate(series);
         const values: number[] = [];
-        for (let i = 0; i < dataset.length; i++) {
-          const q = dataset.at(i);
-          values.push(q?.getIndicator(id) ?? NaN);
+        for (let i = 0; i < series.length; i++) {
+          values.push(calculatedSeries.at(i) ?? NaN);
         }
         results[id] = values;
       }
@@ -909,3 +932,4 @@ router.post("/calculate-indicators", async (req: Request, res: Response) => {
 });
 
 export default router;
+

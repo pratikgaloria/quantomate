@@ -1,5 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { Dataset } from "@quantomate/core";
+import { Bar, BarSeries } from "@quantomate/core";
+import { MACD, MACDSignal, BB, Stochastic } from "@quantomate/library";
 import { DataService } from "@quantomate/data";
 import {
   ComputeIndicatorInputSchema,
@@ -7,6 +8,83 @@ import {
 } from "../schemas/inputs.js";
 import { INDICATOR_CATALOGUE } from "../catalogues.js";
 import { createIndicator } from "../indicatorFactory.js";
+
+/**
+ * Helper to compute an indicator values array statelessly
+ */
+function computeStatelessIndicator(
+  indicator: string,
+  series: BarSeries,
+  params: Record<string, any>
+): any[] {
+  const values: any[] = [];
+
+  if (indicator === "MACD") {
+    const field = params.attribute || "close";
+    const fastPeriod = params.fastPeriod || 12;
+    const slowPeriod = params.slowPeriod || 26;
+    const signalPeriod = params.signalPeriod || 9;
+
+    const macdSeries = new MACD("macd", { fastPeriod, slowPeriod, field }).calculate(series);
+    const signalSeries = new MACDSignal("signal", { fastPeriod, slowPeriod, signalPeriod, field }).calculate(series);
+
+    for (let i = 0; i < series.length; i++) {
+      const macdVal = macdSeries.at(i) ?? NaN;
+      const sigVal = signalSeries.at(i) ?? NaN;
+      const histVal = isNaN(macdVal) || isNaN(sigVal) ? NaN : macdVal - sigVal;
+
+      values.push(
+        isNaN(macdVal) && isNaN(sigVal)
+          ? null
+          : { macd: macdVal, signal: sigVal, histogram: histVal }
+      );
+    }
+  } else if (indicator === "BB") {
+    const period = params.period || 20;
+    const multiplier = params.multiplier || 2.0;
+    const field = params.attribute || "close";
+
+    const upper = new BB("upper", { period, multiplier, band: "upper", field }).calculate(series);
+    const middle = new BB("middle", { period, multiplier, band: "middle", field }).calculate(series);
+    const lower = new BB("lower", { period, multiplier, band: "lower", field }).calculate(series);
+
+    for (let i = 0; i < series.length; i++) {
+      const u = upper.at(i) ?? NaN;
+      const m = middle.at(i) ?? NaN;
+      const l = lower.at(i) ?? NaN;
+
+      values.push(
+        isNaN(m)
+          ? null
+          : { upper: u, middle: m, lower: l }
+      );
+    }
+  } else if (indicator === "Stochastic") {
+    const kPeriod = params.kPeriod || params.period || 14;
+    const dPeriod = params.dPeriod || 3;
+
+    const stoch = new Stochastic("stoch", { kPeriod, dPeriod }).calculate(series);
+
+    for (let i = 0; i < series.length; i++) {
+      const val = stoch.at(i);
+      values.push(
+        !val || (isNaN(val.k) && isNaN(val.d))
+          ? null
+          : { k: val.k, d: val.d }
+      );
+    }
+  } else {
+    const inst = createIndicator(indicator as any, params);
+    const calculated = inst.calculate(series);
+
+    for (let i = 0; i < series.length; i++) {
+      const val = calculated.at(i) ?? NaN;
+      values.push(isNaN(val) ? null : val);
+    }
+  }
+
+  return values;
+}
 
 /**
  * Registers all technical indicator tools on the MCP server.
@@ -68,38 +146,28 @@ export function registerIndicatorTools(server: McpServer) {
           };
         }
 
-        const stockData = rawData.map((d: any) => ({
-          date: d.date instanceof Date ? d.date : new Date(d.date),
+        const bars: Bar[] = rawData.map((d: any) => ({
           open: Number(d.open),
           high: Number(d.high),
           low: Number(d.low),
           close: Number(d.close),
           volume: Number(d.volume),
+          timestamp: d.date instanceof Date ? d.date.getTime() : new Date(d.date).getTime(),
         }));
 
-        const dataset = new Dataset(stockData);
-        const indicatorInstance = createIndicator(indicator as any, params || {});
-        dataset.apply(indicatorInstance);
+        const series = new BarSeries(bars);
+        const indicatorValues = computeStatelessIndicator(indicator, series, params || {});
 
-        const series: { date: string; value: any }[] = [];
-        for (let i = 0; i < dataset.length; i++) {
-          const quote = dataset.at(i)!;
-          const val = quote.value as any;
-          let indicatorValue: any;
-          try {
-            indicatorValue = quote.getIndicator(indicator);
-          } catch {
-            indicatorValue = null;
-          }
-          series.push({
-            date: val.date instanceof Date ? val.date.toISOString() : val.date,
-            value: typeof indicatorValue === "number" && isNaN(indicatorValue)
-              ? null
-              : indicatorValue,
+        const resultSeries: { date: string; value: any }[] = [];
+        for (let i = 0; i < series.length; i++) {
+          const date = new Date(series.at(i)!.timestamp).toISOString();
+          resultSeries.push({
+            date,
+            value: indicatorValues[i],
           });
         }
 
-        const lastValid = [...series].reverse().find((s) => s.value !== null);
+        const lastValid = [...resultSeries].reverse().find((s) => s.value !== null);
 
         return {
           content: [
@@ -112,10 +180,10 @@ export function registerIndicatorTools(server: McpServer) {
                   interval,
                   indicator,
                   params: params ?? {},
-                  barsUsed: stockData.length,
+                  barsUsed: bars.length,
                   latestValue: lastValid?.value ?? null,
                   latestDate: lastValid?.date ?? null,
-                  series,
+                  series: resultSeries,
                 },
                 null,
                 2
@@ -166,33 +234,26 @@ export function registerIndicatorTools(server: McpServer) {
           };
         }
 
-        const stockData = rawData.map((d: any) => ({
-          date: d.date instanceof Date ? d.date : new Date(d.date),
+        const bars: Bar[] = rawData.map((d: any) => ({
           open: Number(d.open),
           high: Number(d.high),
           low: Number(d.low),
           close: Number(d.close),
           volume: Number(d.volume),
+          timestamp: d.date instanceof Date ? d.date.getTime() : new Date(d.date).getTime(),
         }));
 
-        const dataset = new Dataset(stockData);
-        const indicatorInstance = createIndicator(indicator as any, params || {});
-        dataset.apply(indicatorInstance);
+        const series = new BarSeries(bars);
+        const indicatorValues = computeStatelessIndicator(indicator, series, params || {});
 
         const allValues: { date: string; value: any }[] = [];
-        for (let i = 0; i < dataset.length; i++) {
-          const quote = dataset.at(i)!;
-          const val = quote.value as any;
-          let indicatorValue: any;
-          try {
-            indicatorValue = quote.getIndicator(indicator);
-          } catch {
-            indicatorValue = null;
-          }
-          if (indicatorValue !== null && !(typeof indicatorValue === "number" && isNaN(indicatorValue))) {
+        for (let i = 0; i < series.length; i++) {
+          const val = indicatorValues[i];
+          if (val !== null) {
+            const date = new Date(series.at(i)!.timestamp).toISOString();
             allValues.push({
-              date: val.date instanceof Date ? val.date.toISOString() : val.date,
-              value: indicatorValue,
+              date,
+              value: val,
             });
           }
         }

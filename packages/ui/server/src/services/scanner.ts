@@ -1,8 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { Dataset } from '@quantomate/core';
+import { Bar, BarSeries } from '@quantomate/core';
 import { fetchStockData } from './stockDataFetcher';
-import { createStrategy } from './backtestRunner';
+import { createStrategy, getIndicatorsForStrategy } from './backtestRunner';
 
 export interface ScanResult {
   symbol: string;
@@ -35,42 +35,68 @@ export async function runScan(strategyId: string, parameters: Record<string, any
         return { symbol, hasSignal: false, error: 'No data found' };
       }
 
-      const dataset = new Dataset(stockData);
-      const lastSignalQuote = strategy.scan(dataset);
-      const currentQuote = dataset.at(-1)!;
-      const currentPrice = (currentQuote.value as any).close;
+      const bars: Bar[] = stockData.map((d) => ({
+        open: d.open,
+        high: d.high,
+        low: d.low,
+        close: d.close,
+        volume: d.volume,
+        timestamp: d.date.getTime(),
+      }));
+      const series = new BarSeries(bars);
 
-      if (lastSignalQuote) {
-        const signalValue = lastSignalQuote.value as any;
-        const strategyValue = lastSignalQuote.getStrategy(strategy.name);
-        if (!strategyValue) {
-           return { symbol, hasSignal: false, lastClose: currentPrice };
+      const { indicatorSeriesMap, secondarySeriesMap } = getIndicatorsForStrategy(
+        strategyId,
+        series,
+        parameters,
+        strategyId === 'strong-pullback' ? series : undefined
+      );
+
+      const context = {
+        getIndicatorSeries: (name: string) => indicatorSeriesMap.get(name),
+        getSecondaryBarSeries: (id: string) => secondarySeriesMap.get(id),
+      };
+
+      let status: 'idle' | 'long' | 'short' = 'idle';
+      let lastSignalIndex = -1;
+      let lastSignalDirection: 'long' | 'short' = 'long';
+
+      for (let i = 0; i < series.length; i++) {
+        const signal = strategy.evaluate(series, i, context);
+
+        if (status === 'idle') {
+          if (signal.action === 'entry') {
+            const isShort = signal.direction === 'short';
+            status = isShort ? 'short' : 'long';
+            lastSignalIndex = i;
+            lastSignalDirection = isShort ? 'short' : 'long';
+          }
+        } else {
+          if (signal.action === 'exit') {
+            status = 'idle';
+          }
         }
+      }
 
-        const isShort = strategyValue.position.options?.short || false;
-        const entryPrice = strategyId === 'pivot-trend' ? signalValue.open : signalValue.close;
-        
+      const currentPrice = series.at(-1)!.close;
+
+      if (lastSignalIndex !== -1) {
+        const lastSignalBar = series.at(lastSignalIndex)!;
+        const entryPrice = strategyId === 'pivot-trend' ? lastSignalBar.open : lastSignalBar.close;
+        const isShort = lastSignalDirection === 'short';
+
         // P&L Calculation: (Current / Entry - 1) for Long, (1 - Current / Entry) for Short
         const movePercentage = isShort 
           ? (1 - (currentPrice / entryPrice)) * 100
           : ((currentPrice / entryPrice) - 1) * 100;
         
-        // Calculate bars since signal
-        let barsSinceSignal = 0;
-        const signalTime = (lastSignalQuote.value as any).date.getTime();
-        for (let i = dataset.length - 1; i >= 0; i--) {
-          const quote = dataset.at(i);
-          if (quote && (quote.value as any).date.getTime() === signalTime) {
-            barsSinceSignal = dataset.length - 1 - i;
-            break;
-          }
-        }
+        const barsSinceSignal = series.length - 1 - lastSignalIndex;
 
         return {
           symbol,
           hasSignal: true,
-          signalDate: signalValue.date,
-          direction: (isShort ? 'short' : 'long') as any,
+          signalDate: new Date(lastSignalBar.timestamp),
+          direction: lastSignalDirection,
           entryPrice,
           currentPrice,
           movePercentage,
@@ -92,3 +118,4 @@ export async function runScan(strategyId: string, parameters: Record<string, any
 
   return Promise.all(scanPromises);
 }
+
