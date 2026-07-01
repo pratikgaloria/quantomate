@@ -17,6 +17,21 @@ export class VWAP extends IndicatorBase<VWAPParams, number> {
     const volumeField = this.params.volumeField || 'volume';
     const result: number[] = [];
 
+    let isDailyOrHigher = false;
+    if (series.length > 1) {
+      let minDiff = Infinity;
+      const limit = Math.min(series.length, 50);
+      for (let j = 1; j < limit; j++) {
+        const diff = series.at(j)!.timestamp - series.at(j - 1)!.timestamp;
+        if (diff > 0 && diff < minDiff) {
+          minDiff = diff;
+        }
+      }
+      if (minDiff !== Infinity && minDiff >= 20 * 60 * 60 * 1000) {
+        isDailyOrHigher = true;
+      }
+    }
+
     let currentSumPV = 0;
     let currentSumV = 0;
 
@@ -35,9 +50,10 @@ export class VWAP extends IndicatorBase<VWAPParams, number> {
         const d1 = new Date(bar.timestamp);
         const d2 = new Date(prevBar.timestamp);
         const isNewSession =
-          d1.getFullYear() !== d2.getFullYear() ||
-          d1.getMonth() !== d2.getMonth() ||
-          d1.getDate() !== d2.getDate();
+          !isDailyOrHigher &&
+          (d1.getFullYear() !== d2.getFullYear() ||
+            d1.getMonth() !== d2.getMonth() ||
+            d1.getDate() !== d2.getDate());
 
         if (isNewSession) {
           currentSumPV = 0;

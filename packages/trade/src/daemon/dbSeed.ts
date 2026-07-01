@@ -26,16 +26,44 @@ export async function init(): Promise<void> {
       }
     }
 
-    const defaultSessions = [
-      { name: "India Options Session", capital: 200000, virtualCash: 200000, maxDrawdownPct: 10, enabledMarkets: ["india"], provider: "paper", active: true },
-      { name: "US Equities Session", capital: 5000, virtualCash: 5000, maxDrawdownPct: 10, enabledMarkets: ["us"], provider: "paper", active: true },
+    // Create fixed accounts: India (Zerodha/INR) and US (Tradier/USD)
+    const fixedAccounts = [
+      { name: "India", capital: 100000, virtualCash: 100000, maxDrawdownPct: 10, enabledMarkets: ["india"], provider: "zerodha", active: true },
+      { name: "US", capital: 100000, virtualCash: 100000, maxDrawdownPct: 10, enabledMarkets: ["us"], provider: "tradier", active: true },
     ];
 
-    for (const ds of defaultSessions) {
-      const existing = await prisma.allocationSession.findUnique({ where: { name: ds.name } });
+    for (const acct of fixedAccounts) {
+      const existing = await prisma.allocationSession.findUnique({ where: { name: acct.name } });
       if (!existing) {
-        await prisma.allocationSession.create({ data: { ...ds, enabledMarkets: JSON.stringify(ds.enabledMarkets) } });
-        log.info("Daemon", `Seeded default allocation session: ${ds.name}`);
+        await prisma.allocationSession.create({ data: { ...acct, enabledMarkets: JSON.stringify(acct.enabledMarkets) } });
+        log.info("Daemon", `Seeded fixed account: ${acct.name}`);
+      }
+    }
+
+    const indiaAccount = await prisma.allocationSession.findUnique({ where: { name: "India" } });
+    const usAccount = await prisma.allocationSession.findUnique({ where: { name: "US" } });
+
+    // Clean up any other allocation session that is not named "India" or "US"
+    const allSessions = await prisma.allocationSession.findMany();
+    for (const session of allSessions) {
+      if (session.name !== "India" && session.name !== "US") {
+        const markets = Array.isArray(session.enabledMarkets)
+          ? session.enabledMarkets
+          : (typeof session.enabledMarkets === 'string' ? JSON.parse(session.enabledMarkets) : []);
+        const isIndia = markets.includes("india") || session.provider === "zerodha" || session.name.toLowerCase().includes("india");
+        const targetAccount = isIndia ? indiaAccount : usAccount;
+
+        if (targetAccount) {
+          // Reassign any bots to the correct fixed account
+          await prisma.tradingBot.updateMany({
+            where: { allocationSessionId: session.id },
+            data: { allocationSessionId: targetAccount.id }
+          });
+          log.info("Daemon", `Reassigned bots from legacy session '${session.name}' to fixed account '${targetAccount.name}'`);
+        }
+
+        await prisma.allocationSession.delete({ where: { id: session.id } });
+        log.info("Daemon", `Removed legacy allocation session: ${session.name}`);
       }
     }
 

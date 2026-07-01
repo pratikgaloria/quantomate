@@ -3,8 +3,8 @@
   display: flex;
   align-items: center;
   padding: 0 1rem;
-  background: #fafafa;
-  border-bottom: 1px solid #e0e0e0;
+  background: hsl(var(--muted) / 0.4);
+  border-bottom: 1px solid hsl(var(--border));
   flex-shrink: 0;
   gap: 0.75rem;
   overflow-x: auto;
@@ -14,7 +14,7 @@
   .tb-label {
     font-size: 0.72rem;
     font-weight: 600;
-    color: #888;
+    color: hsl(var(--muted-foreground));
     text-transform: uppercase;
     white-space: nowrap;
     padding-right: 0.25rem;
@@ -24,7 +24,7 @@
   .tb-divider {
     width: 1px;
     height: 18px;
-    background: #d0d0d0;
+    background: hsl(var(--border));
     flex-shrink: 0;
   }
 
@@ -34,14 +34,14 @@
     height: 26px;
     padding: 0 0.4rem;
     font-size: 0.78rem;
-    border: 1px solid #ccc;
-    background: #fff;
-    color: #111;
+    border: 1px solid hsl(var(--input));
+    background: hsl(var(--background));
+    color: hsl(var(--foreground));
     outline: none;
     min-width: 120px;
 
     &:focus {
-      border-color: #888;
+      border-color: hsl(var(--ring));
     }
   }
 
@@ -60,19 +60,20 @@
     padding: 0 0.75rem;
     font-size: 0.78rem;
     font-weight: 600;
-    background: #111;
-    color: #fff;
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
     border: none;
     cursor: pointer;
     white-space: nowrap;
     transition: background 0.15s;
 
     &:hover:not(:disabled) {
-      background: #333;
+      background: hsl(var(--primary) / 0.9);
     }
 
     &:disabled {
-      background: #aaa;
+      background: hsl(var(--muted));
+      color: hsl(var(--muted-foreground));
       cursor: not-allowed;
     }
   }
@@ -83,31 +84,46 @@
     padding: 0 0.75rem;
     font-size: 0.78rem;
     font-weight: 500;
-    background: #fff;
-    color: #333;
-    border: 1px solid #ccc;
+    background: hsl(var(--background));
+    color: hsl(var(--foreground));
+    border: 1px solid hsl(var(--input));
     cursor: pointer;
     white-space: nowrap;
     transition: background 0.15s, border-color 0.15s;
 
     &:hover:not(:disabled) {
-      background: #f0f0f0;
-      border-color: #999;
+      background: hsl(var(--accent));
+      color: hsl(var(--accent-foreground));
     }
 
     &:disabled {
-      color: #aaa;
+      color: hsl(var(--muted-foreground));
+      background: hsl(var(--muted));
       cursor: not-allowed;
     }
   }
 
   /* Danger variant */
   .tb-btn-danger {
-    @extend .tb-btn;
-    background: #c0392b;
+    height: 26px;
+    padding: 0 0.75rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    background: hsl(var(--destructive));
+    color: hsl(var(--destructive-foreground));
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s;
 
     &:hover:not(:disabled) {
-      background: #a93226;
+      background: hsl(var(--destructive) / 0.9);
+    }
+
+    &:disabled {
+      background: hsl(var(--muted));
+      color: hsl(var(--muted-foreground));
+      cursor: not-allowed;
     }
   }
 
@@ -118,24 +134,24 @@
     gap: 0.35rem;
     font-size: 0.72rem;
     font-weight: 600;
-    color: #555;
+    color: hsl(var(--muted-foreground));
     white-space: nowrap;
 
     .tb-dot {
       width: 6px;
       height: 6px;
       border-radius: 50%;
-      background: #aaa;
+      background: hsl(var(--muted-foreground) / 0.5);
       flex-shrink: 0;
 
       &.running {
-        background: #16a34a;
+        background: var(--color-profit);
         animation: tb-pulse 1.5s infinite;
       }
-      &.idle   { background: #aaa; }
-      &.offline { background: #c0392b; }
-      &.connected { background: #16a34a; }
-      &.disconnected { background: #ccc; }
+      &.idle   { background: hsl(var(--muted-foreground) / 0.5); }
+      &.offline { background: var(--color-loss); }
+      &.connected { background: var(--color-profit); }
+      &.disconnected { background: hsl(var(--muted-foreground) / 0.5); }
     }
   }
 
@@ -145,13 +161,13 @@
     gap: 0.5rem;
     padding: 0 0.5rem;
     height: 22px;
-    border: 1px solid #ddd;
-    background: #fff;
+    border: 1px solid hsl(var(--border));
+    background: hsl(var(--background));
   }
 }
 
 @keyframes tb-pulse {
-  0%   { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.6); }
-  70%  { box-shadow: 0 0 0 5px rgba(22, 163, 74, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
+  0%   { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); }
+  70%  { box-shadow: 0 0 0 5px rgba(16, 185, 129, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
 }

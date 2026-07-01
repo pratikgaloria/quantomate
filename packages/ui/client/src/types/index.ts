@@ -24,8 +24,8 @@ export interface BacktestRequest {
     endDate: string;
     interval?: string;
   };
-  config: {
-    capital: number;
+  config?: {
+    capital?: number;
   };
 }
 
@@ -47,6 +47,7 @@ export interface BacktestResponse {
     totalCommissions: number;
     totalSlippage: number;
     trades: any[];
+    sharpeRatio?: number;
   };
   chartData: {
     prices: any[];

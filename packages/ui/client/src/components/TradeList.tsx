@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { CollapsibleSection } from './CollapsibleSection';
+import { Card } from './atoms';
 import './TradeList.scss';
 
 interface Trade {
@@ -12,11 +12,17 @@ interface Trade {
 
 interface TradeListProps {
   trades: Trade[];
+  initialCapital?: number;
+  periodRange?: string;
+  selectedTrade?: { id: number; entryDate: string; exitDate: string } | null;
+  onSelectTrade?: (trade: { id: number; entryDate: string; exitDate: string } | null) => void;
 }
 
-export const TradeList: FC<TradeListProps> = ({ trades }) => {
-  // Group trades into positions (entry + exit pairs)
+export const TradeList: FC<TradeListProps> = ({ trades, initialCapital, periodRange, selectedTrade, onSelectTrade }) => {
+  // Group trades into positions (entry + exit pairs) and track cumulative account value
+  let currentCapital = initialCapital ?? 10000;
   const positions: Array<{
+    id: number;
     entryDate: string;
     entryPrice: number;
     exitDate: string;
@@ -25,6 +31,7 @@ export const TradeList: FC<TradeListProps> = ({ trades }) => {
     isShort: boolean;
     profitLoss: number;
     profitLossPercent: number;
+    cumulativeValue: number;
   }> = [];
 
   for (let i = 0; i < trades.length; i++) {
@@ -40,7 +47,10 @@ export const TradeList: FC<TradeListProps> = ({ trades }) => {
         const profitLoss = isShort ? entryPrice - exitPrice : exitPrice - entryPrice;
         const profitLossPercent = (profitLoss / entryPrice) * 100;
 
+        currentCapital += profitLoss;
+
         positions.push({
+          id: 100 + positions.length,
           entryDate: trade.date,
           entryPrice,
           exitDate: exitTrade.date,
@@ -49,6 +59,7 @@ export const TradeList: FC<TradeListProps> = ({ trades }) => {
           isShort,
           profitLoss,
           profitLossPercent,
+          cumulativeValue: currentCapital,
         });
         i++; // Skip the exit trade
       }
@@ -62,6 +73,14 @@ export const TradeList: FC<TradeListProps> = ({ trades }) => {
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const year = d.getFullYear();
     return `${day}.${month}.${year}`;
+  };
+
+  const formatTime = (dateStr: string) => {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return 'Invalid Time';
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
   };
 
   const formatFullDate = (dateStr: string) => {
@@ -95,53 +114,78 @@ export const TradeList: FC<TradeListProps> = ({ trades }) => {
   };
 
   return (
-    <CollapsibleSection title="Trade History" className="trade-list">
-      {positions.length === 0 ? (
-        <p className="no-trades">No trades executed</p>
-      ) : (
-        <div className="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Period</th>
-                <th>Direction</th>
-                <th>Entry Price</th>
-                <th>Exit Price</th>
-                <th>Exit Reason</th>
-                <th>P&L ($)</th>
-                <th>P&L (%)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {positions.map((position, index) => (
-                <tr key={index}>
-                  <td title={`${formatFullDate(position.entryDate)} - ${formatFullDate(position.exitDate)}`}>
-                    {formatCustomDate(position.entryDate)} - {formatCustomDate(position.exitDate)}
-                  </td>
-                  <td>
-                    <span className={`direction-label ${position.isShort ? 'short' : 'long'}`}>
-                      {position.isShort ? 'Short' : 'Long'}
-                    </span>
-                  </td>
-                  <td>${position.entryPrice?.toFixed(2) ?? '0.00'}</td>
-                  <td>${position.exitPrice?.toFixed(2) ?? '0.00'}</td>
-                  <td>
-                    <span className={`exit-reason ${getExitReasonClass(position.exitReason)}`}>
-                      {getExitReasonLabel(position.exitReason)}
-                    </span>
-                  </td>
-                  <td className={position.profitLoss >= 0 ? 'profit' : 'loss'}>
-                    ${position.profitLoss?.toFixed(2) ?? '0.00'}
-                  </td>
-                  <td className={position.profitLoss >= 0 ? 'profit' : 'loss'}>
-                    {position.profitLossPercent?.toFixed(2) ?? '0.00'}%
-                  </td>
+    <Card title="Trade History" className="trade-list">
+      <div className="trades-card-content">
+        {positions.length === 0 ? (
+          <p className="no-trades">No trades executed</p>
+        ) : (
+          <div className="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Period</th>
+                  <th>Price</th>
+                  <th>Direction</th>
+                  <th>P&L ($)</th>
+                  <th>P&L (%)</th>
+                  <th>Cumulative Value</th>
+                  <th>Exit Reason</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </CollapsibleSection>
+              </thead>
+              <tbody>
+                {positions.map((position, index) => {
+                  const isSelected = selectedTrade && selectedTrade.id === position.id;
+                  return (
+                    <tr
+                      key={index}
+                      className={isSelected ? 'selected-row' : ''}
+                      onClick={() => {
+                        if (isSelected) {
+                          onSelectTrade?.(null);
+                        } else {
+                          onSelectTrade?.({ id: position.id, entryDate: position.entryDate, exitDate: position.exitDate });
+                        }
+                      }}
+                      style={{ cursor: 'pointer' }}
+                    >
+                    <td>#{position.id}</td>
+                    <td title={`${formatFullDate(position.entryDate)} - ${formatFullDate(position.exitDate)}`}>
+                      {periodRange === 'yesterday'
+                        ? `${formatTime(position.entryDate)} - ${formatTime(position.exitDate)}`
+                        : `${formatCustomDate(position.entryDate)} - ${formatCustomDate(position.exitDate)}`
+                      }
+                    </td>
+                    <td>
+                      ${position.entryPrice?.toFixed(2) ?? '0.00'} - ${position.exitPrice?.toFixed(2) ?? '0.00'}
+                    </td>
+                    <td>
+                      <span className={`direction-label ${position.isShort ? 'short' : 'long'}`}>
+                        {position.isShort ? 'Short' : 'Long'}
+                      </span>
+                    </td>
+                    <td className={position.profitLoss >= 0 ? 'profit' : 'loss'}>
+                      ${position.profitLoss?.toFixed(2) ?? '0.00'}
+                    </td>
+                    <td className={position.profitLoss >= 0 ? 'profit' : 'loss'}>
+                      {position.profitLossPercent?.toFixed(2) ?? '0.00'}%
+                    </td>
+                    <td>
+                      ${position.cumulativeValue?.toFixed(2) ?? '0.00'}
+                    </td>
+                    <td>
+                      <span className={`exit-reason ${getExitReasonClass(position.exitReason)}`}>
+                        {getExitReasonLabel(position.exitReason)}
+                      </span>
+                    </td>
+                  </tr>
+                );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </Card>
   );
 };

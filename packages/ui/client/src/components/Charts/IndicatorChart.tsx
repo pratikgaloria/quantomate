@@ -15,6 +15,7 @@ interface IndicatorChartProps {
     type: string;
     name: string;
     params: Record<string, any>;
+    visible?: boolean;
   }>;
   indicatorData: Record<string, number[]>;
 }
@@ -99,6 +100,11 @@ export const IndicatorChart: FC<IndicatorChartProps> = ({ data, activeIndicators
     // Draw Overlay Indicators on Plot 0
     activeIndicators.forEach((ind) => {
       if (overlayTypes.includes(ind.type)) {
+        // Skip hidden indicators
+        if (ind.visible === false) {
+          colorIdx++;
+          return;
+        }
         const key = ind.id;
         const color = colors[colorIdx % colors.length];
         colorIdx++;
@@ -148,10 +154,13 @@ export const IndicatorChart: FC<IndicatorChartProps> = ({ data, activeIndicators
         const color = colors[colorIdx % colors.length];
         colorIdx++;
 
-        // Add a new plot pane
+        // Add a new plot pane (always allocate to preserve layout)
         const panePlot = chart.plot(plotCount);
         panePlot.height(separatePlotHeight);
         plotCount++;
+
+        // Skip hidden indicators — pane is kept but no series drawn
+        if (ind.visible === false) return;
 
         if (ind.type === 'RSI') {
           const vals = indicatorData[key];

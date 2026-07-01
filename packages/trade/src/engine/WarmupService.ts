@@ -1,14 +1,12 @@
 import { DataService } from '@quantomate/data';
 import { Bar } from '@quantomate/core';
-import { BotConfig, LiveEngineConfig } from './LiveTradingEngine';
+import { LiveEngineConfig } from './LiveTradingEngine';
 
 export class WarmupService {
   /**
    * Fetches historical quotes for warming up a bot's candle series
    */
-  static async fetchWarmupBars(bot: BotConfig, config: LiveEngineConfig): Promise<Bar[]> {
-    const symbol = bot.symbol;
-    const intv = bot.interval;
+  static async fetchWarmupBars(symbol: string, intv: string, config: LiveEngineConfig): Promise<Bar[]> {
     let warmupQuotes: any[] = [];
 
     try {

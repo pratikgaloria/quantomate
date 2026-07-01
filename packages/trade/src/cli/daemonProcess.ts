@@ -47,32 +47,24 @@ export async function startDaemon(
 
 export async function stopDaemon(pidFile: string, daemonUrl: string): Promise<void> {
   console.log('Stopping trading daemon...');
-
   try {
-    const res = await axios.post(`${daemonUrl}/stop`);
-    if (res.data.success) {
-      console.log('Daemon requested graceful shutdown via API.');
-      if (fs.existsSync(pidFile)) fs.unlinkSync(pidFile);
-      return;
-    }
-  } catch (err) {
-    // API offline, try PID kill
-  }
+    await axios.post(`${daemonUrl}/stop`);
+    console.log('Daemon requested graceful shutdown via API.');
+  } catch (err) {}
 
   if (fs.existsSync(pidFile)) {
     const pid = parseInt(fs.readFileSync(pidFile, 'utf8'), 10);
     try {
       process.kill(pid, 'SIGTERM');
       console.log(`Sent SIGTERM to process (PID: ${pid}).`);
-      fs.unlinkSync(pidFile);
     } catch (err: any) {
       if (err.code === 'ESRCH') {
         console.log('Process was already stopped.');
-        fs.unlinkSync(pidFile);
       } else {
         console.error(`Failed to kill process: ${err.message}`);
       }
     }
+    fs.unlinkSync(pidFile);
   } else {
     console.log('No active daemon PID file found. Daemon is likely stopped.');
   }

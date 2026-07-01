@@ -17,7 +17,7 @@ export async function calculateOrderQty(
     targetCapital = callbacks.getVirtualCash(sessionId);
   }
 
-  const tradeCapital = targetCapital * allocation;
+  const tradeCapital = Math.max(0, Math.min(targetCapital * allocation, accountBalance));
 
   let tradePrice = currentPrice;
   if (config.tradeOptions && 'lastPrices' in (broker as any)) {

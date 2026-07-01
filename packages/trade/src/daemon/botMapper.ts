@@ -17,10 +17,16 @@ export function mapBotsConfig(openBots: any[], defaultCandleInterval: string): B
       allocationRatio: isOptionStrat ? 0.05 : 0.95
     };
 
+    const symbols = (bot.symbol || "")
+      .split(",")
+      .map((s: string) => s.trim().toUpperCase())
+      .filter(Boolean);
+
     return {
       id: bot.id,
       strategy,
       symbol: bot.symbol,
+      symbols,
       interval,
       executorConfig
     };

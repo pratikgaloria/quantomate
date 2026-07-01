@@ -7,9 +7,13 @@ interface EquityCurveProps {
     value: number;
   }>;
   initialCapital: number;
+  selectedTrade?: {
+    entryDate: Date | string;
+    exitDate: Date | string;
+  } | null;
 }
 
-export const EquityCurve: FC<EquityCurveProps> = ({ data, initialCapital }) => {
+export const EquityCurve: FC<EquityCurveProps> = ({ data, initialCapital, selectedTrade }) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<any>(null);
 
@@ -26,10 +30,10 @@ export const EquityCurve: FC<EquityCurveProps> = ({ data, initialCapital }) => {
       chartInstance.current.dispose();
     }
 
-    // Prepare equity data
+    // Prepare equity data as percentage returns relative to initial capital
     const equityData = data.map(d => [
       new Date(d.date).getTime(),
-      d.value
+      initialCapital > 0 ? ((d.value - initialCapital) / initialCapital) * 100 : 0
     ]);
 
     // Create stock chart
@@ -39,18 +43,24 @@ export const EquityCurve: FC<EquityCurveProps> = ({ data, initialCapital }) => {
 
     // Create line series
     const series = plot.line(equityData);
-    series.name('Equity');
+    series.name('Return');
     series.stroke('#2196f3', 2);
 
-    // Add baseline at initial capital
+    // Add baseline at 0%
     plot.lineMarker()
-      .value(initialCapital)
+      .value(0)
       .stroke('#9e9e9e', 1, '5 5');
 
     // Configure chart
-    chart.title('Equity Curve');
-    plot.yAxis().title('Capital ($)');
-    plot.yAxis().labels().format('${%value}{decimalsCount:2}');
+    chart.padding(10, 0, 10, 0);
+    chart.scroller().enabled(false);
+    plot.legend().enabled(false);
+    plot.yAxis().orientation('left');
+    plot.yAxis().labels().position('inside');
+    plot.yAxis().labels().format('{%value}{decimalsCount:0}%');
+    plot.yAxis().labels().fontSize(10).fontColor('#94a3b8');
+    plot.yAxis().labels().offsetX(5);
+    plot.yAxis().stroke('#e2e8f0');
 
     chart.container(chartRef.current);
     chart.draw();
@@ -63,6 +73,25 @@ export const EquityCurve: FC<EquityCurveProps> = ({ data, initialCapital }) => {
       }
     };
   }, [data, initialCapital]);
+
+  // Update range marker dynamically when selectedTrade changes
+  useEffect(() => {
+    if (!chartInstance.current) return;
+    const plot = chartInstance.current.plot(0);
+    if (!plot) return;
+
+    const rangeMarker = plot.rangeMarker(0);
+    if (selectedTrade) {
+      rangeMarker.layout('vertical');
+      rangeMarker.axis(plot.xAxis()); // Bind to timeline X-axis!
+      rangeMarker.from(new Date(selectedTrade.entryDate).getTime());
+      rangeMarker.to(new Date(selectedTrade.exitDate).getTime());
+      rangeMarker.fill("rgba(148, 163, 184, 0.15)");
+      rangeMarker.enabled(true);
+    } else {
+      rangeMarker.enabled(false);
+    }
+  }, [selectedTrade, data, initialCapital]);
 
   return <div ref={chartRef} style={{ width: '100%', height: '100%' }} />;
 };

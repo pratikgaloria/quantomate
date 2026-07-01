@@ -9,7 +9,12 @@ export class PaperBroker implements IBroker {
   public lastAsks = new Map<string, number>();
   public currentSimulatedTime?: number;
 
-  constructor(public accountName: string, public initialBalance: number = 100000, public commissionPerOrder: number = 20) {}
+  constructor(
+    public accountName: string, 
+    public initialBalance: number = 100000, 
+    public commissionPerOrder: number = 20,
+    public isLive: boolean = false
+  ) {}
 
   setLastPrice(symbol: string, price: number, bid?: number, ask?: number, timestamp?: number) {
     this.lastPrices.set(symbol, price);
@@ -49,9 +54,20 @@ export class PaperBroker implements IBroker {
   }
 
   public async getOrCreateAccount() {
-    const existing = await prisma.tradingAccount.findFirst({ where: { name: this.accountName, provider: 'paper' } });
-    return existing || prisma.tradingAccount.create({
-      data: { name: this.accountName, provider: 'paper', balance: this.initialBalance, currency: 'INR', isLive: false }
+    const existing = await prisma.tradingAccount.findFirst({ 
+      where: { name: this.accountName, provider: 'paper', isLive: this.isLive } 
+    });
+    if (existing) {
+      if (existing.balance < this.initialBalance) {
+        return prisma.tradingAccount.update({
+          where: { id: existing.id },
+          data: { balance: this.initialBalance }
+        });
+      }
+      return existing;
+    }
+    return prisma.tradingAccount.create({
+      data: { name: this.accountName, provider: 'paper', balance: this.initialBalance, currency: 'INR', isLive: this.isLive }
     });
   }
 

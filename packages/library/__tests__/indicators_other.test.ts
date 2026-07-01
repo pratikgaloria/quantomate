@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { BarSeries } from '@quantomate/core';
-import { BB, CCI, WilliamsR, ROC, MOM, Slope } from '../src/indicators';
+import { BB, CCI, WilliamsR, ROC, MOM, Slope, VWAP } from '../src/indicators';
 
 describe('Indicator Regression Tests - Other', () => {
   let series: BarSeries;
@@ -56,5 +56,13 @@ describe('Indicator Regression Tests - Other', () => {
     const slope = new Slope('Slope', { period: 1 }).calculate(series);
     expect(slope.length).toBe(1002);
     expect(slope.at(-1)).toBeCloseTo(-9.5, 4);
+  });
+
+  test('VWAP calculates correctly on daily chart without matching close', () => {
+    const vwap = new VWAP('VWAP').calculate(series);
+    expect(vwap.length).toBe(1002);
+    const lastClose = series.at(-1)!.close;
+    expect(vwap.at(-1)).not.toBe(lastClose);
+    expect(vwap.at(-1)).toBeCloseTo(5043.964680313397, 4);
   });
 });

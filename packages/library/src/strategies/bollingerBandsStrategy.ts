@@ -50,6 +50,7 @@ export class BollingerBandsStrategy implements Strategy {
       return { action: 'idle' };
     }
 
+    const positionStatus = context.getPositionStatus?.() ?? 'idle';
     const canLong = this.direction === 'long' || this.direction === 'both';
     const canShort = this.direction === 'short' || this.direction === 'both';
 
@@ -59,14 +60,21 @@ export class BollingerBandsStrategy implements Strategy {
     const entryShort = prevBar.close <= prevUpper && currentBar.close > upperVal;
     const exitShort = prevBar.close >= prevLower && currentBar.close < lowerVal;
 
-    if (canLong && entryLong) {
-      return { action: 'entry', direction: 'long' };
-    }
-    if (canShort && entryShort) {
-      return { action: 'entry', direction: 'short' };
-    }
-    if ((canLong && exitLong) || (canShort && exitShort)) {
-      return { action: 'exit' };
+    if (positionStatus === 'idle') {
+      if (canLong && entryLong) {
+        return { action: 'entry', direction: 'long' };
+      }
+      if (canShort && entryShort) {
+        return { action: 'entry', direction: 'short' };
+      }
+    } else {
+      const isLong = positionStatus === 'long';
+      if (isLong && exitLong) {
+        return { action: 'exit' };
+      }
+      if (!isLong && exitShort) {
+        return { action: 'exit' };
+      }
     }
 
     return { action: 'idle' };

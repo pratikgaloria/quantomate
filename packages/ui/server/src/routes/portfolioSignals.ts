@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
 import { prisma } from "@quantomate/db";
-import { DataService, FundamentalService, PortfolioSignalService } from "@quantomate/data";
+import { DataService, FundamentalService, PortfolioSignalService, YahooFinanceProvider } from "@quantomate/data";
 import { Bar, BarSeries } from "@quantomate/core";
 import { createStrategy, getIndicatorsForStrategy } from "../services/backtestRunner";
 import * as fs from "fs";
@@ -107,7 +107,8 @@ router.get("/chart/:symbol", async (req: Request, res: Response) => {
     const symbol = req.params.symbol.trim().toUpperCase();
 
     // 1. Fetch historical quotes from local TimescaleDB (fetching/syncing if needed)
-    const history = await DataService.getHistoricalData(symbol);
+    const yahooProvider = new YahooFinanceProvider();
+    const history = await DataService.getHistoricalData(symbol, undefined, undefined, yahooProvider);
     if (!history || history.length === 0) {
       return res
         .status(404)

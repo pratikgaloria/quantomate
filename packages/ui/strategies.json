@@ -37,7 +37,7 @@
     {
       "id": "pivot-trend",
       "name": "Pivot Trend",
-      "description": "Enter long when previous day's close is above pivot resistance (R), exit when below pivot support (S). Entry/exit at next day's open.",
+      "description": "Enter long when close is above R, exit when below S. Next day's open fill.",
       "parameters": [
         {
           "name": "direction",
@@ -49,13 +49,58 @@
             "both"
           ],
           "description": "Trading direction"
+        },
+        {
+          "name": "useTrendFilter",
+          "type": "boolean",
+          "default": false,
+          "description": "Use higher timeframe trend filter"
+        },
+        {
+          "name": "trendFilterInterval",
+          "type": "select",
+          "default": "1d",
+          "options": [
+            "1d",
+            "1wk"
+          ],
+          "description": "Trend filter interval"
+        },
+        {
+          "name": "stopLossType",
+          "type": "select",
+          "default": "none",
+          "options": [
+            "none",
+            "fixed-atr",
+            "trailing-atr",
+            "pivot"
+          ],
+          "description": "Stop Loss Type"
+        },
+        {
+          "name": "atrPeriod",
+          "type": "number",
+          "default": 14,
+          "min": 5,
+          "max": 50,
+          "description": "ATR Period"
+        },
+        {
+          "name": "stopLossMultiplier",
+          "type": "number",
+          "default": 2,
+          "min": 0.5,
+          "max": 5,
+          "step": 0.1,
+          "description": "Stop Loss ATR Multiplier"
         }
       ]
     },
     {
       "id": "rsi-mean-reversion",
       "name": "RSI Mean Reversion",
-      "description": "Buy when RSI is oversold and sell when it is overbought, with optional trend filtering.",
+      "description": "Buy oversold and sell overbought RSI conditions.",
       "parameters": [
         {
           "name": "rsiPeriod",
@@ -111,7 +156,7 @@
     {
       "id": "bollinger-bands",
       "name": "Bollinger Bands",
-      "description": "Buy when price crosses below the lower band and sell when it crosses above the upper band.",
+      "description": "Buy when price crosses below lower band, sell when above upper band.",
       "parameters": [
         {
           "name": "period",
@@ -145,7 +190,7 @@
     {
       "id": "macd",
       "name": "MACD",
-      "description": "Buy when MACD line crosses above the signal line and sell when it crosses below.",
+      "description": "Buy when MACD crosses above signal line, sell when it crosses below.",
       "parameters": [
         {
           "name": "signalPeriod",
@@ -171,7 +216,7 @@
     {
       "id": "strong-pullback",
       "name": "Strong Pullback",
-      "description": "Multi-timeframe strategy that looks for intraday pullbacks in a strong higher-timeframe trend. Checks daily trend (EMA50) and intraday alignment with VWAP and EMA20.",
+      "description": "Looks for pullbacks in a strong higher-timeframe trend.",
       "parameters": [
         {
           "name": "emaPeriod",
@@ -231,7 +276,7 @@
           "min": 0.2,
           "max": 5,
           "step": 0.1,
-          "description": "Take Profit 1 (R multiplier)"
+          "description": "Take Profit 1"
         },
         {
           "name": "tp2_R",
@@ -240,7 +285,7 @@
           "min": 0.5,
           "max": 10,
           "step": 0.1,
-          "description": "Take Profit 2 (R multiplier)"
+          "description": "Take Profit 2"
         },
         {
           "name": "tp1_pct",
@@ -248,7 +293,7 @@
           "default": 50,
           "min": 1,
           "max": 100,
-          "description": "TP1 position percentage exit"
+          "description": "TP1 percentage exit"
         },
         {
           "name": "direction",
@@ -276,7 +321,7 @@
           "min": 0,
           "max": 0.05,
           "step": 0.0001,
-          "description": "Slippage (e.g. 0.0002 for 0.02%)"
+          "description": "Slippage rate"
         }
       ]
     },
@@ -336,7 +381,7 @@
     {
       "id": "long-straddle",
       "name": "Long Straddle",
-      "description": "Buy ATM Call and ATM Put when RSI is outside middle zone (breakout/high volatility).",
+      "description": "Buy ATM Call and ATM Put when RSI is outside middle zone.",
       "parameters": [
         {
           "name": "rsiPeriod",
@@ -367,7 +412,7 @@
     {
       "id": "long-strangle",
       "name": "Long Strangle",
-      "description": "Buy OTM Call and OTM Put when RSI is outside middle zone (cheaper breakout play).",
+      "description": "Buy OTM Call and OTM Put when RSI is outside middle zone.",
       "parameters": [
         {
           "name": "rsiPeriod",
@@ -400,6 +445,277 @@
           "min": 1,
           "max": 10,
           "description": "Strike offset count"
+        }
+      ]
+    },
+    {
+      "id": "index-option-momentum",
+      "name": "Index Option Momentum",
+      "description": "Option momentum strategy based on EMA crossovers of the underlying index.",
+      "parameters": [
+        {
+          "name": "fastPeriod",
+          "type": "number",
+          "default": 9,
+          "min": 2,
+          "max": 50,
+          "description": "Fast EMA period"
+        },
+        {
+          "name": "slowPeriod",
+          "type": "number",
+          "default": 20,
+          "min": 5,
+          "max": 100,
+          "description": "Slow EMA period"
+        },
+        {
+          "name": "source",
+          "type": "select",
+          "default": "close",
+          "options": [
+            "close",
+            "open",
+            "high",
+            "low"
+          ],
+          "description": "Source Candle Value"
+        }
+      ]
+    },
+    {
+      "id": "index-option-rsi-reversion",
+      "name": "Index Option RSI Reversion",
+      "description": "RSI reversion options strategy on the index.",
+      "parameters": [
+        {
+          "name": "rsiPeriod",
+          "type": "number",
+          "default": 14,
+          "min": 2,
+          "max": 50,
+          "description": "RSI period"
+        },
+        {
+          "name": "oversoldThreshold",
+          "type": "number",
+          "default": 30,
+          "min": 5,
+          "max": 50,
+          "description": "Oversold threshold"
+        },
+        {
+          "name": "overboughtThreshold",
+          "type": "number",
+          "default": 70,
+          "min": 50,
+          "max": 95,
+          "description": "Overbought threshold"
+        },
+        {
+          "name": "source",
+          "type": "select",
+          "default": "close",
+          "options": [
+            "close",
+            "open",
+            "high",
+            "low"
+          ],
+          "description": "Source Candle Value"
+        }
+      ]
+    },
+    {
+      "id": "pivot-trend-option",
+      "name": "Pivot Trend Option",
+      "description": "Option trading based on Pivot Point trend lines.",
+      "parameters": [
+        {
+          "name": "direction",
+          "type": "select",
+          "default": "both",
+          "options": [
+            "long",
+            "short",
+            "both"
+          ],
+          "description": "Trading direction"
+        },
+        {
+          "name": "useTrendFilter",
+          "type": "boolean",
+          "default": false,
+          "description": "Use higher timeframe trend filter"
+        },
+        {
+          "name": "trendFilterInterval",
+          "type": "select",
+          "default": "1d",
+          "options": [
+            "1d",
+            "1wk"
+          ],
+          "description": "Trend filter interval"
+        },
+        {
+          "name": "stopLossType",
+          "type": "select",
+          "default": "none",
+          "options": [
+            "none",
+            "fixed-atr",
+            "trailing-atr",
+            "pivot"
+          ],
+          "description": "Stop Loss Type"
+        },
+        {
+          "name": "atrPeriod",
+          "type": "number",
+          "default": 14,
+          "min": 5,
+          "max": 50,
+          "description": "ATR Period"
+        },
+        {
+          "name": "stopLossMultiplier",
+          "type": "number",
+          "default": 2,
+          "min": 0.5,
+          "max": 5,
+          "step": 0.1,
+          "description": "Stop Loss ATR Multiplier"
+        }
+      ]
+    },
+    {
+      "id": "vwap-rvol-option",
+      "name": "VWAP + RVOL Option",
+      "description": "Option entry when price crosses VWAP on high Relative Volume.",
+      "parameters": [
+        {
+          "name": "rvolThreshold",
+          "type": "number",
+          "default": 2,
+          "min": 1,
+          "max": 5,
+          "step": 0.1,
+          "description": "RVOL Threshold"
+        },
+        {
+          "name": "source",
+          "type": "select",
+          "default": "close",
+          "options": [
+            "close",
+            "open",
+            "high",
+            "low"
+          ],
+          "description": "Source Candle Value"
+        }
+      ]
+    },
+    {
+      "id": "vsa-climactic-option",
+      "name": "VSA Climactic Option",
+      "description": "Option entry on climactic volume spikes and small candle bodies near BB limits.",
+      "parameters": [
+        {
+          "name": "bbPeriod",
+          "type": "number",
+          "default": 20,
+          "min": 5,
+          "max": 100,
+          "description": "Bollinger Bands Period"
+        },
+        {
+          "name": "bbStdDev",
+          "type": "number",
+          "default": 2,
+          "min": 0.5,
+          "max": 5,
+          "step": 0.1,
+          "description": "Bollinger Bands Std Dev"
+        },
+        {
+          "name": "rvolThreshold",
+          "type": "number",
+          "default": 2,
+          "min": 1,
+          "max": 5,
+          "step": 0.1,
+          "description": "RVOL Threshold"
+        },
+        {
+          "name": "bodyMultiplier",
+          "type": "number",
+          "default": 0.8,
+          "min": 0.1,
+          "max": 2,
+          "step": 0.1,
+          "description": "Body size multiplier"
+        },
+        {
+          "name": "source",
+          "type": "select",
+          "default": "close",
+          "options": [
+            "close",
+            "open",
+            "high",
+            "low"
+          ],
+          "description": "Source Candle Value"
+        }
+      ]
+    },
+    {
+      "id": "weekly-avwap-option",
+      "name": "Weekly AVWAP Option",
+      "description": "Weekly Anchored VWAP crossover option play with volume filter.",
+      "parameters": [
+        {
+          "name": "volumeSmaPeriod",
+          "type": "number",
+          "default": 20,
+          "min": 5,
+          "max": 50,
+          "description": "Volume SMA Period"
+        }
+      ]
+    },
+    {
+      "id": "chandelier-trend-option",
+      "name": "Chandelier Trend Option",
+      "description": "Option entry based on Chandelier Exit signals and high volume.",
+      "parameters": [
+        {
+          "name": "period",
+          "type": "number",
+          "default": 22,
+          "min": 5,
+          "max": 50,
+          "description": "Chandelier Period"
+        },
+        {
+          "name": "multiplier",
+          "type": "number",
+          "default": 3,
+          "min": 0.5,
+          "max": 10,
+          "step": 0.1,
+          "description": "Chandelier Multiplier"
+        },
+        {
+          "name": "rvolThreshold",
+          "type": "number",
+          "default": 2,
+          "min": 1,
+          "max": 5,
+          "step": 0.1,
+          "description": "RVOL Threshold"
         }
       ]
     }

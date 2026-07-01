@@ -21,15 +21,23 @@ router.post("/cleanup", async (req, res) => {
     return res.status(400).json({ success: false, message: "Invalid symbols list." });
   }
 
-  log.info("API", `Cleanup triggered for symbols: ${symbols.join(", ")}`);
+  const parsedSymbols = Array.from(
+    new Set(
+      symbols
+        .flatMap((s: string) => (typeof s === "string" ? s.split(",").map((sub) => sub.trim().toUpperCase()) : []))
+        .filter(Boolean)
+    )
+  );
+
+  log.info("API", `Cleanup triggered for symbols: ${parsedSymbols.join(", ")}`);
 
   const broker = daemonState.currentBroker || daemonState.globalMemoryBroker;
   if (broker && typeof broker.cleanupSymbols === "function") {
-    await broker.cleanupSymbols(symbols);
+    await broker.cleanupSymbols(parsedSymbols);
   }
 
   const { SessionManager } = await import('../session/SessionManager');
-  SessionManager.getInstance().cleanupVirtualPositions(symbols);
+  SessionManager.getInstance().cleanupVirtualPositions(parsedSymbols);
 
   res.json({ success: true, message: "Cleaned symbols in broker and session manager." });
 });
@@ -61,6 +69,7 @@ router.post("/stop", async (req, res) => {
   try {
     await stopEngine();
     res.json({ success: true, message: "Engine stopped." });
+    setTimeout(() => process.exit(0), 1000);
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message });
   }

@@ -1,13 +1,21 @@
+import dotenv from 'dotenv';
+import path from 'path';
+
+// Load environment configurations from workspace root .env
+dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, '../../../../.env'), override: true });
+
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import { exec } from 'child_process';
-import path from 'path';
 import strategiesRouter from './routes/strategies';
+import customStrategiesRouter from './routes/customStrategies';
 import backtestRouter from './routes/backtest';
 import scanRouter from './routes/scanner';
 import portfolioSignalsRouter from './routes/portfolioSignals';
 
 import tradeRouter from './routes/trade';
+import { searchSymbolsHandler } from './routes/searchSymbols';
 
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3001;
@@ -16,13 +24,37 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3001;
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
+app.use((req, res, next) => {
+  const originalJson = res.json;
+  res.json = function (body) {
+    if (body && body.success && body.data) {
+      const parseMarkets = (s: any) => {
+        if (s && s.enabledMarkets && typeof s.enabledMarkets === 'string') {
+          try {
+            s.enabledMarkets = JSON.parse(s.enabledMarkets);
+          } catch {}
+        }
+      };
+      if (Array.isArray(body.data)) {
+        body.data.forEach(parseMarkets);
+      } else {
+        parseMarkets(body.data);
+      }
+    }
+    return originalJson.call(this, body);
+  };
+  next();
+});
+
 // Routes
+app.use('/api/strategies/custom', customStrategiesRouter);
 app.use('/api/strategies', strategiesRouter);
 app.use('/api/backtest', backtestRouter);
 app.use('/api/scan', scanRouter);
 app.use('/api/portfolio-signals', portfolioSignalsRouter);
 app.use('/api/quotes', portfolioSignalsRouter);
 
+app.get('/api/trade/search-symbols', searchSymbolsHandler);
 app.use('/api/trade', tradeRouter);
 
 // Health check

@@ -29,6 +29,7 @@ export class Backtester {
     const context: StrategyContext = {
       getIndicatorSeries: (name) => this.indicatorSeriesMap.get(name),
       getSecondaryBarSeries: (id) => this.secondarySeriesMap.get(id),
+      getPositionStatus: () => manager.getState().status,
     };
 
     // Simulate bar-by-bar processing

@@ -4,7 +4,7 @@
   h3.collapsible-header {
     font-size: 0.95rem;
     margin-bottom: 0.5rem;
-    color: #222;
+    color: hsl(var(--foreground));
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -14,11 +14,11 @@
     font-weight: 600;
     background-color: transparent;
     border: none;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid hsl(var(--border));
     border-radius: 0;
 
     &:hover {
-      color: #000;
+      opacity: 0.8;
     }
 
     .arrow {

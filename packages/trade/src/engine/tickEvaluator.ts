@@ -52,33 +52,41 @@ export async function evaluateBotsOnTick(
   series: BarSeries,
   engine: any
 ): Promise<void> {
+  const symUpper = symbol.toUpperCase();
   for (const bot of engine.bots) {
-    if (bot.symbol.toUpperCase() !== symbol.toUpperCase() || bot.interval !== intv) {
-      continue;
-    }
+    if (!bot.symbols.includes(symUpper) || bot.interval !== intv) continue;
 
-    const manager = engine.positionManagers.get(bot.id);
+    const managerKey = `${bot.id}:${symUpper}`;
+    const manager = engine.positionManagers.get(managerKey);
     const executor = engine.liveExecutors.get(bot.id);
     if (!manager || !executor) continue;
 
-    const lastTraded = engine.lastTradedCandleTimestamp.get(bot.id);
+    const lastTraded = engine.lastTradedCandleTimestamp.get(managerKey);
     if (lastTraded === currentCandle.timestamp) continue;
 
-    const context = createStrategyContext(bot.strategy, series, engine.baseSeriesMap);
+    const context = createStrategyContext(bot.strategy, series, engine.baseSeriesMap, symbol);
+    context.getPositionStatus = () => manager.getState().status;
+    context.getPosition = () => manager.getState();
     const lastIndex = series.length - 1;
     const signal = bot.strategy.evaluate(series, lastIndex, context);
 
     if (signal.action === 'entry' || signal.action === 'exit') {
       console.log(`[Signal] Tick trigger (${signal.action}) for ${symbol} (${intv}) on bot ${bot.id}. Validating...`);
       const verified = await SignalValidator.validateSignalWithRest(
+        symbol,
         bot,
         series,
         signal.action,
         currentCandle.timestamp,
-        (b, s) => createStrategyContext(b.strategy, s, engine.baseSeriesMap)
+        (b, s) => {
+          const ctx = createStrategyContext(b.strategy, s, engine.baseSeriesMap, symbol);
+          ctx.getPositionStatus = () => manager.getState().status;
+          ctx.getPosition = () => manager.getState();
+          return ctx;
+        }
       );
       if (verified) {
-        engine.lastTradedCandleTimestamp.set(bot.id, currentCandle.timestamp);
+        engine.lastTradedCandleTimestamp.set(managerKey, currentCandle.timestamp);
         const transition = manager.processSignal(signal, series.at(-1)!);
         if (transition) {
           await executor.execute(transition, symbol);

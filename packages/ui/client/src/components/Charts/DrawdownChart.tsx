@@ -6,9 +6,13 @@ interface DrawdownChartProps {
     date: Date | string;
     value: number;
   }>;
+  selectedTrade?: {
+    entryDate: Date | string;
+    exitDate: Date | string;
+  } | null;
 }
 
-export const DrawdownChart: FC<DrawdownChartProps> = ({ equityData }) => {
+export const DrawdownChart: FC<DrawdownChartProps> = ({ equityData, selectedTrade }) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<any>(null);
 
@@ -45,9 +49,15 @@ export const DrawdownChart: FC<DrawdownChartProps> = ({ equityData }) => {
     series.stroke('#ef5350', 2);
 
     // Configure chart
-    chart.title('Drawdown');
-    plot.yAxis().title('Drawdown (%)');
-    plot.yAxis().labels().format('{%value}{decimalsCount:2}%');
+    chart.padding(10, 0, 10, 0);
+    chart.scroller().enabled(false);
+    plot.legend().enabled(false);
+    plot.yAxis().orientation('left');
+    plot.yAxis().labels().position('inside');
+    plot.yAxis().labels().format('{%value}{decimalsCount:0}%');
+    plot.yAxis().labels().fontSize(10).fontColor('#94a3b8');
+    plot.yAxis().labels().offsetX(5);
+    plot.yAxis().stroke('#e2e8f0');
 
     chart.container(chartRef.current);
     chart.draw();
@@ -60,6 +70,25 @@ export const DrawdownChart: FC<DrawdownChartProps> = ({ equityData }) => {
       }
     };
   }, [equityData]);
+
+  // Update range marker dynamically when selectedTrade changes
+  useEffect(() => {
+    if (!chartInstance.current) return;
+    const plot = chartInstance.current.plot(0);
+    if (!plot) return;
+
+    const rangeMarker = plot.rangeMarker(0);
+    if (selectedTrade) {
+      rangeMarker.layout('vertical');
+      rangeMarker.axis(plot.xAxis()); // Bind to timeline X-axis!
+      rangeMarker.from(new Date(selectedTrade.entryDate).getTime());
+      rangeMarker.to(new Date(selectedTrade.exitDate).getTime());
+      rangeMarker.fill("rgba(148, 163, 184, 0.15)");
+      rangeMarker.enabled(true);
+    } else {
+      rangeMarker.enabled(false);
+    }
+  }, [selectedTrade, equityData]);
 
   return <div ref={chartRef} style={{ width: '100%', height: '100%' }} />;
 };

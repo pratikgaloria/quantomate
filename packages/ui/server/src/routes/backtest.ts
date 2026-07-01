@@ -9,9 +9,9 @@ router.post('/', async (req: Request, res: Response) => {
     const { strategyId, parameters, stock, config } = req.body;
 
     // Validate request
-    if (!strategyId || !stock || !config) {
+    if (!strategyId || !stock) {
       return res.status(400).json({
-        error: 'Missing required fields: strategyId, stock, config'
+        error: 'Missing required fields: strategyId, stock'
       });
     }
 

@@ -1,6 +1,6 @@
-import { ILiveFeed } from '@quantomate/data';
+import { ILiveFeed, DataService, YahooFinanceProvider } from '@quantomate/data';
 import { CandleBuilder, intervalToMs } from '../utils/CandleBuilder';
-import { Bar, BarSeries, PositionManager, OptionSelector } from '@quantomate/core';
+import { Bar, BarSeries, PositionManager, OptionSelector, Strategy } from '@quantomate/core';
 import { IBroker } from '../broker';
 import { LiveExecutor } from '../executor';
 import { SessionManager } from '../session/SessionManager';
@@ -35,6 +35,9 @@ export class LiveTradingEngine {
     this.isRunning = true;
 
     configureDataProvider(this.feed.constructor.name, this.config);
+    if (this.feed.constructor.name !== 'HistoricalMockFeed' && DataService.provider instanceof YahooFinanceProvider) {
+      throw new Error(`Trading engine cannot use YahooFinanceProvider for live execution (feed: ${this.feed.constructor.name})`);
+    }
     await this.feed.connect();
 
     const callbacks = {
@@ -47,24 +50,42 @@ export class LiveTradingEngine {
     };
 
     for (const bot of this.bots) {
-      const datasetKey = `${bot.symbol}:${bot.interval}`;
-      if (!this.baseSeriesMap.has(datasetKey)) {
-        const warmupBars = await WarmupService.fetchWarmupBars(bot, this.config);
-        this.baseSeriesMap.set(datasetKey, new BarSeries(warmupBars));
+      const strategy = bot.strategy as Strategy;
+      for (const sym of bot.symbols) {
+        const datasetKey = `${sym}:${bot.interval}`;
+        if (!this.baseSeriesMap.has(datasetKey)) {
+          const warmupBars = await WarmupService.fetchWarmupBars(sym, bot.interval, this.config);
+          this.baseSeriesMap.set(datasetKey, new BarSeries(warmupBars));
+        }
+
+        if (strategy.getRequiredSecondaryIntervals) {
+          const neededIntervals = strategy.getRequiredSecondaryIntervals(bot.interval);
+          for (const secInterval of neededIntervals) {
+            const secKey = `${sym}:${secInterval}`;
+            if (!this.baseSeriesMap.has(secKey)) {
+              const secWarmup = await WarmupService.fetchWarmupBars(sym, secInterval, this.config);
+              this.baseSeriesMap.set(secKey, new BarSeries(secWarmup));
+            }
+          }
+        }
+
+        this.positionManagers.set(`${bot.id}:${sym}`, new PositionManager());
       }
-      this.positionManagers.set(bot.id, new PositionManager());
       this.liveExecutors.set(bot.id, new LiveExecutor(this.broker, bot.executorConfig, callbacks));
     }
 
     const volumeMode = (this.feed.constructor.name === 'HistoricalMockFeed') ? 'delta' : 'cumulative';
     for (const bot of this.bots) {
-      const builderKey = `${bot.symbol}:${bot.interval}`;
-      if (!this.candleBuilders.has(builderKey)) {
-        this.candleBuilders.set(builderKey, new CandleBuilder(intervalToMs(bot.interval), volumeMode));
+      for (const sym of bot.symbols) {
+        const builderKey = `${sym}:${bot.interval}`;
+        if (!this.candleBuilders.has(builderKey)) {
+          this.candleBuilders.set(builderKey, new CandleBuilder(intervalToMs(bot.interval), volumeMode));
+        }
       }
     }
 
-    this.feed.subscribe(Array.from(new Set(this.bots.map(b => b.symbol))), (tick) => this.enqueueTick(tick));
+    const allSymbols = Array.from(new Set(this.bots.flatMap(b => b.symbols)));
+    this.feed.subscribe(allSymbols, (tick) => this.enqueueTick(tick));
     this.feed.onDisconnect(() => {
       this.isRunning = false;
       if (this.syncTimer) { clearInterval(this.syncTimer); this.syncTimer = null; }

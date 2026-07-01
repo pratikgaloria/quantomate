@@ -8,7 +8,9 @@ import {
   VsaClimacticOptionStrategy,
   ChandelierTrendOptionStrategy,
   IndexOptionMomentumStrategy,
-  IndexOptionRsiReversionStrategy
+  IndexOptionRsiReversionStrategy,
+  LongStraddleStrategy,
+  LongStrangleStrategy
 } from '@quantomate/library';
 
 export function instantiateStrategy(
@@ -47,6 +49,11 @@ export function instantiateStrategy(
     case "PivotTrendOption":
       return new PivotTrendStrategy(name, {
         direction: params.direction ?? "both",
+        useTrendFilter: params.useTrendFilter ?? false,
+        trendFilterInterval: params.trendFilterInterval ?? "1d",
+        stopLossType: params.stopLossType ?? "none",
+        atrPeriod: params.atrPeriod ?? 14,
+        stopLossMultiplier: params.stopLossMultiplier ?? 2.0,
       });
     case "VwapRvolOption":
       return new VwapRvolOptionStrategy(name, {
@@ -68,6 +75,19 @@ export function instantiateStrategy(
         period: params.period ?? 22,
         multiplier: params.multiplier ?? 3.0,
         rvolThreshold: params.rvolThreshold ?? 2.0,
+      });
+    case "LongStraddle":
+      return new LongStraddleStrategy(name, {
+        rsiPeriod: params.rsiPeriod ?? 14,
+        lowerThreshold: params.lowerThreshold ?? 35,
+        upperThreshold: params.upperThreshold ?? 65,
+      });
+    case "LongStrangle":
+      return new LongStrangleStrategy(name, {
+        rsiPeriod: params.rsiPeriod ?? 14,
+        lowerThreshold: params.lowerThreshold ?? 35,
+        upperThreshold: params.upperThreshold ?? 65,
+        strikeOffset: params.strikeOffset ?? 2,
       });
     default:
       throw new Error(`Unsupported strategy type: ${strategyType}`);

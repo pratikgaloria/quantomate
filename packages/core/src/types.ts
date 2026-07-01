@@ -10,6 +10,7 @@ export interface Bar {
 export interface TradeSignal {
   action: 'entry' | 'exit' | 'idle';
   direction?: 'long' | 'short';
+  metadata?: Record<string, any>;
 }
 
 export interface OptionSelector {

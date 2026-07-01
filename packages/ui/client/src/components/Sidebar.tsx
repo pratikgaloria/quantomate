@@ -14,7 +14,7 @@ export function Sidebar() {
     <aside className="sidebar">
       {/* Logo mark */}
       <div className="sidebar__logo" title="Quantomate">
-        <i className="la la-layer-group" />
+        Q
       </div>
 
       {/* Navigation */}

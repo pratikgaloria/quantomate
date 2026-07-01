@@ -15,9 +15,13 @@ interface PriceChartProps {
     price: number;
     exitReason?: 'stop-loss' | 'take-profit' | 'strategy';
   }>;
+  selectedTrade?: {
+    entryDate: Date | string;
+    exitDate: Date | string;
+  } | null;
 }
 
-export const PriceChart: FC<PriceChartProps> = ({ data, trades }) => {
+export const PriceChart: FC<PriceChartProps> = ({ data, trades, selectedTrade }) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<any>(null);
 
@@ -57,6 +61,21 @@ export const PriceChart: FC<PriceChartProps> = ({ data, trades }) => {
       }
     }
 
+    const getThemeColor = (varName: string, fallback: string): string => {
+      if (typeof window !== 'undefined') {
+        const val = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+        if (val) return val;
+      }
+      return fallback;
+    };
+
+    const colorProfitChart = getThemeColor('--color-profit-chart', '#26a69a');
+    const colorLossChart = getThemeColor('--color-loss-chart', '#ef5350');
+    const colorProfit = getThemeColor('--color-profit', '#10b981');
+    const colorExitSL = getThemeColor('--color-exit-sl', '#b91c1c');
+    const colorExitTP = getThemeColor('--color-exit-tp', '#1d4ed8');
+    const colorExitStrat = getThemeColor('--color-exit-strat', '#c2410c');
+
     // Prepare OHLC data with colors based on trade P&L
     const ohlcData = data.map(d => {
       const timestamp = new Date(d.date).getTime();
@@ -65,7 +84,7 @@ export const PriceChart: FC<PriceChartProps> = ({ data, trades }) => {
       let color = null;
       for (const pos of positions) {
         if (timestamp >= pos.entryDate && timestamp <= pos.exitDate) {
-          color = pos.profit >= 0 ? '#26a69a' : '#ef5350';
+          color = pos.profit >= 0 ? colorProfitChart : colorLossChart;
           break;
         }
       }
@@ -96,13 +115,13 @@ export const PriceChart: FC<PriceChartProps> = ({ data, trades }) => {
     ohlcSeries.risingStroke(function(this: any) {
       const point = this as any;
       const dataItem = ohlcData.find(d => d.x === point.x);
-      return dataItem?.stroke || '#26a69a';
+      return dataItem?.stroke || colorProfitChart;
     }, 1);
     
     ohlcSeries.fallingStroke(function(this: any) {
       const point = this as any;
       const dataItem = ohlcData.find(d => d.x === point.x);
-      return dataItem?.stroke || '#ef5350';
+      return dataItem?.stroke || colorLossChart;
     }, 1);
 
     // Add entry markers
@@ -114,10 +133,10 @@ export const PriceChart: FC<PriceChartProps> = ({ data, trades }) => {
       ]);
       const entryMarkers = plot.marker(entryData);
       entryMarkers.name('Entry');
-      entryMarkers.type('arrow-up');
-      entryMarkers.fill('#4caf50');
-      entryMarkers.stroke('#4caf50', 2);
-      entryMarkers.size(10);
+      entryMarkers.type('triangle-up');
+      entryMarkers.fill(colorProfit);
+      entryMarkers.stroke(null);
+      entryMarkers.size(7);
       entryMarkers.tooltip().enabled(false);
     }
 
@@ -126,9 +145,9 @@ export const PriceChart: FC<PriceChartProps> = ({ data, trades }) => {
     
     const exitReasons: Array<'stop-loss' | 'take-profit' | 'strategy'> = ['stop-loss', 'take-profit', 'strategy'];
     const exitColors = {
-      'stop-loss': '#f44336',
-      'take-profit': '#2196f3',
-      'strategy': '#ff9800'
+      'stop-loss': colorExitSL,
+      'take-profit': colorExitTP,
+      'strategy': colorExitStrat
     };
     const exitNames = {
       'stop-loss': 'Stop-Loss Exit',
@@ -145,19 +164,25 @@ export const PriceChart: FC<PriceChartProps> = ({ data, trades }) => {
         ]);
         const exitMarker = plot.marker(exitData);
         exitMarker.name(exitNames[reason]);
-        exitMarker.type('arrow-down');
+        exitMarker.type('triangle-down');
         const color = exitColors[reason];
         exitMarker.fill(color);
-        exitMarker.stroke(color, 2);
-        exitMarker.size(10);
+        exitMarker.stroke(null);
+        exitMarker.size(7);
         exitMarker.tooltip().enabled(false);
       }
     });
 
-    // Configure chart with 2 decimal formatting
-    chart.title('Price Chart with Trade Markers');
-    plot.yAxis().title('Price ($)');
-    plot.yAxis().labels().format('${%value}{decimalsCount:2}');
+    // Configure chart formatting
+    chart.padding(10, 0, 10, 0);
+    chart.scroller().enabled(false);
+    plot.legend().enabled(false);
+    plot.yAxis().orientation('left');
+    plot.yAxis().labels().position('inside');
+    plot.yAxis().labels().format('${%value}{decimalsCount:0}');
+    plot.yAxis().labels().fontSize(10).fontColor('#94a3b8');
+    plot.yAxis().labels().offsetX(5);
+    plot.yAxis().stroke('#e2e8f0');
 
     // Set container and draw
     chart.container(chartRef.current);
@@ -171,6 +196,25 @@ export const PriceChart: FC<PriceChartProps> = ({ data, trades }) => {
       }
     };
   }, [data, trades]);
+
+  // Update range marker dynamically when selectedTrade changes
+  useEffect(() => {
+    if (!chartInstance.current) return;
+    const plot = chartInstance.current.plot(0);
+    if (!plot) return;
+
+    const rangeMarker = plot.rangeMarker(0);
+    if (selectedTrade) {
+      rangeMarker.layout('vertical');
+      rangeMarker.axis(plot.xAxis()); // Bind to timeline X-axis!
+      rangeMarker.from(new Date(selectedTrade.entryDate).getTime());
+      rangeMarker.to(new Date(selectedTrade.exitDate).getTime());
+      rangeMarker.fill("rgba(148, 163, 184, 0.15)");
+      rangeMarker.enabled(true);
+    } else {
+      rangeMarker.enabled(false);
+    }
+  }, [selectedTrade, data, trades]);
 
   return (
     <div className="chart-container">

@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
 import { prisma } from "@quantomate/db";
-import { DataService, KiteInstrumentMapper, TradierDataProvider, YahooFinanceProvider } from "@quantomate/data";
+import { DataService, KiteInstrumentMapper, TradierDataProvider, YahooFinanceProvider, KiteDataProvider, RoutingDataProvider } from "@quantomate/data";
 import dotenv from "dotenv";
 import path from "path";
 import { 
@@ -27,59 +27,37 @@ import {
 
 // Load environment configurations
 dotenv.config();
-dotenv.config({ path: path.resolve(__dirname, "../../../../.env") });
+dotenv.config({ path: path.resolve(__dirname, "../../../../../.env"), override: true });
 
 const router = Router();
 
-// Helper to determine market from symbol name
-function getMarketForSymbol(symbol: string): string {
-  const sym = symbol.toUpperCase().trim();
-  const cryptoAssets = ["BTC", "ETH", "SOL", "ADA", "DOT", "DOGE", "XRP"];
-  if (
-    cryptoAssets.some(
-      (c) =>
-        sym.startsWith(c) ||
-        sym.endsWith(c) ||
-        sym.includes("/USD") ||
-        sym.includes("-USD"),
-    )
-  ) {
-    return "crypto";
-  }
-  if (
-    sym.startsWith("NIFTY") ||
-    sym.startsWith("BANKNIFTY") ||
-    sym.startsWith("^NSE") ||
-    sym.endsWith(".NS") ||
-    sym.includes("NSEI") ||
-    sym.includes("NSEBANK") ||
-    sym.startsWith("NSE:") ||
-    sym.startsWith("NFO:") ||
-    ["SBIN", "RELIANCE", "TCS", "INFY", "HDFCBANK", "ICICIBANK"].includes(sym)
-  ) {
-    return "india";
-  }
-  return "us";
-}
+// Router-level middleware to configure DataService.provider to use Zerodha/Tradier live providers for all /api/trade requests
+router.use(async (req, res, next) => {
+  try {
+    const session = await prisma.tradingSession.findFirst({
+      where: { provider: "zerodha" },
+      orderBy: { createdAt: "desc" },
+    });
 
-// Helper to map symbol to Yahoo ticker symbol
-function mapSymbolToYahooTicker(symbol: string): string {
-  const sym = symbol.toUpperCase().trim();
-  if (sym === "NIFTY 50" || sym === "NSEI" || sym === "NIFTY") {
-    return "^NSEI";
+    const kiteKey = process.env.ZERODHA_API_KEY || '';
+    const kiteToken = session?.accessToken || '';
+    
+    const tradierToken = process.env.TRADIER_API_KEY || '';
+    const useSandbox = process.env.TRADIER_ENV !== 'production';
+
+    const kiteProvider = new KiteDataProvider(kiteKey, kiteToken);
+    const tradierProvider = new TradierDataProvider(tradierToken, useSandbox);
+
+    DataService.provider = new RoutingDataProvider({
+      kite: kiteProvider,
+      tradier: tradierProvider
+    });
+  } catch (error) {
+    console.error("[TradeRoutes] Failed to initialize live RoutingDataProvider:", error);
   }
-  if (sym === "NIFTY BANK" || sym === "NSEBANK" || sym === "BANKNIFTY") {
-    return "^NSEBANK";
-  }
-  const market = getMarketForSymbol(sym);
-  if (market === "crypto") {
-    return sym.replace("/", "-");
-  }
-  if (market === "india") {
-    return `${sym}.NS`;
-  }
-  return sym;
-}
+  next();
+});
+
 const DAEMON_PORT = process.env.DAEMON_PORT
   ? parseInt(process.env.DAEMON_PORT, 10)
   : 8082;
@@ -269,8 +247,41 @@ router.get("/status", async (req: Request, res: Response) => {
 // GET /api/trade/positions
 router.get("/positions", async (req: Request, res: Response) => {
   try {
-    const daemonStatus = await fetchFromDaemon("/status");
-    res.json({ success: true, data: daemonStatus.positions || [] });
+    const modeSetting = await prisma.systemSetting.findUnique({ where: { key: "trading_mode" } });
+    const isLive = modeSetting?.value === "live";
+    const accountName = isLive ? "Live-Zerodha-Account" : "Paper-Zerodha-Account";
+
+    const account = await prisma.tradingAccount.findFirst({
+      where: { name: accountName, isLive }
+    });
+
+    if (!account) {
+      return res.json({ success: true, data: [] });
+    }
+
+    const dbPositions = await prisma.tradingPosition.findMany({ where: { accountId: account.id } });
+    
+    let latestPrices: Record<string, number> = {};
+    try {
+      const daemonStatus = await fetchFromDaemon("/status");
+      latestPrices = daemonStatus.prices || {};
+    } catch (e) {
+      // Daemon offline
+    }
+
+    const positions = dbPositions.map(pos => {
+      const currentPrice = latestPrices[pos.symbol] || pos.marketPrice || pos.entryPrice;
+      return {
+        symbol: pos.symbol,
+        qty: pos.qty,
+        avgEntryPrice: pos.entryPrice,
+        marketPrice: currentPrice,
+        unrealizedPL: (currentPrice - pos.entryPrice) * pos.qty,
+        costBasis: pos.entryPrice * pos.qty
+      };
+    });
+
+    res.json({ success: true, data: positions });
   } catch (error) {
     res.json({ success: true, data: [], offline: true });
   }
@@ -279,8 +290,36 @@ router.get("/positions", async (req: Request, res: Response) => {
 // GET /api/trade/orders
 router.get("/orders", async (req: Request, res: Response) => {
   try {
-    const daemonStatus = await fetchFromDaemon("/status");
-    res.json({ success: true, data: daemonStatus.orders || [] });
+    const modeSetting = await prisma.systemSetting.findUnique({ where: { key: "trading_mode" } });
+    const isLive = modeSetting?.value === "live";
+    const accountName = isLive ? "Live-Zerodha-Account" : "Paper-Zerodha-Account";
+
+    const account = await prisma.tradingAccount.findFirst({
+      where: { name: accountName, isLive }
+    });
+
+    if (!account) {
+      return res.json({ success: true, data: [] });
+    }
+
+    const dbOrders = await prisma.tradingOrder.findMany({
+      where: { accountId: account.id },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    const orders = dbOrders.map(ord => ({
+      id: ord.id,
+      clientOrderId: ord.id,
+      status: ord.status,
+      filledQty: ord.qty,
+      avgFillPrice: ord.filledPrice || undefined,
+      filledAt: ord.updatedAt,
+      commissionPaid: ord.commission,
+      symbol: ord.symbol,
+      side: ord.side
+    }));
+
+    res.json({ success: true, data: orders });
   } catch (error) {
     res.json({ success: true, data: [], offline: true });
   }
@@ -319,27 +358,15 @@ router.get("/prices", async (req: Request, res: Response) => {
       // Daemon offline
     }
 
-    // 3. Fallback to Yahoo Finance quotes for any null prices
+    // 3. Fallback to live provider quotes for any null prices
     const missingSymbols = symbols.filter((sym) => prices[sym] === null);
     if (missingSymbols.length > 0) {
-      const symbolToTicker = new Map<string, string>();
-      const tickers: string[] = [];
+      const quotes = await DataService.provider.getQuotes(missingSymbols);
 
       for (const sym of missingSymbols) {
-        const ticker = mapSymbolToYahooTicker(sym);
-        symbolToTicker.set(sym, ticker);
-        tickers.push(ticker);
-      }
-
-      const quotes = await DataService.provider.getQuotes(tickers);
-
-      for (const sym of missingSymbols) {
-        const ticker = symbolToTicker.get(sym);
-        if (ticker) {
-          const quote = quotes.get(ticker);
-          if (quote) {
-            prices[sym] = quote.regularMarketPrice ?? null;
-          }
+        const quote = quotes.get(sym.toUpperCase().trim());
+        if (quote) {
+          prices[sym] = quote.regularMarketPrice ?? null;
         }
       }
     }
@@ -533,6 +560,46 @@ router.delete("/bots/:id", async (req: Request, res: Response) => {
   }
 });
 
+// POST /api/trade/bots/:id/clear - Clear previous positions/orders for a bot from db
+router.post("/bots/:id/clear", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const bot = await prisma.tradingBot.findUnique({
+      where: { id },
+    });
+    if (!bot) {
+      return res.status(404).json({ success: false, message: "Bot not found" });
+    }
+
+    const modeSetting = await prisma.systemSetting.findUnique({ where: { key: "trading_mode" } });
+    const isLive = modeSetting?.value === "live";
+    const accountName = isLive ? "Live-Zerodha-Account" : "Paper-Zerodha-Account";
+
+    const account = await prisma.tradingAccount.findFirst({
+      where: { name: accountName, isLive }
+    });
+
+    if (account) {
+      await prisma.tradingPosition.deleteMany({
+        where: { accountId: account.id, symbol: bot.symbol }
+      });
+      await prisma.tradingOrder.deleteMany({
+        where: { accountId: account.id, symbol: bot.symbol }
+      });
+      try {
+        await fetchFromDaemon("/cleanup", "POST", { symbols: [bot.symbol] });
+      } catch (err) {
+        // Ignore
+      }
+    }
+
+    res.json({ success: true, message: `Cleared positions and orders for symbol ${bot.symbol}` });
+  } catch (error: any) {
+    console.error("[ClearBotState] Error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 // POST /api/trade/positions/exit
 router.post("/positions/exit", async (req: Request, res: Response) => {
   try {
@@ -630,56 +697,30 @@ router.post("/settings", async (req: Request, res: Response) => {
   }
 });
 
-// GET /api/trade/sessions
+// GET /api/trade/sessions (now called "accounts")
 router.get("/sessions", async (req: Request, res: Response) => {
   try {
     const sessions = await prisma.allocationSession.findMany({
       include: { bots: true },
       orderBy: { createdAt: "asc" },
     });
-    res.json({ success: true, data: sessions });
+    // Enrich with currency field based on market
+    const enriched = sessions.map((s: any) => {
+      const markets = Array.isArray(s.enabledMarkets)
+        ? s.enabledMarkets
+        : (typeof s.enabledMarkets === 'string' ? JSON.parse(s.enabledMarkets) : []);
+      const market = markets[0] || 'us';
+      return { ...s, enabledMarkets: markets, currency: market === 'india' ? 'INR' : 'USD' };
+    });
+    res.json({ success: true, data: enriched });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });
   }
 });
 
-// POST /api/trade/sessions
+// POST /api/trade/sessions — disabled (accounts are fixed)
 router.post("/sessions", async (req: Request, res: Response) => {
-  try {
-    const { name, capital, maxDrawdownPct, enabledMarkets, provider, active } =
-      req.body;
-    if (!name || capital === undefined || !provider) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Missing required fields: name, capital, provider",
-        });
-    }
-
-    if (!enabledMarkets || !Array.isArray(enabledMarkets) || enabledMarkets.length !== 1 || !["india", "us"].includes(enabledMarkets[0])) {
-      return res.status(400).json({
-        success: false,
-        message: "Exactly one enabled market (india or us) must be selected.",
-      });
-    }
-
-    const session = await prisma.allocationSession.create({
-      data: {
-        name,
-        capital: parseFloat(capital),
-        virtualCash: parseFloat(capital),
-        maxDrawdownPct: maxDrawdownPct ? parseFloat(maxDrawdownPct) : 10.0,
-        enabledMarkets: enabledMarkets || [],
-        provider,
-        active: active ?? true,
-      },
-    });
-
-    res.json({ success: true, data: session });
-  } catch (error: any) {
-    res.status(500).json({ success: false, message: error.message });
-  }
+  res.status(403).json({ success: false, message: "Account creation is disabled. Use the fixed India and US accounts." });
 });
 
 // PUT /api/trade/sessions/:id
@@ -733,41 +774,9 @@ router.put("/sessions/:id", async (req: Request, res: Response) => {
   }
 });
 
-// DELETE /api/trade/sessions/:id
+// DELETE /api/trade/sessions/:id — disabled (accounts are fixed)
 router.delete("/sessions/:id", async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-
-    // Get symbols for bots inside this session to clean up their positions/orders
-    const bots = await prisma.tradingBot.findMany({
-      where: { allocationSessionId: id },
-      select: { symbol: true },
-    });
-    const symbols = Array.from(new Set(bots.map((b) => b.symbol)));
-
-    const deleted = await prisma.allocationSession.delete({
-      where: { id },
-    });
-
-    if (symbols.length > 0) {
-      try {
-        await fetchFromDaemon("/cleanup", "POST", { symbols });
-      } catch (err) {
-        // Ignore
-      }
-    }
-
-    // Notify daemon
-    try {
-      await fetchFromDaemon("/reconcile", "POST");
-    } catch (err) {
-      // Ignore
-    }
-
-    res.json({ success: true, data: deleted });
-  } catch (error: any) {
-    res.status(500).json({ success: false, message: error.message });
-  }
+  res.status(403).json({ success: false, message: "Account deletion is disabled. India and US accounts are fixed." });
 });
 
 // POST /api/trade/reset

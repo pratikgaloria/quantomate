@@ -14,12 +14,12 @@ export class ReconciliationService {
     console.log('[BackgroundSync] Starting periodic dataset reconciliation...');
     let delay = 0;
 
-    const uniqueSymbols = Array.from(new Set(bots.map(b => b.symbol.toUpperCase())));
+    const uniqueSymbols = Array.from(new Set(bots.flatMap(b => b.symbols.map(s => s.toUpperCase()))));
 
     for (const symbol of uniqueSymbols) {
       const activeIntervals = new Set<string>();
       for (const bot of bots) {
-        if (bot.symbol.toUpperCase() === symbol) {
+        if (bot.symbols.map(s => s.toUpperCase()).includes(symbol)) {
           activeIntervals.add(bot.interval);
         }
       }

@@ -8,12 +8,32 @@ import {
   EarningsData,
   ScreenerResult
 } from './IDataProvider';
+import { KiteInstrumentMapper } from './KiteProvider';
 
 const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 
 export class YahooFinanceProvider implements IDataProvider {
   private toYahooTicker(symbol: string): string {
-    return symbol.toUpperCase().trim();
+    const s = symbol.toUpperCase().trim();
+    if (s === 'NIFTY 50' || s === 'NIFTY50' || s === 'NSEI' || s === '^NSEI') return '^NSEI';
+    if (s === 'NIFTY BANK' || s === 'BANKNIFTY' || s === 'NSEBANK' || s === '^NSEBANK') return '^NSEBANK';
+    if (s.endsWith('.NS') || s.endsWith('.BO')) return s;
+
+    // Check if it exists in Kite Instrument mapping
+    try {
+      const token = KiteInstrumentMapper.getInstrumentToken(s);
+      if (token) {
+        const list = KiteInstrumentMapper.getCachedList();
+        const inst = list.find(item => item.instrument_token === token);
+        if (inst && inst.exchange === 'NSE' && inst.segment !== 'INDICES') {
+          return `${inst.tradingsymbol}.NS`;
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+
+    return s;
   }
 
   async getHistoricalData(

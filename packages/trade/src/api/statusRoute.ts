@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import log from 'npmlog';
 import { daemonState } from '../daemon/orchestrator';
+import { getSystemSettings } from '../daemon/engineControl';
 
 const router = Router();
 
@@ -28,14 +29,29 @@ router.get("/status", async (req, res) => {
     }
   }
 
-  res.json({
-    running: isRunning,
-    activeBots: daemonState.activeEngineBotsCount,
-    account: accountInfo,
-    positions: openPositions,
-    orders: openOrders,
-    prices: activePrices
-  });
+  try {
+    const settings = await getSystemSettings();
+    res.json({
+      success: true,
+      settings,
+      running: isRunning,
+      activeBots: daemonState.activeEngineBotsCount,
+      account: accountInfo,
+      positions: openPositions,
+      orders: openOrders,
+      prices: activePrices
+    });
+  } catch (err: any) {
+    res.json({
+      success: true,
+      running: isRunning,
+      activeBots: daemonState.activeEngineBotsCount,
+      account: accountInfo,
+      positions: openPositions,
+      orders: openOrders,
+      prices: activePrices
+    });
+  }
 });
 
 export const statusRoute = router;

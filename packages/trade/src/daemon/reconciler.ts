@@ -23,10 +23,7 @@ export async function reconcileEngine(): Promise<void> {
 
     await SessionManager.getInstance().loadSessions();
 
-    const openBots = activeBots.filter((bot) => {
-      const market = getMarketForSymbol(bot.symbol);
-      return settings.enabledMarkets.includes(market) && isMarketOpen(market);
-    });
+    const openBots = activeBots.filter(b => settings.enabledMarkets.includes(getMarketForSymbol(b.symbol)) && isMarketOpen(getMarketForSymbol(b.symbol)));
 
     daemonState.lastOpenBotsHash = openBots.map((b) => `${b.id}:${b.symbol}`).sort().join(",");
     daemonState.activeEngineBotsCount = openBots.length;
@@ -38,34 +35,28 @@ export async function reconcileEngine(): Promise<void> {
     }
 
     let session: any = null;
-    try {
-      session = await checkZerodhaAuth(openBots, settings, activeBots);
-    } catch (err: any) {
-      if (err.message === "AUTH_EXPIRED") return;
-      throw err;
-    }
+    try { session = await checkZerodhaAuth(openBots, settings, activeBots); }
+    catch (err: any) { if (err.message === "AUTH_EXPIRED") return; throw err; }
 
     await stopEngine();
 
-    const hasIndiaMarket = openBots.some((bot) => getMarketForSymbol(bot.symbol) === "india");
+    const hasIndiaMarket = openBots.some(b => getMarketForSymbol(b.symbol) === "india");
     const apiKey = process.env.ZERODHA_API_KEY;
-    if (hasIndiaMarket && !apiKey) {
-      log.error("Daemon", "ZERODHA_API_KEY is not defined in env.");
-      return;
-    }
+    if (hasIndiaMarket && !apiKey) return log.error("Daemon", "ZERODHA_API_KEY is not defined in env.");
 
     const hasUSMarket = openBots.some((bot) => getMarketForSymbol(bot.symbol) === "us");
     const tradierApiKey = process.env.TRADIER_API_KEY;
 
     daemonState.currentFeed = await initializeFeed(hasIndiaMarket, hasUSMarket, apiKey, session, tradierApiKey);
 
+    const sessions = await prisma.allocationSession.findMany({ where: { active: true } });
+    const totalCap = sessions.reduce((sum, s) => sum + s.capital, 0);
+    const brokerBalance = Math.max(100000, totalCap);
+
     if (settings.tradingMode === "paper") {
-      if (!daemonState.globalMemoryBroker) {
-        daemonState.globalMemoryBroker = new MemoryBroker("Paper-Zerodha-Account", 100000);
-      }
-      daemonState.currentBroker = daemonState.globalMemoryBroker;
+      daemonState.currentBroker = new PaperBroker("Paper-Zerodha-Account", brokerBalance, 20, false);
     } else {
-      daemonState.currentBroker = new PaperBroker("Live-Zerodha-Account", 100000);
+      daemonState.currentBroker = new PaperBroker("Live-Zerodha-Account", brokerBalance, 20, true);
     }
 
     const bots = mapBotsConfig(openBots, settings.candleInterval);
@@ -79,8 +70,7 @@ export async function reconcileEngine(): Promise<void> {
       kiteAccessToken: session?.accessToken || undefined,
       tradierAccessToken: tradierApiKey || undefined,
       tradierUseSandbox: process.env.TRADIER_ENV !== "production",
-      resolveOptionSymbol: (underlying, optionType, price, selector) =>
-        resolveOptionSymbol(underlying, optionType, price, selector, tradierApiKey)
+      resolveOptionSymbol: (und, type, price, sel) => resolveOptionSymbol(und, type, price, sel, tradierApiKey)
     });
 
     await daemonState.engine.start();

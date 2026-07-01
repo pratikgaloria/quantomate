@@ -37,6 +37,7 @@ export class PositionManager {
           status: nextStatus,
           entryPrice: bar.close,
           entryTime: bar.timestamp,
+          metadata: signal.metadata,
         };
         return {
           type: 'entry',

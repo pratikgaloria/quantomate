@@ -43,6 +43,13 @@ export class StrongPullbackStrategy implements Strategy {
     this.direction = params.direction ?? 'both';
   }
 
+  getRequiredSecondaryIntervals(baseInterval: string): string[] {
+    if (baseInterval !== '1d') {
+      return ['1d'];
+    }
+    return [];
+  }
+
   evaluate(series: BarSeries, index: number, context: StrategyContext): TradeSignal {
     if (index < 1) {
       return { action: 'idle' };
@@ -223,10 +230,21 @@ export class StrongPullbackStrategy implements Strategy {
     let high = dailySeries.length - 1;
     let resultIndex = -1;
 
+    const toUtcDateStr = (ts: number) => {
+      return new Date(ts).toISOString().split('T')[0];
+    };
+
+    const currentUtcDateStr = toUtcDateStr(timestamp);
+
     while (low <= high) {
       const mid = Math.floor((low + high) / 2);
       const midBar = dailySeries.at(mid);
-      if (midBar && midBar.timestamp < timestamp) {
+      if (!midBar) {
+        high = mid - 1;
+        continue;
+      }
+
+      if (toUtcDateStr(midBar.timestamp) < currentUtcDateStr) {
         resultIndex = mid;
         low = mid + 1;
       } else {

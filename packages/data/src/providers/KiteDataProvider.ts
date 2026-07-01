@@ -1,56 +1,29 @@
-import { IDataProvider, HistoricalPriceData, QuoteData, FundamentalData, StockSummaryData, EarningsData, ScreenerResult } from './IDataProvider';
+import { IDataProvider, HistoricalPriceData, QuoteData, FundamentalData } from './IDataProvider';
 // @ts-ignore
 import { KiteConnect } from 'kiteconnect';
 import { KiteInstrumentMapper } from './KiteProvider';
 
 export class KiteDataProvider implements IDataProvider {
   private kc: any;
-
   constructor(apiKey: string, accessToken: string) {
-    this.kc = new KiteConnect({
-      api_key: apiKey,
-      access_token: accessToken
-    });
+    this.kc = new KiteConnect({ api_key: apiKey, access_token: accessToken });
   }
 
   private mapInterval(interval?: string): string {
-    if (!interval) return 'day';
-    switch (interval) {
-      case '1m': return 'minute';
-      case '3m': return '3minute';
-      case '5m': return '5minute';
-      case '15m': return '15minute';
-      case '30m': return '30minute';
-      case '60m':
-      case '1h': return '60minute';
-      case '3h': return '3hour';
-      case '1d': return 'day';
-      default: return 'day';
-    }
+    const map: Record<string, string> = { '1m': 'minute', '3m': '3minute', '5m': '5minute', '15m': '15minute', '30m': '30minute', '60m': '60minute', '1h': '60minute', '3h': '3hour', '1d': 'day' };
+    return interval ? map[interval] || 'day' : 'day';
   }
 
-  async getHistoricalData(
-    symbol: string,
-    start: Date,
-    end: Date,
-    interval?: string
-  ): Promise<HistoricalPriceData[]> {
+  async getHistoricalData(symbol: string, start: Date, end: Date, interval?: string): Promise<HistoricalPriceData[]> {
     const token = KiteInstrumentMapper.getInstrumentToken(symbol);
     if (!token) {
       console.warn(`[KiteDataProvider] Token not found for symbol ${symbol}. Historical fetch skipped.`);
       return [];
     }
-
-    const kiteInterval = this.mapInterval(interval);
     try {
-      const candles = await this.kc.getHistoricalData(token, kiteInterval, start, end);
+      const candles = await this.kc.getHistoricalData(token, this.mapInterval(interval), start, end);
       return (candles || []).map((c: any) => ({
-        date: new Date(c.date),
-        open: Number(c.open),
-        high: Number(c.high),
-        low: Number(c.low),
-        close: Number(c.close),
-        volume: Number(c.volume),
+        date: new Date(c.date), open: Number(c.open), high: Number(c.high), low: Number(c.low), close: Number(c.close), volume: Number(c.volume),
       }));
     } catch (err: any) {
       console.error(`[KiteDataProvider] Historical fetch failed for ${symbol}:`, err.message);
@@ -58,9 +31,7 @@ export class KiteDataProvider implements IDataProvider {
     }
   }
 
-  async getFundamentals(symbol: string): Promise<FundamentalData> {
-    return { symbol, name: symbol };
-  }
+  async getFundamentals(symbol: string): Promise<FundamentalData> { return { symbol, name: symbol }; }
 
   async getQuotes(symbols: string[]): Promise<Map<string, QuoteData>> {
     const map = new Map<string, QuoteData>();
@@ -69,19 +40,19 @@ export class KiteDataProvider implements IDataProvider {
     const kiteSymbols = symbols.map(s => {
       const upper = s.toUpperCase().trim();
       if (upper.includes(':')) return upper;
-      return `NSE:${upper}`;
+      const exchange = (upper.endsWith('CE') || upper.endsWith('PE') || upper.endsWith('FUT')) ? 'NFO' : 'NSE';
+      return `${exchange}:${upper}`;
     });
 
     try {
       const quotesRes = await this.kc.getQuote(kiteSymbols);
       for (const s of symbols) {
         const upper = s.toUpperCase().trim();
-        const kiteKey = upper.includes(':') ? upper : `NSE:${upper}`;
-        const q = quotesRes[kiteKey];
+        const exchange = (upper.endsWith('CE') || upper.endsWith('PE') || upper.endsWith('FUT')) ? 'NFO' : 'NSE';
+        const q = quotesRes[`${exchange}:${upper}`];
         if (q) {
           map.set(upper, {
-            symbol: upper,
-            regularMarketPrice: Number(q.last_price),
+            symbol: upper, regularMarketPrice: Number(q.last_price),
             bid: q.depth?.buy?.[0]?.price ? Number(q.depth.buy[0].price) : undefined,
             ask: q.depth?.sell?.[0]?.price ? Number(q.depth.sell[0].price) : undefined,
             regularMarketVolume: Number(q.volume),
@@ -94,35 +65,20 @@ export class KiteDataProvider implements IDataProvider {
     return map;
   }
 
-  async getSummaries(symbols: string[]): Promise<Map<string, StockSummaryData>> {
-    return new Map();
-  }
-
-  async getPeers(symbol: string): Promise<string[]> {
-    return [];
-  }
-
-  async getEarnings(symbol: string): Promise<EarningsData | null> {
-    return null;
-  }
-
-  async getScreener(scrId: string, count?: number): Promise<ScreenerResult | null> {
-    return null;
-  }
+  async getSummaries(symbols: string[]) { return new Map(); }
+  async getPeers(symbol: string) { return []; }
+  async getEarnings(symbol: string) { return null; }
+  async getScreener(scrId: string) { return null; }
 
   async search(query: string): Promise<any> {
-    const upperQuery = query.toUpperCase().trim();
-    const list = KiteInstrumentMapper.getCachedList();
-    const matches = list.filter(item => 
-      item.tradingsymbol?.toUpperCase().includes(upperQuery) || 
-      item.name?.toUpperCase().includes(upperQuery)
-    );
-
-    return matches.slice(0, 50).map(item => ({
-      symbol: `${item.exchange}:${item.tradingsymbol}`,
-      shortname: item.name || item.tradingsymbol,
-      longname: item.name || item.tradingsymbol,
-      exchange: item.exchange,
-    }));
+    const q = query.toUpperCase().trim();
+    return KiteInstrumentMapper.getCachedList()
+      .filter(item => item.tradingsymbol?.toUpperCase().includes(q) || item.name?.toUpperCase().includes(q))
+      .slice(0, 50).map(item => ({
+        symbol: `${item.exchange}:${item.tradingsymbol}`,
+        shortname: item.name || item.tradingsymbol,
+        longname: item.name || item.tradingsymbol,
+        exchange: item.exchange,
+      }));
   }
 }

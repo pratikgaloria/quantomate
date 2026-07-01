@@ -5,6 +5,7 @@ export interface BotConfig {
   id: string;
   strategy: V2Strategy;
   symbol: string;
+  symbols: string[];
   interval: string;
   executorConfig: ExecutorConfig;
 }

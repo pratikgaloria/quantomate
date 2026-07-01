@@ -1,4 +1,4 @@
-import { DataService } from '@quantomate/data';
+import { DataService, YahooFinanceProvider } from '@quantomate/data';
 import YahooFinance from 'yahoo-finance2';
 
 const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
@@ -36,7 +36,8 @@ export async function fetchStockData(
       day: '2-digit'
     });
 
-    const allData = await DataService.getHistoricalData(symbol, undefined, interval);
+    const yahooProvider = new YahooFinanceProvider();
+    const allData = await DataService.getHistoricalData(symbol, undefined, interval, yahooProvider);
 
     return allData
       .filter(item => {

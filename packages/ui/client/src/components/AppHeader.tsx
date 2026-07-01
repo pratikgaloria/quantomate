@@ -8,12 +8,8 @@ export const AppHeader: FC = () => {
   return (
     <header className="app-header">
       <div className="app-header__left">
-        <span className="app-header__app-name">Quantomate</span>
         {pageTitle && (
-          <>
-            <span className="app-header__divider">/</span>
-            <span className="app-header__page-title">{pageTitle}</span>
-          </>
+          <span className="app-header__page-title">{pageTitle}</span>
         )}
       </div>
       <div className="app-header__right">

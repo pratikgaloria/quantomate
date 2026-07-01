@@ -4,6 +4,7 @@ import { BotConfig } from './engineTypes';
 
 export class SignalValidator {
   static async validateSignalWithRest(
+    symbol: string,
     bot: BotConfig,
     series: BarSeries,
     localSignalValue: 'entry' | 'exit',
@@ -11,30 +12,31 @@ export class SignalValidator {
     createStrategyContext: (bot: BotConfig, series: BarSeries) => any
   ): Promise<boolean> {
     try {
-      console.log(`[Validation] Querying REST historical data for ${bot.symbol} (${bot.interval}) to verify signal`);
-      const allQuotes = await DataService.getHistoricalData(bot.symbol, undefined, bot.interval);
+      console.log(`[Validation] Querying REST historical data for ${symbol} (${bot.interval}) to verify signal`);
+      const allQuotes = await DataService.getHistoricalData(symbol, undefined, bot.interval);
 
       const officialCandle = allQuotes.find((q: any) => new Date(q.date).getTime() === closedTimestamp);
       if (!officialCandle) {
-        console.warn(`[Validation] Official REST candle not found yet for ${bot.symbol} (${bot.interval}) at timestamp ${closedTimestamp}. Retrying...`);
+        console.warn(`[Validation] Official REST candle not found yet for ${symbol} (${bot.interval}) at timestamp ${closedTimestamp}. Retrying...`);
         await new Promise((resolve) => setTimeout(resolve, 1500));
-        const retryQuotes = await DataService.getHistoricalData(bot.symbol, undefined, bot.interval);
+        const retryQuotes = await DataService.getHistoricalData(symbol, undefined, bot.interval);
         const retryCandle = retryQuotes.find((q: any) => new Date(q.date).getTime() === closedTimestamp);
         if (!retryCandle) {
-          console.warn(`[Validation] Failed to find official REST candle after retry for ${bot.symbol} (${bot.interval}). Using local.`);
+          console.warn(`[Validation] Failed to find official REST candle after retry for ${symbol} (${bot.interval}). Using local.`);
           return true;
         }
-        return this.verifyAndApplyOfficialCandle(bot, series, localSignalValue, retryCandle, createStrategyContext);
+        return this.verifyAndApplyOfficialCandle(symbol, bot, series, localSignalValue, retryCandle, createStrategyContext);
       }
 
-      return this.verifyAndApplyOfficialCandle(bot, series, localSignalValue, officialCandle, createStrategyContext);
+      return this.verifyAndApplyOfficialCandle(symbol, bot, series, localSignalValue, officialCandle, createStrategyContext);
     } catch (err: any) {
-      console.error(`[Validation] Error during REST validation for ${bot.symbol}:`, err.message);
+      console.error(`[Validation] Error during REST validation for ${symbol}:`, err.message);
       return true;
     }
   }
 
   private static verifyAndApplyOfficialCandle(
+    symbol: string,
     bot: BotConfig,
     series: BarSeries,
     localSignalValue: 'entry' | 'exit',
@@ -68,7 +70,7 @@ export class SignalValidator {
     const signal = bot.strategy.evaluate(series, index, context);
     
     if (signal.action === localSignalValue) {
-      console.log(`[Validation] Signal CONFIRMED for ${bot.symbol} via REST API.`);
+      console.log(`[Validation] Signal CONFIRMED for ${symbol} via REST API.`);
       return true;
     } else {
       console.warn(`[Validation] Signal REJECTED. Local was ${localSignalValue}, but Official REST is ${signal.action}.`);
