@@ -10,7 +10,7 @@
         "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
         "build:client": "cd client && npm run build",
         "build": "npm run fetch-strategies && npm run build:client",
-        "test": "echo 'No tests for UI'"
+        "test": "npm run test --prefix server"
     },
     "devDependencies": {
         "concurrently": "^8.2.2",

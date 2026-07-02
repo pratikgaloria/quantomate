@@ -6,14 +6,16 @@ interface IndicatorSettingsModalProps {
 }
 
 export const IndicatorSettingsModal: FC<IndicatorSettingsModalProps> = ({ state }) => {
-  const { settingsIndicator, closeSettings, handleParamChange } = state;
+  const { settingsIndicator, closeSettings, updateIndicator, period } = state;
   const [localParams, setLocalParams] = useState<Record<string, any>>({});
+  const [localTimeframe, setLocalTimeframe] = useState<string>('');
   const firstInputRef = useRef<HTMLInputElement | HTMLSelectElement>(null);
 
-  // Sync local params when the target indicator changes
+  // Sync local states when the target indicator changes
   useEffect(() => {
     if (settingsIndicator) {
       setLocalParams({ ...settingsIndicator.params });
+      setLocalTimeframe(settingsIndicator.timeframe || '');
     }
   }, [settingsIndicator]);
 
@@ -35,6 +37,7 @@ export const IndicatorSettingsModal: FC<IndicatorSettingsModalProps> = ({ state 
 
   const handleApply = () => {
     // Apply each changed param, with validation
+    const updatedParams: Record<string, any> = {};
     schema.params.forEach(p => {
       let value = localParams[p.name];
       if (p.type === 'number') {
@@ -43,8 +46,10 @@ export const IndicatorSettingsModal: FC<IndicatorSettingsModalProps> = ({ state 
         if (p.min !== undefined && value < p.min) value = p.min;
         if (p.max !== undefined && value > p.max) value = p.max;
       }
-      handleParamChange(settingsIndicator.id, p.name, value);
+      updatedParams[p.name] = value;
     });
+    
+    updateIndicator(settingsIndicator.id, updatedParams, localTimeframe);
     closeSettings();
   };
 
@@ -107,6 +112,33 @@ export const IndicatorSettingsModal: FC<IndicatorSettingsModalProps> = ({ state 
               )}
             </div>
           ))}
+
+          {/* Timeframe Selection */}
+          <div className="ind-settings-modal__field">
+            <label className="ind-settings-modal__label">Timeframe</label>
+            <select
+              className="ind-settings-modal__select"
+              value={localTimeframe}
+              onChange={(e) => setLocalTimeframe(e.target.value)}
+            >
+              <option value="">Chart Timeframe</option>
+              {(period === '1d' || period === '1w') ? (
+                <>
+                  <option value="1m">1 Min</option>
+                  <option value="5m">5 Min</option>
+                  <option value="15m">15 Min</option>
+                  <option value="1h">1 Hour</option>
+                  <option value="1d">1 Day</option>
+                </>
+              ) : (
+                <>
+                  <option value="1d">1 Day</option>
+                  <option value="1wk">1 Week</option>
+                  <option value="1mo">1 Month</option>
+                </>
+              )}
+            </select>
+          </div>
         </div>
 
         {/* Footer */}

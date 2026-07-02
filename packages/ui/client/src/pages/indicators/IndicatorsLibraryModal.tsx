@@ -7,12 +7,16 @@ interface IndicatorsLibraryModalProps {
 
 export const IndicatorsLibraryModal: FC<IndicatorsLibraryModalProps> = ({ state }) => {
   const [search, setSearch] = useState('');
+  const [pendingIndicators, setPendingIndicators] = useState<IndicatorSchema[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Focus search input on mount
+  // Focus search input on mount, and clear pending selections when modal opens/closes
   useEffect(() => {
-    if (state.libraryOpen && inputRef.current) {
-      inputRef.current.focus();
+    if (state.libraryOpen) {
+      setPendingIndicators([]);
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
     }
   }, [state.libraryOpen]);
 
@@ -28,25 +32,45 @@ export const IndicatorsLibraryModal: FC<IndicatorsLibraryModalProps> = ({ state 
       )
     : INDICATORS_SCHEMA;
 
-  const handleAdd = (schema: IndicatorSchema) => {
-    state.addIndicator(schema);
+  const handleQueueIndicator = (schema: IndicatorSchema) => {
+    setPendingIndicators(prev => [...prev, schema]);
   };
 
-  // Count active instances per type
+  const handleRemovePending = (indexToRemove: number) => {
+    setPendingIndicators(prev => prev.filter((_, idx) => idx !== indexToRemove));
+  };
+
+  const handleApply = () => {
+    pendingIndicators.forEach(schema => {
+      state.addIndicator(schema);
+    });
+    setPendingIndicators([]);
+    state.setLibraryOpen(false);
+  };
+
+  const handleClose = () => {
+    setPendingIndicators([]);
+    state.setLibraryOpen(false);
+  };
+
+  // Count active instances per type (including pending additions)
   const activeCounts: Record<string, number> = {};
   state.activeIndicators.forEach(ind => {
     activeCounts[ind.type] = (activeCounts[ind.type] || 0) + 1;
   });
+  pendingIndicators.forEach(schema => {
+    activeCounts[schema.type] = (activeCounts[schema.type] || 0) + 1;
+  });
 
   return (
-    <div className="ind-modal-backdrop" onClick={() => state.setLibraryOpen(false)}>
+    <div className="ind-modal-backdrop" onClick={handleClose}>
       <div className="ind-library-modal" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="ind-library-modal__header">
           <span className="ind-library-modal__title">Indicators</span>
           <button
             className="ind-library-modal__close"
-            onClick={() => state.setLibraryOpen(false)}
+            onClick={handleClose}
             aria-label="Close indicators library"
           >
             <i className="la la-times" />
@@ -91,7 +115,7 @@ export const IndicatorsLibraryModal: FC<IndicatorsLibraryModalProps> = ({ state 
                   <button
                     key={schema.type}
                     className="ind-library-modal__item"
-                    onClick={() => handleAdd(schema)}
+                    onClick={() => handleQueueIndicator(schema)}
                     title={schema.description}
                   >
                     <span className="ind-library-modal__item-name">{schema.name}</span>
@@ -104,6 +128,43 @@ export const IndicatorsLibraryModal: FC<IndicatorsLibraryModalProps> = ({ state 
               })}
             </div>
           </div>
+        </div>
+
+        {/* Pending / Selected list */}
+        {pendingIndicators.length > 0 && (
+          <div className="ind-library-modal__pending-section">
+            <div className="ind-library-modal__section-label">Selected to Add</div>
+            <div className="ind-library-modal__pending-list">
+              {pendingIndicators.map((schema, idx) => (
+                <div key={idx} className="ind-library-modal__pending-item">
+                  <span>{schema.name}</span>
+                  <button
+                    onClick={() => handleRemovePending(idx)}
+                    aria-label={`Remove pending ${schema.name}`}
+                  >
+                    <i className="la la-times" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Footer */}
+        <div className="ind-library-modal__footer">
+          <button
+            className="ind-library-modal__btn ind-library-modal__btn--cancel"
+            onClick={handleClose}
+          >
+            Cancel
+          </button>
+          <button
+            className="ind-library-modal__btn ind-library-modal__btn--apply"
+            onClick={handleApply}
+            disabled={pendingIndicators.length === 0}
+          >
+            Apply ({pendingIndicators.length})
+          </button>
         </div>
       </div>
     </div>

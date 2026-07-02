@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { KiteInstrumentMapper, TradierDataProvider } from '@quantomate/data';
+import { KiteInstrumentMapper, TradierDataProvider, YahooFinanceProvider } from '@quantomate/data';
 
 export async function searchSymbolsHandler(req: Request, res: Response) {
   try {
@@ -54,21 +54,22 @@ export async function searchSymbolsHandler(req: Request, res: Response) {
         }
       }
       return res.json({ success: true, data: matches });
-    } else if (market === "us") {
+    } else if (market === "us" || market === "yf") {
       let rawResults: any[] = [];
       const token = process.env.TRADIER_API_KEY;
-      if (token) {
+      if (token && market !== "yf") {
         const useSandbox = process.env.TRADIER_ENV !== "production";
         const provider = new TradierDataProvider(token, useSandbox);
         rawResults = await provider.search(q);
       } else {
-        console.warn("[SearchSymbols] TRADIER_API_KEY is not defined in process.env");
+        const provider = new YahooFinanceProvider();
+        rawResults = await provider.search(q);
       }
       const matches = (rawResults || []).map((item: any) => ({
         symbol: item.symbol,
         name: item.shortname || item.longname || item.name || item.symbol,
-        exchange: item.exchange || 'US',
-        market: 'us'
+        exchange: item.exchange || (market === 'yf' ? 'YF' : 'US'),
+        market: market
       }));
       return res.json({ success: true, data: matches });
     }

@@ -1,4 +1,4 @@
-import { BarSeries } from '@quantomate/core';
+import { BarSeries, Series } from '@quantomate/core';
 import { Strategy, StrategyContext } from '@quantomate/core';
 import { TradeSignal } from '@quantomate/core';
 import { PIVOT_TREND_UP, PIVOT_TREND_DOWN } from '../indicators/pivotTrend';
@@ -10,6 +10,7 @@ export interface PivotTrendParams {
   stopLossType?: 'none' | 'fixed-atr' | 'trailing-atr' | 'pivot';
   atrPeriod?: number;
   stopLossMultiplier?: number;
+  continuousTrend?: boolean;
 }
 
 export class PivotTrendStrategy implements Strategy {
@@ -20,6 +21,7 @@ export class PivotTrendStrategy implements Strategy {
   private readonly stopLossType: 'none' | 'fixed-atr' | 'trailing-atr' | 'pivot';
   private readonly atrPeriod: number;
   private readonly stopLossMultiplier: number;
+  private readonly continuousTrend: boolean;
 
   constructor(name = 'PivotTrend', params: PivotTrendParams = {}) {
     this.name = name;
@@ -29,6 +31,7 @@ export class PivotTrendStrategy implements Strategy {
     this.stopLossType = params.stopLossType ?? 'none';
     this.atrPeriod = params.atrPeriod ?? 14;
     this.stopLossMultiplier = params.stopLossMultiplier ?? 2.0;
+    this.continuousTrend = params.continuousTrend ?? false;
   }
 
   getRequiredSecondaryIntervals(baseInterval: string): string[] {
@@ -36,6 +39,22 @@ export class PivotTrendStrategy implements Strategy {
       return [this.trendFilterInterval];
     }
     return [];
+  }
+
+  private resolveTrend(trendSeries: Series<number> | undefined, index: number): number | undefined {
+    if (!trendSeries) return undefined;
+    const trend = trendSeries.at(index);
+    if (!this.continuousTrend) {
+      return trend;
+    }
+    // Backward scan to find the first non-zero, non-NaN trend
+    for (let i = index; i >= 0; i--) {
+      const val = trendSeries.at(i);
+      if (val !== undefined && !isNaN(val) && val !== 0) {
+        return val;
+      }
+    }
+    return 0; // Neutral fallback if no active trend found yet
   }
 
   evaluate(series: BarSeries, index: number, context: StrategyContext): TradeSignal {
@@ -91,7 +110,7 @@ export class PivotTrendStrategy implements Strategy {
       }
 
       const trendSeries = context.getIndicatorSeries('pivotTrend');
-      const trend = trendSeries?.at(index);
+      const trend = this.resolveTrend(trendSeries, index);
       if (trend !== undefined && !isNaN(trend)) {
         const isLong = position.status === 'long';
         if (isLong && trend === PIVOT_TREND_DOWN) {
@@ -112,7 +131,7 @@ export class PivotTrendStrategy implements Strategy {
       return { action: 'idle' };
     }
 
-    const trend = trendSeries.at(index);
+    const trend = this.resolveTrend(trendSeries, index);
     if (trend === undefined || isNaN(trend)) {
       return { action: 'idle' };
     }
@@ -134,7 +153,7 @@ export class PivotTrendStrategy implements Strategy {
         return { action: 'idle' };
       }
 
-      const dailyTrend = dailyTrendSeries.at(dailyIndex);
+      const dailyTrend = this.resolveTrend(dailyTrendSeries, dailyIndex);
       if (dailyTrend === undefined || isNaN(dailyTrend)) {
         return { action: 'idle' };
       }

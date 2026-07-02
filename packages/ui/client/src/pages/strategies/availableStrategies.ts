@@ -15,7 +15,8 @@ export const AVAILABLE_STRATEGIES: Record<string, any> = {
       trendFilterInterval: '1d',
       stopLossType: 'none',
       atrPeriod: 14,
-      stopLossMultiplier: 2.0
+      stopLossMultiplier: 2.0,
+      continuousTrend: false
     },
     paramSchema: [
       sel('direction', 'Direction', ['both', 'long', 'short'], 'both'),
@@ -23,7 +24,8 @@ export const AVAILABLE_STRATEGIES: Record<string, any> = {
       sel('trendFilterInterval', 'Trend Filter Interval', ['1d', '1wk'], '1d'),
       sel('stopLossType', 'Stop Loss Type', ['none', 'fixed-atr', 'trailing-atr', 'pivot'], 'none'),
       num('atrPeriod', 'ATR Period', 14),
-      num('stopLossMultiplier', 'Stop Loss Multiplier', 2.0)
+      num('stopLossMultiplier', 'Stop Loss Multiplier', 2.0),
+      bool('continuousTrend', 'Continuous Trend (Ignore Neutral)', false)
     ]
   },
   PivotTrendOption: {
@@ -34,7 +36,8 @@ export const AVAILABLE_STRATEGIES: Record<string, any> = {
       trendFilterInterval: '1d',
       stopLossType: 'none',
       atrPeriod: 14,
-      stopLossMultiplier: 2.0
+      stopLossMultiplier: 2.0,
+      continuousTrend: false
     },
     paramSchema: [
       sel('direction', 'Direction', ['both', 'long', 'short'], 'both'),
@@ -42,7 +45,8 @@ export const AVAILABLE_STRATEGIES: Record<string, any> = {
       sel('trendFilterInterval', 'Trend Filter Interval', ['1d', '1wk'], '1d'),
       sel('stopLossType', 'Stop Loss Type', ['none', 'fixed-atr', 'trailing-atr', 'pivot'], 'none'),
       num('atrPeriod', 'ATR Period', 14),
-      num('stopLossMultiplier', 'Stop Loss Multiplier', 2.0)
+      num('stopLossMultiplier', 'Stop Loss Multiplier', 2.0),
+      bool('continuousTrend', 'Continuous Trend (Ignore Neutral)', false)
     ]
   },
   VwapRvolOption: { name: 'VWAP + RVOL Option', defaultParams: { rvolThreshold: 2.0, source: 'close' }, paramSchema: [num('rvolThreshold', 'RVOL Threshold', 2.0), sel('source', 'Source Candle Value', ['close', 'open', 'high', 'low'], 'close')] },

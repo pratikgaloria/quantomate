@@ -140,6 +140,32 @@ export function runSimulation(
     }
   }
 
+  if (status !== 'idle') {
+    const lastBar = series.at(series.length - 1)!;
+    const price = lastBar.close;
+    const isShort = status === 'short';
+    const slipCost = price * slippageRate;
+    const fillPrice = isShort ? price + slipCost : price - slipCost;
+    const commCost = shares * commissionRate;
+
+    totalCommissions += commCost;
+    totalSlippage += (shares * slipCost);
+    const priceChange = isShort ? entryPrice - fillPrice : fillPrice - entryPrice;
+    const exitContext = {
+      entryPrice, exitPrice: fillPrice, entryDate: entryDate!, exitDate: new Date(lastBar.timestamp),
+      holdDuration: lastBar.timestamp - entryDate!.getTime(), priceChange, priceChangePercent: (priceChange / entryPrice) * 100
+    };
+
+    capital = isShort ? capital - (shares * fillPrice + commCost) : capital + (shares * fillPrice - commCost);
+    trades.push({
+      type: 'exit', date: new Date(lastBar.timestamp), tradedValue: fillPrice, shares, short: isShort,
+      currentCapital: capital, exitReason: 'strategy', exitContext, commission: commCost, slippage: slipCost * shares
+    });
+    shares = 0;
+    status = 'idle';
+    strategyExits++;
+  }
+
   const returns = capital - resolvedInitialCapital;
   return {
     initialCapital: resolvedInitialCapital, finalCapital: capital, returns, returnsPercentage: (returns / resolvedInitialCapital) * 100,

@@ -94,6 +94,12 @@
           "max": 5,
           "step": 0.1,
           "description": "Stop Loss ATR Multiplier"
+        },
+        {
+          "name": "continuousTrend",
+          "type": "boolean",
+          "default": false,
+          "description": "Continuous Trend (Ignore Neutral)"
         }
       ]
     },
@@ -586,6 +592,12 @@
           "max": 5,
           "step": 0.1,
           "description": "Stop Loss ATR Multiplier"
+        },
+        {
+          "name": "continuousTrend",
+          "type": "boolean",
+          "default": false,
+          "description": "Continuous Trend (Ignore Neutral)"
         }
       ]
     },

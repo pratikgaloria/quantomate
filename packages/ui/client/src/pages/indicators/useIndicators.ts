@@ -24,6 +24,7 @@ export interface ActiveIndicator {
   id: string;
   type: string;
   name: string;
+  timeframe?: string; // Optional custom timeframe/interval (e.g. '1d', '1wk', '1mo')
   params: Record<string, any>;
   visible: boolean;
 }
@@ -214,21 +215,19 @@ export const INDICATORS_SCHEMA: IndicatorSchema[] = [
   }
 ];
 
-/** Overlay indicators render on the main price chart plot */
 export const OVERLAY_TYPES = ['SMA', 'EMA', 'WMA', 'DEMA', 'TEMA', 'VWAP', 'AVWAP', 'BB'];
-/** Separate-pane indicators render in their own sub-plots */
 export const SEPARATE_TYPES = ['RSI', 'MACD', 'Stochastic', 'ATR', 'CCI', 'ROC', 'MOM', 'WilliamsR', 'RVOL', 'Slope', 'PivotTrend'];
 
-function buildIndicatorLabel(type: string, params: Record<string, any>): string {
+export function buildIndicatorLabel(type: string, params: Record<string, any>, timeframe?: string): string {
   const labelVal = params.period ?? params.signalPeriod ?? params.kPeriod ?? '';
-  return `${type} (${labelVal})`;
+  const tfSuffix = timeframe ? `, ${timeframe}` : '';
+  return `${type} (${labelVal}${tfSuffix})`;
 }
 
 export function useIndicators() {
   const { setPageTitle, setToolbar } = usePageContext();
 
-  // Market / Symbol / Period / Interval
-  const [market, setMarket] = useState<'us' | 'india'>('us');
+  // Symbol / Period / Interval
   const [symbol, setSymbol] = useState('AAPL');
   const [symbolQuery, setSymbolQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -259,7 +258,7 @@ export function useIndicators() {
     return () => setToolbar(null);
   }, [setPageTitle, setToolbar]);
 
-  // Fetch quotes and calculate indicators
+  // Fetch quotes
   const handleRefresh = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -268,19 +267,7 @@ export function useIndicators() {
         params: { symbol, period, interval }
       });
       if (res.data.success) {
-        const newQuotes = res.data.data;
-        setQuotes(newQuotes);
-        if (newQuotes.length > 0 && activeIndicators.length > 0) {
-          const calcRes = await axios.post('/api/trade/calculate-indicators', {
-            quotes: newQuotes,
-            indicators: activeIndicators
-          });
-          if (calcRes.data.success) {
-            setIndicatorData(calcRes.data.data.indicators);
-          }
-        } else {
-          setIndicatorData({});
-        }
+        setQuotes(res.data.data);
       } else {
         setError(res.data.message || 'Failed to fetch historical quotes.');
       }
@@ -289,13 +276,46 @@ export function useIndicators() {
     } finally {
       setLoading(false);
     }
-  }, [symbol, period, interval, activeIndicators]);
+  }, [symbol, period, interval]);
 
-  // Initial load on mount
+  // Calculate indicators
+  const calculateIndicators = useCallback(async (quotesToUse: any[]) => {
+    if (quotesToUse.length === 0) {
+      setIndicatorData({});
+      return;
+    }
+    try {
+      if (activeIndicators.length > 0) {
+        const calcRes = await axios.post('/api/trade/calculate-indicators', {
+          symbol,
+          period,
+          quotes: quotesToUse,
+          indicators: activeIndicators
+        });
+        if (calcRes.data.success) {
+          setIndicatorData(calcRes.data.data.indicators);
+        }
+      } else {
+        setIndicatorData({});
+      }
+    } catch (err: any) {
+      console.error("Failed to calculate indicators:", err);
+    }
+  }, [symbol, period, activeIndicators]);
+
+  // Auto fetch quotes when config changes
   useEffect(() => {
     handleRefresh();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [symbol, period, interval, handleRefresh]);
+
+  // Auto calculate indicators when quotes or indicators list changes
+  useEffect(() => {
+    if (quotes.length > 0) {
+      calculateIndicators(quotes);
+    } else {
+      setIndicatorData({});
+    }
+  }, [quotes, activeIndicators, calculateIndicators]);
 
   // Period change handler
   const handlePeriodChange = (newPeriod: string) => {
@@ -309,7 +329,7 @@ export function useIndicators() {
     }
   };
 
-  // Autocomplete symbol search
+  // Autocomplete symbol search (using 'yf' only)
   const handleSymbolSearch = (val: string) => {
     setSymbolQuery(val);
     if (searchTimeout.current) clearTimeout(searchTimeout.current);
@@ -322,7 +342,7 @@ export function useIndicators() {
     searchTimeout.current = setTimeout(async () => {
       try {
         const res = await axios.get('/api/trade/search-symbols', {
-          params: { market, query: val }
+          params: { market: 'yf', query: val }
         });
         if (res.data.success) {
           setSearchResults(res.data.data);
@@ -335,14 +355,6 @@ export function useIndicators() {
 
   const handleSelectSymbol = (item: any) => {
     setSymbol(item.symbol);
-    setSymbolQuery('');
-    setSearchResults([]);
-  };
-
-  const handleMarketChange = (newMarket: 'us' | 'india') => {
-    setMarket(newMarket);
-    const defaultSymbol = newMarket === 'india' ? 'NIFTY' : 'AAPL';
-    setSymbol(defaultSymbol);
     setSymbolQuery('');
     setSearchResults([]);
   };
@@ -378,15 +390,16 @@ export function useIndicators() {
     );
   };
 
-  // Handle parameter input changes
-  const handleParamChange = (indId: string, paramName: string, value: any) => {
+  // Update indicator parameters and/or custom timeframe
+  const updateIndicator = (id: string, updatedParams: Record<string, any>, timeframe: string) => {
     setActiveIndicators(prev => prev.map(ind => {
-      if (ind.id === indId) {
-        const updatedParams = { ...ind.params, [paramName]: value };
+      if (ind.id === id) {
+        const tfValue = timeframe || undefined;
         return {
           ...ind,
-          name: buildIndicatorLabel(ind.type, updatedParams),
-          params: updatedParams
+          name: buildIndicatorLabel(ind.type, updatedParams, tfValue),
+          params: updatedParams,
+          timeframe: tfValue
         };
       }
       return ind;
@@ -407,12 +420,11 @@ export function useIndicators() {
     : null;
 
   return {
-    // Market / Symbol
-    market,
+    // Symbol / Autocomplete
     symbol,
     symbolQuery,
     searchResults,
-    handleMarketChange,
+    setSearchResults,
     handleSymbolSearch,
     handleSelectSymbol,
 
@@ -434,7 +446,7 @@ export function useIndicators() {
     addIndicator,
     removeIndicator,
     toggleVisibility,
-    handleParamChange,
+    updateIndicator,
 
     // Library modal
     libraryOpen,

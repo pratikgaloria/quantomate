@@ -3,6 +3,7 @@ import { prisma } from "@quantomate/db";
 import { DataService, KiteInstrumentMapper, TradierDataProvider, YahooFinanceProvider, KiteDataProvider, RoutingDataProvider } from "@quantomate/data";
 import dotenv from "dotenv";
 import path from "path";
+import { fetchPriceData } from "../services/priceDataService";
 import { 
   Bar, 
   BarSeries
@@ -16,11 +17,20 @@ import {
   MACDSignal, 
   ATR, 
   VWAP, 
+  AVWAP,
   RVOL, 
   Slope, 
   PivotTrend,
   ChandelierExit,
-  WeeklyAVWAP 
+  WeeklyAVWAP,
+  WMA,
+  DEMA,
+  TEMA,
+  CCI,
+  Stochastic,
+  WilliamsR,
+  ROC,
+  MOM
 } from "@quantomate/library";
 
 
@@ -163,10 +173,10 @@ router.get("/search-symbols", async (req: Request, res: Response) => {
       }
 
       return res.json({ success: true, data: matches });
-    } else if (market === "us") {
+    } else if (market === "us" || market === "yf") {
       let rawResults: any[] = [];
       const token = process.env.TRADIER_API_KEY;
-      if (token) {
+      if (token && market !== "yf") {
         const useSandbox = process.env.TRADIER_ENV !== "production";
         const provider = new TradierDataProvider(token, useSandbox);
         rawResults = await provider.search(q);
@@ -177,8 +187,8 @@ router.get("/search-symbols", async (req: Request, res: Response) => {
       const matches = (rawResults || []).map((item: any) => ({
         symbol: item.symbol,
         name: item.shortname || item.longname || item.name || item.symbol,
-        exchange: item.exchange || 'US',
-        market: 'us'
+        exchange: item.exchange || (market === 'yf' ? 'YF' : 'US'),
+        market: market
       }));
       return res.json({ success: true, data: matches });
     }
@@ -799,27 +809,14 @@ router.get("/historical-prices", async (req: Request, res: Response) => {
 
     const p = (period as string) || "1y";
     const intv = (interval as string) || "1d";
-    const now = new Date();
-    const startDate = new Date();
 
-    if (p === "1d") {
-      startDate.setDate(now.getDate() - 1);
-    } else if (p === "1w") {
-      startDate.setDate(now.getDate() - 7);
-    } else if (p === "1m") {
-      startDate.setMonth(now.getMonth() - 1);
-    } else if (p === "1y") {
-      startDate.setFullYear(now.getFullYear() - 1);
-    } else if (p === "3y") {
-      startDate.setFullYear(now.getFullYear() - 3);
-    } else {
-      startDate.setFullYear(now.getFullYear() - 1);
-    }
+    const { data } = await fetchPriceData({
+      symbol,
+      period: p,
+      interval: intv,
+    });
 
-    const rawQuotes = await DataService.getHistoricalData(symbol, undefined, intv);
-    const filteredQuotes = rawQuotes.filter((q: any) => new Date(q.date) >= startDate);
-
-    res.json({ success: true, data: filteredQuotes });
+    res.json({ success: true, data });
   } catch (error: any) {
     console.error("[HistoricalPrices] Error:", error);
     res.status(500).json({ success: false, message: error.message });
@@ -827,9 +824,90 @@ router.get("/historical-prices", async (req: Request, res: Response) => {
 });
 
 // POST /api/trade/calculate-indicators
+function getIntervalDuration(interval: string): number {
+  const num = parseInt(interval, 10);
+  if (interval.endsWith("m")) return num * 60 * 1000;
+  if (interval.endsWith("h")) return num * 60 * 60 * 1000;
+  if (interval.endsWith("d")) return num * 24 * 60 * 60 * 1000;
+  if (interval.endsWith("wk")) return 7 * 24 * 60 * 60 * 1000;
+  if (interval.endsWith("mo")) return 30 * 24 * 60 * 60 * 1000;
+  return 24 * 60 * 60 * 1000;
+}
+
+function alignHTFValuesToLTF(
+  htfSeries: BarSeries,
+  htfValues: number[],
+  ltfSeries: BarSeries,
+  timeframe: string
+): number[] {
+  const result: number[] = [];
+  const htfDuration = getIntervalDuration(timeframe);
+
+  let htfIdx = 0;
+  for (let i = 0; i < ltfSeries.length; i++) {
+    const ltfBar = ltfSeries.at(i);
+    if (!ltfBar) {
+      result.push(NaN);
+      continue;
+    }
+    const ltfTime = ltfBar.timestamp;
+
+    while (htfIdx + 1 < htfSeries.length) {
+      const nextBar = htfSeries.at(htfIdx + 1);
+      if (nextBar && (nextBar.timestamp + htfDuration) <= ltfTime) {
+        htfIdx++;
+      } else {
+        break;
+      }
+    }
+
+    const currentBar = htfSeries.at(htfIdx);
+    if (currentBar && (currentBar.timestamp + htfDuration) <= ltfTime) {
+      result.push(htfValues[htfIdx]);
+    } else {
+      result.push(NaN);
+    }
+  }
+  return result;
+}
+
+async function fetchHTFSeries(symbol: string, period: string, timeframe: string): Promise<BarSeries> {
+  const p = period || "1y";
+  const intv = timeframe || "1d";
+  const now = new Date();
+  const startDate = new Date();
+
+  if (p === "1d") {
+    startDate.setDate(now.getDate() - 1);
+  } else if (p === "1w") {
+    startDate.setDate(now.getDate() - 7);
+  } else if (p === "1m") {
+    startDate.setMonth(now.getMonth() - 1);
+  } else if (p === "1y") {
+    startDate.setFullYear(now.getFullYear() - 1);
+  } else if (p === "3y") {
+    startDate.setFullYear(now.getFullYear() - 3);
+  } else {
+    startDate.setFullYear(now.getFullYear() - 1);
+  }
+
+  const yahooProvider = new YahooFinanceProvider();
+  const rawQuotes = await DataService.getHistoricalData(symbol, undefined, intv, yahooProvider);
+
+  const bars: Bar[] = rawQuotes.map((q: any) => ({
+    open: q.open,
+    high: q.high,
+    low: q.low,
+    close: q.close,
+    volume: q.volume,
+    timestamp: new Date(q.date).getTime(),
+  }));
+  return new BarSeries(bars);
+}
+
 router.post("/calculate-indicators", async (req: Request, res: Response) => {
   try {
-    const { quotes, indicators } = req.body;
+    const { symbol, period, quotes, indicators } = req.body;
     if (!quotes || !Array.isArray(quotes)) {
       return res.status(400).json({ success: false, message: "Missing or invalid parameter: quotes" });
     }
@@ -847,10 +925,54 @@ router.post("/calculate-indicators", async (req: Request, res: Response) => {
     }));
     const series = new BarSeries(bars);
 
+    // Determine the main interval to check if timeframe parameter requires HTF lookup
+    // Default to '1d' if not easily determined
+    const sampleDuration = quotes.length >= 2 ? (new Date(quotes[1].date).getTime() - new Date(quotes[0].date).getTime()) : 0;
+    let mainInterval = "1d";
+    if (sampleDuration > 0) {
+      if (sampleDuration <= 60 * 1000) mainInterval = "1m";
+      else if (sampleDuration <= 5 * 60 * 1000) mainInterval = "5m";
+      else if (sampleDuration <= 15 * 60 * 1000) mainInterval = "15m";
+      else if (sampleDuration <= 60 * 60 * 1000) mainInterval = "1h";
+    }
+
     const results: Record<string, number[]> = {};
+    const htfCache: Record<string, BarSeries> = {};
 
     for (const indConfig of indicators) {
-      const { id, type, params } = indConfig;
+      const { id, type, params, timeframe } = indConfig;
+
+      let calcSeries = series;
+      const isHTF = timeframe && timeframe !== mainInterval;
+
+      if (isHTF) {
+        if (!symbol) {
+          return res.status(400).json({ success: false, message: `Missing required parameter symbol for MTF calculation on indicator ${id}` });
+        }
+        if (!htfCache[timeframe]) {
+          htfCache[timeframe] = await fetchHTFSeries(symbol, period, timeframe);
+        }
+        calcSeries = htfCache[timeframe];
+      }
+
+      // Skip processing if there is no data in calcSeries (prevent crash)
+      if (calcSeries.length === 0) {
+        if (type === "MACD") {
+          results[id] = new Array(series.length).fill(NaN);
+          results[id + "_signal"] = new Array(series.length).fill(NaN);
+          results[id + "_hist"] = new Array(series.length).fill(NaN);
+        } else if (type === "BB") {
+          results[id + "_upper"] = new Array(series.length).fill(NaN);
+          results[id + "_middle"] = new Array(series.length).fill(NaN);
+          results[id + "_lower"] = new Array(series.length).fill(NaN);
+        } else if (type === "Stochastic") {
+          results[id + "_k"] = new Array(series.length).fill(NaN);
+          results[id + "_d"] = new Array(series.length).fill(NaN);
+        } else {
+          results[id] = new Array(series.length).fill(NaN);
+        }
+        continue;
+      }
 
       if (type === "MACD") {
         const field = params.attribute || "close";
@@ -858,44 +980,78 @@ router.post("/calculate-indicators", async (req: Request, res: Response) => {
         const slowPeriod = params.slowPeriod || 26;
         const signalPeriod = params.signalPeriod || 9;
 
-        const macdSeries = new MACD(id, { fastPeriod, slowPeriod, field }).calculate(series);
-        const signalSeries = new MACDSignal(id + "_signal", { fastPeriod, slowPeriod, signalPeriod, field }).calculate(series);
+        const macdSeries = new MACD(id, { fastPeriod, slowPeriod, field }).calculate(calcSeries);
+        const signalSeries = new MACDSignal(id + "_signal", { fastPeriod, slowPeriod, signalPeriod, field }).calculate(calcSeries);
 
-        const macdValues: number[] = [];
-        const signalValues: number[] = [];
-        const histValues: number[] = [];
+        let macdValues: number[] = [];
+        let signalValues: number[] = [];
+        let histValues: number[] = [];
 
-        for (let i = 0; i < series.length; i++) {
+        for (let i = 0; i < calcSeries.length; i++) {
           const macdVal = macdSeries.at(i) ?? NaN;
           const sigVal = signalSeries.at(i) ?? NaN;
           macdValues.push(macdVal);
           signalValues.push(sigVal);
           histValues.push(isNaN(macdVal) || isNaN(sigVal) ? NaN : macdVal - sigVal);
         }
+
+        if (isHTF) {
+          macdValues = alignHTFValuesToLTF(calcSeries, macdValues, series, timeframe);
+          signalValues = alignHTFValuesToLTF(calcSeries, signalValues, series, timeframe);
+          histValues = alignHTFValuesToLTF(calcSeries, histValues, series, timeframe);
+        }
+
         results[id] = macdValues;
         results[id + "_signal"] = signalValues;
         results[id + "_hist"] = histValues;
       } else if (type === "BB") {
-        const period = params.period || 20;
+        const periodVal = params.period || 20;
         const multiplier = params.multiplier || 2.0;
         const field = params.attribute || "close";
 
-        const upperSeries = new BB(id + "_upper", { period, multiplier, band: "upper", field }).calculate(series);
-        const middleSeries = new BB(id + "_middle", { period, multiplier, band: "middle", field }).calculate(series);
-        const lowerSeries = new BB(id + "_lower", { period, multiplier, band: "lower", field }).calculate(series);
+        const upperSeries = new BB(id + "_upper", { period: periodVal, multiplier, band: "upper", field }).calculate(calcSeries);
+        const middleSeries = new BB(id + "_middle", { period: periodVal, multiplier, band: "middle", field }).calculate(calcSeries);
+        const lowerSeries = new BB(id + "_lower", { period: periodVal, multiplier, band: "lower", field }).calculate(calcSeries);
 
-        const upperValues: number[] = [];
-        const middleValues: number[] = [];
-        const lowerValues: number[] = [];
+        let upperValues: number[] = [];
+        let middleValues: number[] = [];
+        let lowerValues: number[] = [];
 
-        for (let i = 0; i < series.length; i++) {
+        for (let i = 0; i < calcSeries.length; i++) {
           upperValues.push(upperSeries.at(i) ?? NaN);
           middleValues.push(middleSeries.at(i) ?? NaN);
           lowerValues.push(lowerSeries.at(i) ?? NaN);
         }
+
+        if (isHTF) {
+          upperValues = alignHTFValuesToLTF(calcSeries, upperValues, series, timeframe);
+          middleValues = alignHTFValuesToLTF(calcSeries, middleValues, series, timeframe);
+          lowerValues = alignHTFValuesToLTF(calcSeries, lowerValues, series, timeframe);
+        }
+
         results[id + "_upper"] = upperValues;
         results[id + "_middle"] = middleValues;
         results[id + "_lower"] = lowerValues;
+      } else if (type === "Stochastic") {
+        const kPeriod = params.kPeriod || 14;
+        const dPeriod = params.dPeriod || 3;
+        const stochSeries = new Stochastic(id, { kPeriod, dPeriod }).calculate(calcSeries);
+
+        let kValues: number[] = [];
+        let dValues: number[] = [];
+        for (let i = 0; i < calcSeries.length; i++) {
+          const val = stochSeries.at(i);
+          kValues.push(val?.k ?? NaN);
+          dValues.push(val?.d ?? NaN);
+        }
+
+        if (isHTF) {
+          kValues = alignHTFValuesToLTF(calcSeries, kValues, series, timeframe);
+          dValues = alignHTFValuesToLTF(calcSeries, dValues, series, timeframe);
+        }
+
+        results[id + "_k"] = kValues;
+        results[id + "_d"] = dValues;
       } else {
         let indicatorInstance: any = null;
         const field = params.attribute || "close";
@@ -904,12 +1060,28 @@ router.post("/calculate-indicators", async (req: Request, res: Response) => {
           indicatorInstance = new SMA(id, { period: params.period, field });
         } else if (type === "EMA") {
           indicatorInstance = new EMA(id, { period: params.period, field });
+        } else if (type === "WMA") {
+          indicatorInstance = new WMA(id, { period: params.period, field });
+        } else if (type === "DEMA") {
+          indicatorInstance = new DEMA(id, { period: params.period, field });
+        } else if (type === "TEMA") {
+          indicatorInstance = new TEMA(id, { period: params.period, field });
         } else if (type === "RSI") {
           indicatorInstance = new RSI(id, { period: params.period, field });
         } else if (type === "ATR") {
           indicatorInstance = new ATR(id, { period: params.period });
+        } else if (type === "CCI") {
+          indicatorInstance = new CCI(id, { period: params.period });
+        } else if (type === "WilliamsR") {
+          indicatorInstance = new WilliamsR(id, { period: params.period });
+        } else if (type === "ROC") {
+          indicatorInstance = new ROC(id, { period: params.period, field });
+        } else if (type === "MOM") {
+          indicatorInstance = new MOM(id, { period: params.period, field });
         } else if (type === "VWAP") {
           indicatorInstance = new VWAP(id, { field });
+        } else if (type === "AVWAP") {
+          indicatorInstance = new AVWAP(id, { anchorIndex: params.anchorIndex ?? 0, field });
         } else if (type === "RVOL") {
           indicatorInstance = new RVOL(id, { period: params.period });
         } else if (type === "Slope") {
@@ -924,10 +1096,14 @@ router.post("/calculate-indicators", async (req: Request, res: Response) => {
           return res.status(400).json({ success: false, message: `Indicator type ${type} is not supported in core` });
         }
 
-        const calculatedSeries = indicatorInstance.calculate(series);
-        const values: number[] = [];
-        for (let i = 0; i < series.length; i++) {
+        const calculatedSeries = indicatorInstance.calculate(calcSeries);
+        let values: number[] = [];
+        for (let i = 0; i < calcSeries.length; i++) {
           values.push(calculatedSeries.at(i) ?? NaN);
+        }
+
+        if (isHTF) {
+          values = alignHTFValuesToLTF(calcSeries, values, series, timeframe);
         }
         results[id] = values;
       }

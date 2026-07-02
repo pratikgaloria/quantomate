@@ -26,6 +26,134 @@
     }
   }
 
+  /* ── Floating Controls and Applied Indicators Stack (Top-Left) ──────── */
+  .ind-chart-controls-container {
+    position: absolute;
+    top: 0.5rem;
+    left: 1rem;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+    pointer-events: none; // Allow clicks to pass to the chart unless on a control element
+  }
+
+  .ind-controls-bar {
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    background: hsl(var(--card) / 0.85);
+    backdrop-filter: blur(4px);
+    border: 1px solid hsl(var(--border));
+  }
+
+  .ind-interval-buttons-row {
+    display: flex;
+    gap: 0.15rem;
+  }
+
+  .ind-interval-btn {
+    height: 22px;
+    padding: 0 0.5rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    background: transparent;
+    color: hsl(var(--muted-foreground));
+    border: none;
+    cursor: pointer;
+    transition: all 0.12s;
+
+    &:hover {
+      background: hsl(var(--accent));
+      color: hsl(var(--accent-foreground));
+    }
+
+    &.active {
+      background: hsl(var(--primary));
+      color: hsl(var(--primary-foreground));
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+  }
+
+  .ind-applied-stack {
+    pointer-events: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+    width: 100%;
+  }
+
+  .ind-legend-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    padding: 0.2rem 0.4rem;
+    background: hsl(var(--card) / 0.85);
+    backdrop-filter: blur(4px);
+    border: 1px solid hsl(var(--border));
+    font-size: 0.72rem;
+    color: hsl(var(--foreground));
+    transition: all 0.12s;
+
+    &--hidden {
+      opacity: 0.4;
+    }
+
+    &-color-dots {
+      display: inline-flex;
+      gap: 0.15rem;
+      align-items: center;
+      margin-right: 0.1rem;
+    }
+
+    &-color-dot {
+      width: 10px;
+      height: 3px;
+      border-radius: 1px;
+      display: inline-block;
+    }
+
+    &-name {
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    &-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.15rem;
+    }
+
+    &-action {
+      background: none;
+      border: none;
+      padding: 0.1rem;
+      cursor: pointer;
+      color: hsl(var(--muted-foreground));
+      font-size: 0.75rem;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+
+      &:hover {
+        color: hsl(var(--foreground));
+      }
+
+      &--remove:hover {
+        color: var(--color-loss);
+      }
+    }
+  }
+
   /* ── Empty State ────────────────────────────────────────────────────── */
   .ind-empty-state {
     flex: 1;
@@ -99,106 +227,6 @@
 }
 
 /* ==========================================================================
-   Legend Overlays
-   Positioned absolutely inside the chart area to overlay AnyChart plots.
-   ========================================================================== */
-
-.ind-legends-container {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 5;
-}
-
-.ind-legend {
-  position: absolute;
-  left: 1rem;
-  pointer-events: auto;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.35rem 0.5rem;
-  background: hsl(var(--card) / 0.85);
-  backdrop-filter: blur(4px);
-  border: 1px solid hsl(var(--border));
-  z-index: 6;
-  max-width: calc(100% - 6rem);
-
-  &--main {
-    top: 0.5rem;
-  }
-
-  &--dimmed {
-    opacity: 0.5;
-  }
-}
-
-.ind-legend__symbol {
-  display: flex;
-  align-items: baseline;
-  gap: 0.4rem;
-  margin-right: 0.25rem;
-
-  &-name {
-    font-size: 0.82rem;
-    font-weight: 700;
-    color: hsl(var(--foreground));
-  }
-
-  &-tf {
-    font-size: 0.68rem;
-    font-weight: 600;
-    color: hsl(var(--primary));
-    background: hsl(var(--primary) / 0.08);
-    padding: 0.05rem 0.3rem;
-  }
-}
-
-.ind-legend__entry {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  font-size: 0.72rem;
-  color: hsl(var(--foreground));
-
-  &--hidden {
-    opacity: 0.4;
-  }
-
-  &-name {
-    font-weight: 500;
-    white-space: nowrap;
-  }
-
-  &-actions {
-    display: inline-flex;
-    align-items: center;
-    gap: 0;
-  }
-}
-
-.ind-legend__action {
-  background: none;
-  border: none;
-  padding: 0.15rem 0.2rem;
-  cursor: pointer;
-  color: hsl(var(--muted-foreground));
-  font-size: 0.78rem;
-  line-height: 1;
-  display: inline-flex;
-  align-items: center;
-
-  &:hover {
-    color: hsl(var(--foreground));
-  }
-
-  &--remove:hover {
-    color: var(--color-loss);
-  }
-}
-
-/* ==========================================================================
    Modal Backdrop (shared)
    ========================================================================== */
 
@@ -221,7 +249,7 @@
   border: 1px solid hsl(var(--border));
   width: 520px;
   max-width: 90vw;
-  max-height: 70vh;
+  max-height: 80vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -376,6 +404,91 @@
     min-width: 1.1rem;
     text-align: center;
   }
+
+  /* ── Pending Selections Section ── */
+  &__pending-section {
+    padding: 0.5rem 1rem;
+    border-top: 1px solid hsl(var(--border));
+    background: hsl(var(--muted) / 0.15);
+    flex-shrink: 0;
+  }
+
+  &__pending-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.25rem;
+    max-height: 80px;
+    overflow-y: auto;
+  }
+
+  &__pending-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.72rem;
+    background: hsl(var(--primary) / 0.08);
+    color: hsl(var(--foreground));
+    padding: 0.15rem 0.4rem;
+    border: 1px solid hsl(var(--primary) / 0.15);
+
+    button {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      color: hsl(var(--muted-foreground));
+      font-size: 0.65rem;
+      display: flex;
+      align-items: center;
+
+      &:hover {
+        color: var(--color-loss);
+      }
+    }
+  }
+
+  /* ── Modal Footer ── */
+  &__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-top: 1px solid hsl(var(--border));
+    flex-shrink: 0;
+  }
+
+  &__btn {
+    padding: 0.4rem 1.2rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+
+    &--cancel {
+      background: hsl(var(--muted));
+      color: hsl(var(--muted-foreground));
+
+      &:hover {
+        background: hsl(var(--accent));
+        color: hsl(var(--accent-foreground));
+      }
+    }
+
+    &--apply {
+      background: hsl(var(--primary));
+      color: hsl(var(--primary-foreground));
+
+      &:hover:not(:disabled) {
+        background: hsl(var(--primary) / 0.9);
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+  }
 }
 
 /* ==========================================================================
@@ -492,7 +605,6 @@
 
 /* ==========================================================================
    Toolbar Autocomplete Dropdown
-   Rendered inside a relative wrapper in the toolbar area.
    ========================================================================== */
 
 .tb-symbol-wrapper {
@@ -502,15 +614,13 @@
 }
 
 .tb-autocomplete-dropdown {
-  position: absolute;
-  top: calc(100% + 2px);
-  left: 0;
-  width: 260px;
+  position: fixed;
+  width: 240px;
   max-height: 220px;
   overflow-y: auto;
   background: hsl(var(--card));
   border: 1px solid hsl(var(--border));
-  z-index: 50;
+  z-index: 9999;
 
   &::-webkit-scrollbar {
     width: 3px;

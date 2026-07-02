@@ -1,6 +1,5 @@
 import { Bar, BarSeries, StrategyContext, Strategy } from '@quantomate/core';
-import { fetchStockData } from './stockDataFetcher';
-import { resolveActiveTradingRange } from './backtestDateResolver';
+import { fetchPriceData } from './priceDataService';
 import { createStrategy, getWarmupDate } from './strategyFactory';
 import { getIndicatorsForStrategy } from './indicatorFactory';
 import { runSimulation } from './simulation';
@@ -18,14 +17,18 @@ export async function runBacktest(request: BacktestRequest) {
   const { strategyId, parameters, stock, config } = request;
   const interval = stock.interval || '1d';
 
-  // Adjust dates if the requested range falls on weekend/holiday/market-closed days
-  const { startDate, endDate } = await resolveActiveTradingRange(stock.symbol, stock.startDate, stock.endDate, interval);
-  stock.startDate = startDate;
-  stock.endDate = endDate;
+  // Adjust dates and fetch main timeframe data
+  const { data: stockData, resolvedStartDate, resolvedEndDate } = await fetchPriceData({
+    symbol: stock.symbol,
+    interval,
+    startDate: stock.startDate,
+    endDate: stock.endDate,
+    warmupDays: interval === '1d' ? 100 : 30,
+  });
 
-  const warmupStartDate = getWarmupDate(stock.startDate, interval === '1d' ? 100 : 30);
+  stock.startDate = resolvedStartDate;
+  stock.endDate = resolvedEndDate;
 
-  const stockData = await fetchStockData(stock.symbol, warmupStartDate, stock.endDate, interval);
   if (stockData.length === 0) throw new Error('No stock data available for the specified period');
 
   const series = new BarSeries(stockData.map((d) => ({
@@ -38,7 +41,13 @@ export async function runBacktest(request: BacktestRequest) {
   if (strategy.getRequiredSecondaryIntervals) {
     const neededIntervals = strategy.getRequiredSecondaryIntervals(interval);
     for (const secInterval of neededIntervals) {
-      const secData = await fetchStockData(stock.symbol, getWarmupDate(stock.startDate, 100), stock.endDate, secInterval);
+      const { data: secData } = await fetchPriceData({
+        symbol: stock.symbol,
+        interval: secInterval,
+        startDate: stock.startDate,
+        endDate: stock.endDate,
+        warmupDays: 100,
+      });
       if (secData.length > 0) {
         const secSeries = new BarSeries(secData.map((d) => ({
           open: d.open, high: d.high, low: d.low, close: d.close, volume: d.volume, timestamp: d.date.getTime(),
